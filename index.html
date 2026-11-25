@@ -159,7 +159,7 @@
       <!-- Brand -->
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-sky-500/25">
-          <i data-lucide="heart" class="w-5 h-5 text-slate-950 fill-current"></i>
+          <i data-lucide="heart" class="w-5 h-5 text-white fill-current"></i>
         </div>
         <div>
           <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight flex items-center gap-1.5">
@@ -258,6 +258,10 @@
             <button type="button" onclick="switchTab('query')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 transition-colors">
               <i data-lucide="search" class="w-3.5 h-3.5"></i>
               <span>紀錄查詢</span>
+            </button>
+            <button type="button" onclick="switchTab('album')" class="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/35 text-sky-300 text-xs font-bold flex items-center gap-1 transition-colors">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <span>體態相簿</span>
             </button>
             <button type="button" onclick="switchTab('profile')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 transition-colors">
               <i data-lucide="user-circle" class="w-3.5 h-3.5"></i>
@@ -515,7 +519,10 @@
           <span id="dashboard-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">雙人同步模式</span>
           <span class="text-xs sm:text-sm text-slate-300" id="dashboard-subtitle">檢視兩人的即時體態指標與本週運動進度</span>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="button" onclick="switchTab('album')" class="text-xs text-sky-300 hover:text-sky-200 font-bold flex items-center gap-1">
+            <i data-lucide="camera" class="w-3.5 h-3.5"></i> 體態相簿
+          </button>
           <button type="button" onclick="switchTab('query')" class="text-xs text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1">
             <i data-lucide="search" class="w-3.5 h-3.5"></i> 複合查詢
           </button>
@@ -1084,6 +1091,86 @@
       </div>
     </section>
 
+    <!-- ==================== TAB 5: BODY PHOTO ALBUM (體態相簿) ==================== -->
+    <section id="view-album" class="hidden space-y-5">
+      <!-- Person tabs -->
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="setAlbumUser('me')" id="album-tab-me" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
+          <span id="album-tab-label-me" class="truncate">Chumi 的相簿</span>
+        </button>
+        <button type="button" onclick="setAlbumUser('partner')" id="album-tab-partner" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span class="w-3 h-3 rounded-full bg-rose-400 shrink-0"></span>
+          <span id="album-tab-label-partner" class="truncate">Weeki 的相簿</span>
+        </button>
+      </div>
+
+      <!-- Upload card -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="camera" class="w-5 h-5 text-sky-400"></i>
+            <span id="album-upload-title">上傳體態照片</span>
+          </h3>
+          <button type="button" onclick="switchTab('dashboard')" class="text-xs text-slate-300 hover:text-white font-bold flex items-center gap-1">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> 返回健康
+          </button>
+        </div>
+
+        <form onsubmit="submitAlbumPhoto(event)" class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">拍攝日期</label>
+              <input type="date" id="album-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">當時體重 kg <span class="text-slate-500">(選填)</span></label>
+              <input type="number" step="0.1" id="album-weight" placeholder="例如 68.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">備註 <span class="text-slate-500">(選填)</span></label>
+              <input type="text" id="album-note" maxlength="40" placeholder="例如：正面、第 4 週" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500" />
+            </div>
+          </div>
+
+          <label class="block cursor-pointer">
+            <input type="file" id="album-file" accept="image/*" multiple class="sr-only" onchange="handleAlbumFilesChosen(this)" />
+            <div class="py-4 rounded-xl border border-dashed border-sky-500/50 bg-sky-500/10 hover:bg-sky-500/15 text-center text-sm font-bold text-sky-300 transition-colors flex items-center justify-center gap-2">
+              <i data-lucide="image-plus" class="w-4 h-4"></i>
+              <span id="album-file-label">選擇照片（可複選，會自動壓縮）</span>
+            </div>
+          </label>
+
+          <button type="submit" id="album-submit-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/25 hover:opacity-95 transition-all">
+            上傳到相簿
+          </button>
+        </form>
+      </div>
+
+      <!-- Compare panel -->
+      <div id="album-compare-panel" class="hidden glass-card rounded-2xl p-5 space-y-3 border border-sky-500/25">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="columns" class="w-4 h-4 text-sky-400"></i> 前後對比
+          </h3>
+          <button type="button" onclick="clearAlbumCompare()" class="text-xs text-slate-400 hover:text-white">清除對比</button>
+        </div>
+        <div id="album-compare-body" class="grid grid-cols-2 gap-3"></div>
+      </div>
+
+      <!-- Photo grid -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="images" class="w-4 h-4 text-sky-400"></i>
+            <span id="album-grid-title">照片時間軸</span>
+          </h3>
+          <span class="text-xs text-slate-400">點照片放大，可加入前後對比</span>
+        </div>
+        <div id="album-grid" class="space-y-4"></div>
+      </div>
+    </section>
+
     <!-- ==================== TAB 4: PERSONAL PROFILE PAGE (個人頁面) ==================== -->
     <section id="view-profile" class="hidden space-y-5">
       <div class="flex items-center gap-3">
@@ -1254,6 +1341,23 @@
     </div>
   </nav>
 
+  <!-- Photo Lightbox -->
+  <div id="photo-modal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+    <button type="button" onclick="closePhotoModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    <img id="photo-modal-img" src="" alt="" class="max-w-full max-h-[68vh] rounded-2xl border border-slate-700 object-contain" />
+    <div id="photo-modal-meta" class="mt-3 text-xs sm:text-sm text-slate-200 font-mono text-center"></div>
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+      <button type="button" onclick="addPhotoToCompare()" class="px-4 py-2 rounded-xl bg-sky-500 text-slate-950 text-xs font-bold flex items-center gap-1.5">
+        <i data-lucide="columns" class="w-4 h-4"></i> 加入前後對比
+      </button>
+      <button type="button" onclick="deleteAlbumPhoto()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-500/25 border border-slate-700 hover:border-rose-500/50 text-rose-300 text-xs font-bold flex items-center gap-1.5">
+        <i data-lucide="trash-2" class="w-4 h-4"></i> <span id="photo-delete-label">刪除</span>
+      </button>
+    </div>
+  </div>
+
   <!-- PWA Add to Home Screen Modal -->
   <div id="pwa-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
     <div class="glass-card max-w-md w-full rounded-3xl p-6 border border-sky-500/30 space-y-4 relative">
@@ -1349,7 +1453,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, deleteDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const appId = (typeof __app_id !== 'undefined' && __app_id) ? __app_id : 'syncfit-chumi-weeki';
 
@@ -1652,6 +1756,7 @@
       if (roomInput) roomInput.value = currentRoomCode;
 
       updateSyncStatusUI('connecting');
+      subscribePhotos();
 
       const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'couple_rooms', currentRoomCode);
 
@@ -1880,7 +1985,7 @@
 
     function switchTab(tabName, optionalSubCategory = null) {
       activeTab = tabName;
-      ['home', 'vault', 'dashboard', 'log', 'query', 'profile'].forEach((t) => {
+      ['home', 'vault', 'dashboard', 'log', 'query', 'profile', 'album'].forEach((t) => {
         document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tabName);
       });
 
@@ -1894,7 +1999,7 @@
         const btn = document.getElementById(btnId);
         if (!btn) return;
         const label = btn.querySelector('.dock-label');
-        const isCurrent = activeTab === tabKey || (tabKey === 'dashboard' && (activeTab === 'log' || activeTab === 'query' || activeTab === 'profile'));
+        const isCurrent = activeTab === tabKey || (tabKey === 'dashboard' && (activeTab === 'log' || activeTab === 'query' || activeTab === 'profile' || activeTab === 'album'));
         btn.classList.toggle('is-active', isCurrent);
         if (label) {
           label.classList.toggle('text-sky-400', isCurrent);
@@ -1915,6 +2020,9 @@
         runCompoundQuery();
       } else if (tabName === 'profile') {
         renderProfilePage();
+      } else if (tabName === 'album') {
+        if (activeContext === 'me' || activeContext === 'partner') albumUser = activeContext;
+        renderAlbum();
       } else if (tabName === 'dashboard') {
         renderDashboard();
       }
@@ -3235,6 +3343,361 @@
       showToast('已重置為預設範例資料');
     }
 
+    // ==================== 11.5 BODY PHOTO ALBUM (體態相簿) ====================
+    // 本機：IndexedDB（容量大）；雲端：每張照片一份獨立 Firestore 文件（避免超過單一文件 1MB 上限）
+    let albumUser = 'me';
+    let albumPhotos = [];
+    let albumPendingFiles = [];
+    let albumViewingId = null;
+    let albumCompareIds = [];
+    let unsubscribePhotos = null;
+    let photoDeleteTimer = null;
+    let photoDeleteArmed = false;
+
+    const IDB_NAME = 'ume_album_db';
+    const IDB_STORE = 'photos';
+
+    function idbOpen() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) { reject(new Error('IndexedDB unavailable')); return; }
+        const rq = indexedDB.open(IDB_NAME, 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore(IDB_STORE, { keyPath: 'id' });
+        rq.onsuccess = () => resolve(rq.result);
+        rq.onerror = () => reject(rq.error);
+      });
+    }
+    async function idbAll() {
+      try {
+        const d = await idbOpen();
+        return await new Promise((resolve, reject) => {
+          const r = d.transaction(IDB_STORE).objectStore(IDB_STORE).getAll();
+          r.onsuccess = () => resolve(r.result || []);
+          r.onerror = () => reject(r.error);
+        });
+      } catch (e) { console.warn('idbAll', e); return []; }
+    }
+    async function idbPut(photo) {
+      try {
+        const d = await idbOpen();
+        await new Promise((resolve, reject) => {
+          const t = d.transaction(IDB_STORE, 'readwrite');
+          t.objectStore(IDB_STORE).put(photo);
+          t.oncomplete = resolve;
+          t.onerror = () => reject(t.error);
+        });
+        return true;
+      } catch (e) { console.warn('idbPut', e); return false; }
+    }
+    async function idbDelete(id) {
+      try {
+        const d = await idbOpen();
+        await new Promise((resolve, reject) => {
+          const t = d.transaction(IDB_STORE, 'readwrite');
+          t.objectStore(IDB_STORE).delete(id);
+          t.oncomplete = resolve;
+          t.onerror = () => reject(t.error);
+        });
+      } catch (e) { console.warn('idbDelete', e); }
+    }
+
+    async function loadAlbumFromLocal() {
+      const all = await idbAll();
+      const cloudIds = new Set(albumPhotos.map((p) => p.id));
+      albumPhotos = [...albumPhotos, ...all.filter((p) => !cloudIds.has(p.id))];
+      if (activeTab === 'album') renderAlbum();
+    }
+
+    function photoDocRef(photo) {
+      return doc(db, 'artifacts', appId, 'public', 'data', 'couple_photos', `${photo.room}_${photo.id}`);
+    }
+
+    async function pushPhotoToCloud(photo) {
+      if (!db || !currentUser) return false;
+      try {
+        await setDoc(photoDocRef(photo), {
+          room: photo.room,
+          id: photo.id,
+          userId: photo.userId,
+          date: photo.date,
+          weight: photo.weight ?? null,
+          note: photo.note || '',
+          data: photo.data,
+          createdAt: photo.createdAt
+        });
+        photo.synced = true;
+        idbPut(photo);
+        return true;
+      } catch (err) {
+        console.error('Photo cloud upload failed:', err);
+        return false;
+      }
+    }
+
+    function subscribePhotos() {
+      if (!db || !currentUser) return;
+      if (unsubscribePhotos) { unsubscribePhotos(); unsubscribePhotos = null; }
+      const room = currentRoomCode;
+      const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'couple_photos'), where('room', '==', room));
+      unsubscribePhotos = onSnapshot(q, (snap) => {
+        const cloud = [];
+        snap.forEach((d) => cloud.push({ ...d.data(), synced: true }));
+        const cloudIds = new Set(cloud.map((p) => p.id));
+        const localRoom = albumPhotos.filter((p) => p.room === room);
+        const unsynced = localRoom.filter((p) => !p.synced && !cloudIds.has(p.id));
+        const removedRemotely = localRoom.filter((p) => p.synced && !cloudIds.has(p.id));
+        removedRemotely.forEach((p) => idbDelete(p.id));
+        albumPhotos = [...albumPhotos.filter((p) => p.room !== room), ...cloud, ...unsynced];
+        cloud.forEach((p) => idbPut(p));
+        unsynced.forEach((p) => pushPhotoToCloud(p));
+        if (activeTab === 'album') renderAlbum();
+      }, (err) => console.warn('Photo snapshot error:', err));
+    }
+
+    function compressImage(file, maxDim = 900, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          let w = img.naturalWidth;
+          let h = img.naturalHeight;
+          const scale = Math.min(1, maxDim / Math.max(w, h));
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+          const c = document.createElement('canvas');
+          c.width = w;
+          c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          let q = quality;
+          let data = c.toDataURL('image/jpeg', q);
+          while (data.length > 700000 && q > 0.4) {
+            q -= 0.1;
+            data = c.toDataURL('image/jpeg', q);
+          }
+          URL.revokeObjectURL(url);
+          resolve(data);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+        img.src = url;
+      });
+    }
+
+    function setAlbumUser(userKey) {
+      albumUser = userKey;
+      albumCompareIds = [];
+      renderAlbum();
+    }
+
+    function handleAlbumFilesChosen(input) {
+      albumPendingFiles = Array.from(input.files || []);
+      const label = document.getElementById('album-file-label');
+      label.textContent = albumPendingFiles.length
+        ? `已選擇 ${albumPendingFiles.length} 張照片，按下方「上傳到相簿」`
+        : '選擇照片（可複選，會自動壓縮）';
+    }
+
+    async function submitAlbumPhoto(e) {
+      e.preventDefault();
+      if (albumPendingFiles.length === 0) {
+        showToast('請先選擇要上傳的照片');
+        return;
+      }
+      const btn = document.getElementById('album-submit-btn');
+      btn.disabled = true;
+      btn.textContent = '壓縮上傳中...';
+
+      const date = document.getElementById('album-date').value || getTodayStr(0);
+      const wRaw = parseFloat(document.getElementById('album-weight').value);
+      const weight = Number.isFinite(wRaw) ? wRaw : null;
+      const note = document.getElementById('album-note').value.trim();
+
+      let ok = 0;
+      let cloudFail = 0;
+      for (let i = 0; i < albumPendingFiles.length; i++) {
+        try {
+          const data = await compressImage(albumPendingFiles[i]);
+          const photo = {
+            id: `ph_${Date.now()}_${i}`,
+            room: currentRoomCode,
+            userId: albumUser,
+            date,
+            weight,
+            note,
+            data,
+            createdAt: Date.now() + i,
+            synced: false
+          };
+          albumPhotos.push(photo);
+          await idbPut(photo);
+          if (db && currentUser) {
+            const sent = await pushPhotoToCloud(photo);
+            if (!sent) cloudFail++;
+          }
+          ok++;
+        } catch (err) {
+          console.error('Photo process failed:', err);
+        }
+      }
+
+      albumPendingFiles = [];
+      document.getElementById('album-file').value = '';
+      document.getElementById('album-file-label').textContent = '選擇照片（可複選，會自動壓縮）';
+      document.getElementById('album-note').value = '';
+      btn.disabled = false;
+      btn.textContent = '上傳到相簿';
+      renderAlbum();
+
+      if (ok === 0) showToast('照片處理失敗，請換一張再試');
+      else if (cloudFail > 0) showToast(`已存 ${ok} 張到本機，雲端同步失敗，之後會自動重試`);
+      else showToast(`已上傳 ${ok} 張照片到 ${appState.profiles[albumUser].name} 的相簿`);
+    }
+
+    function getAlbumPhotosForUser(userKey) {
+      return albumPhotos
+        .filter((p) => p.room === currentRoomCode && p.userId === userKey)
+        .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
+    }
+
+    function renderAlbum() {
+      const meName = appState.profiles.me.name;
+      const partnerName = appState.profiles.partner.name;
+      document.getElementById('album-tab-label-me').textContent = `${meName} 的相簿`;
+      document.getElementById('album-tab-label-partner').textContent = `${partnerName} 的相簿`;
+
+      const tabMe = document.getElementById('album-tab-me');
+      const tabPartner = document.getElementById('album-tab-partner');
+      const tabBase = 'flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all ';
+      if (albumUser === 'me') {
+        tabMe.className = tabBase + 'border-sky-400 bg-sky-500/15 text-sky-300';
+        tabPartner.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
+      } else {
+        tabPartner.className = tabBase + 'border-rose-400 bg-rose-500/15 text-rose-300';
+        tabMe.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
+      }
+
+      const name = appState.profiles[albumUser].name;
+      document.getElementById('album-upload-title').textContent = `上傳 ${name} 的體態照片`;
+      document.getElementById('album-grid-title').textContent = `${name} 的照片時間軸`;
+      const dateInput = document.getElementById('album-date');
+      if (!dateInput.value) dateInput.value = getTodayStr(0);
+
+      const photos = getAlbumPhotosForUser(albumUser);
+      const grid = document.getElementById('album-grid');
+
+      if (photos.length === 0) {
+        grid.innerHTML = `
+          <div class="glass-card rounded-2xl p-8 text-center text-slate-400 text-sm">
+            ${escapeHtml(name)} 還沒有體態照片，從上方選擇照片開始記錄吧。
+          </div>
+        `;
+      } else {
+        const groups = {};
+        photos.forEach((p) => { (groups[p.date] = groups[p.date] || []).push(p); });
+        grid.innerHTML = Object.keys(groups).sort((a, b) => b.localeCompare(a)).map((d) => `
+          <div class="space-y-2">
+            <div class="text-xs font-mono font-bold text-sky-300 px-1">${escapeHtml(d)}</div>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              ${groups[d].map((p) => `
+                <button type="button" onclick="openPhoto('${p.id}')" class="relative rounded-xl overflow-hidden border ${albumCompareIds.includes(p.id) ? 'border-sky-400' : 'border-slate-800'} bg-slate-900 aspect-[3/4]">
+                  <img src="${p.data}" alt="" loading="lazy" class="w-full h-full object-cover" />
+                  ${p.weight ? `<span class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/65 text-[10px] font-mono text-white">${p.weight}kg</span>` : ''}
+                  ${p.synced ? '' : '<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400" title="尚未同步到雲端"></span>'}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      renderAlbumCompare();
+      lucide.createIcons();
+    }
+
+    function renderAlbumCompare() {
+      const panel = document.getElementById('album-compare-panel');
+      const body = document.getElementById('album-compare-body');
+      const picked = albumCompareIds.map((id) => albumPhotos.find((p) => p.id === id)).filter(Boolean)
+        .sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.createdAt || 0) - (b.createdAt || 0));
+      if (picked.length === 0) {
+        panel.classList.add('hidden');
+        body.innerHTML = '';
+        return;
+      }
+      panel.classList.remove('hidden');
+      const labels = picked.length === 2 ? ['之前', '之後'] : ['已選擇 1 張，再選 1 張即可對比'];
+      body.innerHTML = picked.map((p, i) => `
+        <div class="space-y-1.5 min-w-0">
+          <div class="text-[11px] font-bold ${i === 0 ? 'text-slate-300' : 'text-sky-300'}">${labels[i] || ''}</div>
+          <img src="${p.data}" alt="" onclick="openPhoto('${p.id}')" class="w-full aspect-[3/4] object-cover rounded-xl border border-slate-700" />
+          <div class="text-[11px] font-mono text-slate-400 truncate">${escapeHtml(p.date)}${p.weight ? ` · ${p.weight}kg` : ''}</div>
+        </div>
+      `).join('');
+    }
+
+    function openPhoto(id) {
+      const p = albumPhotos.find((x) => x.id === id);
+      if (!p) return;
+      albumViewingId = id;
+      resetPhotoDeleteBtn();
+      document.getElementById('photo-modal-img').src = p.data;
+      const who = appState.profiles[p.userId] ? appState.profiles[p.userId].name : '';
+      document.getElementById('photo-modal-meta').textContent =
+        [who, p.date, p.weight ? `${p.weight}kg` : '', p.note || ''].filter(Boolean).join(' · ');
+      const modal = document.getElementById('photo-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closePhotoModal() {
+      const modal = document.getElementById('photo-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      albumViewingId = null;
+      resetPhotoDeleteBtn();
+    }
+
+    function resetPhotoDeleteBtn() {
+      clearTimeout(photoDeleteTimer);
+      photoDeleteArmed = false;
+      const btn = document.getElementById('photo-delete-label');
+      if (btn) btn.textContent = '刪除';
+    }
+
+    function addPhotoToCompare() {
+      if (!albumViewingId) return;
+      if (!albumCompareIds.includes(albumViewingId)) albumCompareIds.push(albumViewingId);
+      if (albumCompareIds.length > 2) albumCompareIds.shift();
+      closePhotoModal();
+      renderAlbum();
+      showToast(albumCompareIds.length === 2 ? '已加入，下方顯示前後對比' : '已選 1 張，再選另一張即可對比');
+    }
+
+    function clearAlbumCompare() {
+      albumCompareIds = [];
+      renderAlbum();
+    }
+
+    async function deleteAlbumPhoto() {
+      if (!albumViewingId) return;
+      if (!photoDeleteArmed) {
+        photoDeleteArmed = true;
+        document.getElementById('photo-delete-label').textContent = '再按一次確認刪除';
+        photoDeleteTimer = setTimeout(resetPhotoDeleteBtn, 3000);
+        return;
+      }
+      const p = albumPhotos.find((x) => x.id === albumViewingId);
+      if (!p) { closePhotoModal(); return; }
+      albumPhotos = albumPhotos.filter((x) => x.id !== p.id);
+      albumCompareIds = albumCompareIds.filter((id) => id !== p.id);
+      await idbDelete(p.id);
+      if (db && currentUser) {
+        try { await deleteDoc(photoDocRef(p)); } catch (err) { console.warn('Photo cloud delete failed:', err); }
+      }
+      closePhotoModal();
+      renderAlbum();
+      showToast('已刪除照片');
+    }
+
     // ==================== 12. PWA MODAL & INITIALIZATION ====================
     function openPwaModal() {
       const modal = document.getElementById('pwa-modal');
@@ -3258,6 +3721,7 @@
       if (activeTab === 'log') setLogFormUser(logFormUser);
       if (activeTab === 'query') runCompoundQuery();
       if (activeTab === 'profile') renderProfilePage();
+      if (activeTab === 'album') renderAlbum();
     }
 
     Object.assign(window, {
@@ -3299,7 +3763,15 @@
       deleteRecord,
       selectProfileTab,
       saveProfileSettings,
-      resetDemoData
+      resetDemoData,
+      setAlbumUser,
+      handleAlbumFilesChosen,
+      submitAlbumPhoto,
+      openPhoto,
+      closePhotoModal,
+      addPhotoToCompare,
+      clearAlbumCompare,
+      deleteAlbumPhoto
     });
 
     // module script 是延遲執行，DOMContentLoaded 可能已經觸發過，所以兩種情況都處理
@@ -3314,6 +3786,7 @@
       setLogCategory('body');
       switchTab('home');
       lucide.createIcons();
+      loadAlbumFromLocal();
       initCloudSync();
     }
 
