@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SyncFit 情侶主頁與健康財庫</title>
+  <title>UMe</title>
 
   <!-- Mobile Home Screen / PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -47,6 +47,15 @@
   </script>
 
   <style>
+    /* ===== 只允許上下捲動，禁止左右 ===== */
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+      overscroll-behavior-x: none;
+    }
+    main, header > div { min-width: 0; }
+    main > section { max-width: 100%; }
+
     body {
       background-color: #070B14;
       color: #F1F5F9;
@@ -146,7 +155,7 @@
 
   <!-- Top App Bar -->
   <header class="sticky top-0 z-30 bg-[#070B14]/85 backdrop-blur-xl border-b border-slate-800/80">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
       <!-- Brand -->
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-sky-500/25">
@@ -161,7 +170,7 @@
       </div>
 
       <!-- Right Actions: Sync Room, User Switcher & PWA Install Guide -->
-      <div class="flex items-center gap-1.5 sm:gap-2">
+      <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 min-w-0">
         <!-- Cloud Sync Status Button -->
         <button type="button" onclick="openSyncModal()" id="sync-status-btn" title="設定情侶即時同步配對碼" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-medium flex items-center gap-1.5 transition-all">
           <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
@@ -271,13 +280,13 @@
               <i data-lucide="piggy-bank" class="w-5 h-5"></i>
             </div>
             <div>
-              <h3 class="text-base font-bold text-white">情侶小財庫快覽</h3>
+              <h3 class="text-base font-bold text-white">UMe養小豬總覽</h3>
               <p class="text-xs text-slate-400">共同總存款、尚待分配金額與目標進度</p>
             </div>
           </div>
 
           <button type="button" onclick="switchTab('vault')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1 shadow-md shadow-sky-500/20 hover:opacity-95 transition-all">
-            <span>管理小財庫</span>
+            <span>管理小豬豬</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -288,7 +297,7 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 0.5: COUPLE MINI VAULT (小財庫) ==================== -->
+    <!-- ==================== TAB 0.5: COUPLE MINI VAULT (小豬豬) ==================== -->
     <section id="view-vault" class="hidden space-y-5">
       <!-- Shared Total Deposit & Allocation Overview -->
       <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-5 border border-sky-500/25">
@@ -298,7 +307,7 @@
               <i data-lucide="piggy-bank" class="w-6 h-6"></i>
             </div>
             <div>
-              <h2 class="text-lg font-bold text-white">Chumi &amp; Weeki 共同小財庫</h2>
+              <h2 class="text-lg font-bold text-white">Chumi &amp; Weeki 共同小豬豬</h2>
               <p class="text-xs text-slate-400">設定共同總存款與各項儲蓄目標，系統即時試算尚待分配與預算上限</p>
             </div>
           </div>
@@ -361,9 +370,9 @@
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
           </div>
           <div class="space-y-1 text-xs sm:text-sm">
-            <div class="font-bold text-rose-200">餘額不足，請檢查預算</div>
+            <div class="font-bold text-rose-200">小豬豬餘額不足，請檢查預算</div>
             <p class="text-rose-200/90 text-xs leading-relaxed">
-              目前所有細項目標金額相加已超出共同總存款 <span id="vault-exceed-amount" class="font-mono font-bold text-white underline decoration-rose-400">$0</span>。請調降部分目標金額或增加共同總存款，以免分配超支。
+              目前所有細項目標金額相加已超出共同總存款，小豬豬不夠啦! <span id="vault-exceed-amount" class="font-mono font-bold text-white underline decoration-rose-400">$0</span>。請調降部分目標金額或增加共同總存款，以免分配超支。
             </p>
           </div>
         </div>
@@ -477,7 +486,7 @@
             id="vault-submit-btn"
             class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/25 hover:opacity-95 transition-all"
           >
-            新增小財庫目標
+            新增小豬豬目標
           </button>
         </form>
       </div>
@@ -567,7 +576,7 @@
               +500ml
             </button>
             <div class="flex items-center gap-1 flex-1 min-w-[110px]">
-              <input type="number" id="custom-water-input" placeholder="自訂ml" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-cyan-400" />
+              <input type="number" id="custom-water-input" placeholder="自訂ml" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-cyan-400" />
               <button type="button" onclick="addCustomWater()" class="p-2 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               </button>
@@ -615,7 +624,7 @@
               +25g <span class="text-[10px] text-slate-400 font-sans">(乳清/雞胸)</span>
             </button>
             <div class="flex items-center gap-1 flex-1 min-w-[105px]">
-              <input type="number" id="custom-protein-input" placeholder="自訂g" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-sky-400" />
+              <input type="number" id="custom-protein-input" placeholder="自訂g" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-sky-400" />
               <button type="button" onclick="addCustomProtein()" class="p-2 rounded-xl bg-sky-500 text-slate-950 font-bold hover:bg-sky-400 transition-colors">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               </button>
@@ -705,7 +714,7 @@
 
       <!-- SECTION 4: QUICK CHARTS PREVIEW -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="glass-card rounded-2xl p-5">
+        <div class="glass-card rounded-2xl p-5 min-w-0">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
               <i data-lucide="trending-down" class="w-4 h-4 text-sky-400"></i>
@@ -713,12 +722,12 @@
             </h3>
             <span class="text-[11px] text-slate-400">近期紀錄</span>
           </div>
-          <div class="h-52 w-full">
+          <div class="h-52 w-full relative">
             <canvas id="dashboardWeightChart"></canvas>
           </div>
         </div>
 
-        <div class="glass-card rounded-2xl p-5">
+        <div class="glass-card rounded-2xl p-5 min-w-0">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
               <i data-lucide="bar-chart-3" class="w-4 h-4 text-violet-400"></i>
@@ -726,7 +735,7 @@
             </h3>
             <span class="text-[11px] text-slate-400">目標 7-9h</span>
           </div>
-          <div class="h-52 w-full">
+          <div class="h-52 w-full relative">
             <canvas id="dashboardSleepChart"></canvas>
           </div>
         </div>
@@ -929,7 +938,7 @@
         <!-- FORM D: DAILY SLEEP -->
         <form id="form-sleep" onsubmit="submitSleepLog(event)" class="hidden space-y-4">
           <div>
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
               <label class="text-xs font-medium text-slate-300">睡眠時數 (小時)</label>
               <div class="flex items-center gap-2">
                 <span id="sleep-slider-display" class="text-2xl font-mono font-bold text-violet-400">7.5</span>
@@ -1054,23 +1063,23 @@
 
       <!-- Muscle Distribution Chart + History List -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="glass-card rounded-2xl p-5">
+        <div class="glass-card rounded-2xl p-5 min-w-0">
           <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
             <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i>
             肌力訓練部位分佈
           </h3>
           <p class="text-[11px] text-slate-400 mb-3">統計符合篩選條件的部位次數</p>
-          <div class="h-56 w-full flex items-center justify-center">
+          <div class="h-56 w-full flex items-center justify-center relative">
             <canvas id="queryMuscleChart"></canvas>
           </div>
         </div>
 
-        <div class="glass-card rounded-2xl p-5 lg:col-span-2 flex flex-col">
+        <div class="glass-card rounded-2xl p-5 lg:col-span-2 flex flex-col min-w-0">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold text-white">查詢明細列表</h3>
             <span id="query-result-badge" class="text-[11px] font-mono text-slate-400">顯示最新紀錄</span>
           </div>
-          <div id="query-records-list" class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1"></div>
+          <div id="query-records-list" class="space-y-2.5 max-h-[420px] overflow-y-auto overflow-x-hidden pr-1"></div>
         </div>
       </div>
     </section>
@@ -1078,13 +1087,13 @@
     <!-- ==================== TAB 4: PERSONAL PROFILE PAGE (個人頁面) ==================== -->
     <section id="view-profile" class="hidden space-y-5">
       <div class="flex items-center gap-3">
-        <button type="button" onclick="selectProfileTab('me')" id="profile-tab-me" class="flex-1 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
-          <span class="w-3 h-3 rounded-full bg-sky-400"></span>
-          <span id="profile-btn-label-me">Chumi 的個人檔案</span>
+        <button type="button" onclick="selectProfileTab('me')" id="profile-tab-me" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
+          <span id="profile-btn-label-me" class="truncate">Chumi 的個人檔案</span>
         </button>
-        <button type="button" onclick="selectProfileTab('partner')" id="profile-tab-partner" class="flex-1 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
-          <span class="w-3 h-3 rounded-full bg-rose-400"></span>
-          <span id="profile-btn-label-partner">Weeki 的個人檔案</span>
+        <button type="button" onclick="selectProfileTab('partner')" id="profile-tab-partner" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span class="w-3 h-3 rounded-full bg-rose-400 shrink-0"></span>
+          <span id="profile-btn-label-partner" class="truncate">Weeki 的個人檔案</span>
         </button>
       </div>
 
@@ -1170,7 +1179,7 @@
   <!-- Bottom Mobile App-Style Navigation Bar -->
   <nav aria-label="主頁底部導覽列" class="fixed bottom-0 inset-x-0 z-30 bg-[#070B14]/95 backdrop-blur-2xl border-t border-slate-800/90 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.65)]">
     <div class="max-w-xl mx-auto px-3 py-1.5 grid grid-cols-4 gap-1.5">
-      <!-- 1. 主頁 (Couple Illustration Badge Icon matching uploaded artwork) -->
+      <!-- 1. 主頁 -->
       <button type="button" onclick="switchTab('home')" id="nav-tab-home" class="app-dock-item is-active flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
         <span class="dock-icon-shell w-10 h-10 rounded-2xl p-0.5 bg-slate-900 border border-sky-400/50 shadow-md flex items-center justify-center overflow-hidden transition-all">
           <svg viewBox="0 0 64 64" class="w-full h-full rounded-[13px]" aria-hidden="true">
@@ -1185,19 +1194,13 @@
               </linearGradient>
             </defs>
             <rect width="64" height="64" rx="13" fill="url(#homeCreamBg)"/>
-            <!-- Left curly-haired partner -->
             <path d="M9 62 C9 47, 15 41, 24 40 L29 46 L34 40 C40 41, 44 45, 45 53" fill="#6E6B63" stroke="#1E1B18" stroke-width="1.3"/>
             <path d="M15 24 C14 15, 20 9, 28 10 C35 9, 40 15, 39 23 C40 30, 35 37, 28 38 C20 38, 15 31, 15 24 Z" fill="url(#homeSkinTone)" stroke="#1E1B18" stroke-width="1.3"/>
-            <!-- Curly hair clusters -->
             <path d="M14 21 C11 16, 14 10, 19 10 C20 6, 26 5, 29 8 C33 5, 39 7, 40 12 C44 14, 44 20, 40 23 C38 17, 33 14, 27 15 C21 16, 17 19, 14 21 Z" fill="#09090B" stroke="#09090B" stroke-width="1.2" stroke-linejoin="round"/>
-            <!-- Right bangs partner -->
             <path d="M29 63 C29 49, 36 43, 47 43 C54 43, 58 49, 59 63 Z" fill="#111113"/>
             <path d="M34 31 C34 22, 40 17, 47 18 C53 19, 56 26, 55 35 C54 42, 48 46, 41 45 C36 44, 34 38, 34 31 Z" fill="url(#homeSkinTone)" stroke="#1E1B18" stroke-width="1.3"/>
-            <!-- Bangs & long hair -->
             <path d="M33 30 C32 21, 39 16, 47 17 C54 18, 57 24, 57 35 L55 58 L51 58 C50 42, 49 32, 48 26 L46.5 32 L45 25 L43.5 32 L42 25 L40.5 32 L39 26 C36.5 33, 35.5 44, 35 58 L32 58 Z" fill="#09090B"/>
-            <!-- Embracing arm & peace sign -->
             <path d="M19 44 C26 42, 35 43, 44 45 L31 47.5 L22 50.5 L32 50.5 L23 53.5" fill="url(#homeSkinTone)" stroke="#1E1B18" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            <!-- Subtle tech-blue corner indicator -->
             <rect x="46" y="4" width="14" height="5" rx="2.5" fill="#0EA5E9"/>
           </svg>
         </span>
@@ -1222,7 +1225,7 @@
         <span class="dock-label text-[11px] font-medium mt-1 text-slate-400 tracking-wide">Between</span>
       </button>
 
-      <!-- 3. 健康 (Sports / Fitness Icon) -->
+      <!-- 3. 健康 -->
       <button type="button" onclick="switchTab('dashboard')" id="nav-tab-dashboard" class="app-dock-item flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
         <span class="dock-icon-shell w-10 h-10 rounded-2xl bg-slate-900/90 border border-slate-700/90 flex items-center justify-center transition-all">
           <svg viewBox="0 0 48 48" class="w-6 h-6" aria-hidden="true">
@@ -1235,7 +1238,7 @@
         <span class="dock-label text-[11px] font-medium mt-1 text-slate-400 tracking-wide">健康</span>
       </button>
 
-      <!-- 4. 財庫 (Piggy Bank Icon) -->
+      <!-- 4. 財庫 -->
       <button type="button" onclick="switchTab('vault')" id="nav-tab-vault" class="app-dock-item flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
         <span class="dock-icon-shell w-10 h-10 rounded-2xl bg-slate-900/90 border border-slate-700/90 flex items-center justify-center transition-all">
           <svg viewBox="0 0 48 48" class="w-6 h-6" aria-hidden="true">
@@ -1313,11 +1316,11 @@
       </div>
 
       <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2.5">
-          <span id="modal-sync-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <div>
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span id="modal-sync-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+          <div class="min-w-0">
             <div id="modal-sync-title" class="text-xs font-bold text-emerald-300">已連線即時同步</div>
-            <div id="modal-sync-desc" class="text-[11px] text-slate-400 font-mono mt-0.5">目前配對碼：Chumi0419weeki</div>
+            <div id="modal-sync-desc" class="text-[11px] text-slate-400 font-mono mt-0.5 truncate">目前配對碼：Chumi0419weeki</div>
           </div>
         </div>
         <button type="button" onclick="copyShareInvite()" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center gap-1 transition-colors shrink-0">
@@ -1329,7 +1332,7 @@
         <div>
           <label class="block text-xs font-medium text-slate-300 mb-1.5">自訂情侶專屬配對碼（建議英文或數字）</label>
           <div class="flex gap-2">
-            <input type="text" id="room-code-input" required minlength="4" maxlength="32" placeholder="例如：Chumi0419weeki" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+            <input type="text" id="room-code-input" required minlength="4" maxlength="32" placeholder="例如：Chumi0419weeki" class="flex-1 min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
             <button type="submit" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-sky-500/20 hover:opacity-95 transition-all shrink-0">
               切換 / 連線
             </button>
@@ -1366,17 +1369,13 @@
           </defs>
           <rect width="512" height="512" rx="116" fill="url(#bgCream)"/>
           <rect x="16" y="16" width="480" height="480" rx="104" fill="none" stroke="#0EA5E9" stroke-opacity="0.45" stroke-width="8"/>
-          <!-- Left partner with curly hair -->
           <path d="M72 496 C72 378, 124 332, 196 324 L236 372 L276 324 C324 330, 356 362, 368 424" fill="#6E6B63" stroke="#1E1B18" stroke-width="10"/>
           <path d="M120 194 C118 124, 166 78, 224 82 C278 78, 322 120, 318 188 C322 242, 286 296, 222 302 C158 302, 122 250, 120 194 Z" fill="url(#skin)" stroke="#1E1B18" stroke-width="10"/>
           <path d="M112 172 C92 132, 114 82, 156 80 C168 48, 214 42, 238 66 C268 42, 318 56, 328 96 C362 114, 362 166, 328 190 C310 138, 268 112, 218 120 C172 128, 138 156, 112 172 Z" fill="#09090B" stroke="#09090B" stroke-width="10" stroke-linejoin="round"/>
-          <!-- Right partner with bangs -->
           <path d="M234 504 C234 392, 292 344, 384 344 C438 344, 474 392, 482 504 Z" fill="#111113"/>
           <path d="M274 250 C274 176, 322 136, 382 142 C432 148, 458 204, 450 282 C442 342, 392 372, 332 364 C292 358, 274 310, 274 250 Z" fill="url(#skin)" stroke="#1E1B18" stroke-width="10"/>
           <path d="M268 238 C266 168, 318 128, 384 134 C438 140, 464 196, 462 282 L444 466 L412 466 C406 336, 398 256, 386 208 L374 258 L362 204 L350 260 L338 204 L326 260 L314 212 C294 268, 286 356, 282 466 L256 466 Z" fill="#09090B"/>
-          <!-- Embracing arm & peace sign -->
           <path d="M152 354 C212 338, 284 346, 356 362 L252 382 L176 406 L258 404 L184 428" fill="url(#skin)" stroke="#1E1B18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- Tech badge accent -->
           <rect x="372" y="34" width="106" height="32" rx="16" fill="#070B14" stroke="#22D3EE" stroke-width="4"/>
           <circle cx="425" cy="50" r="8" fill="#22D3EE"/>
         </svg>
@@ -1444,18 +1443,26 @@
 
     let currentRoomCode = getInitialRoomCode();
 
+    // 以「本地時區」格式化日期（原本用 toISOString 會變成 UTC，台灣凌晨會差一天）
+    function formatLocalDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
     function getTodayStr(offsetDays = 0) {
       const d = new Date();
       d.setDate(d.getDate() + offsetDays);
-      return d.toISOString().split('T')[0];
+      return formatLocalDate(d);
     }
 
     function getWeekStartStr() {
       const d = new Date();
       const day = d.getDay();
       const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-      const monday = new Date(d.setDate(diff));
-      return monday.toISOString().split('T')[0];
+      const monday = new Date(d.getFullYear(), d.getMonth(), diff);
+      return formatLocalDate(monday);
     }
 
     function createDefaultState() {
@@ -1578,7 +1585,7 @@
         text.textContent = `同步:${currentRoomCode}`;
         text.className = 'text-emerald-300 max-w-[84px] sm:max-w-[130px] truncate font-mono';
         if (modalDot) {
-          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0';
           modalTitle.textContent = '已連線雲端即時同步';
           modalTitle.className = 'text-xs font-bold text-emerald-300';
           modalDesc.textContent = `目前配對碼：${currentRoomCode}`;
@@ -1588,7 +1595,7 @@
         text.textContent = '同步連線中...';
         text.className = 'text-amber-300 max-w-[84px] sm:max-w-[130px] truncate';
         if (modalDot) {
-          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping';
+          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0';
           modalTitle.textContent = '正在連線雲端資料庫...';
           modalTitle.className = 'text-xs font-bold text-amber-300';
           modalDesc.textContent = `嘗試連線配對碼：${currentRoomCode}`;
@@ -1598,7 +1605,7 @@
         text.textContent = '離線本機模式';
         text.className = 'text-rose-300 max-w-[84px] sm:max-w-[130px] truncate';
         if (modalDot) {
-          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-400';
+          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-400 shrink-0';
           modalTitle.textContent = '離線本機模式';
           modalTitle.className = 'text-xs font-bold text-rose-300';
           modalDesc.textContent = detailText || '目前暫存於本機裝置';
@@ -1844,6 +1851,33 @@
     }
 
     // ==================== 6. NAVIGATION & CONTEXT SWITCHERS ====================
+
+    // 【修正】原本缺少此函式，導致整個 script 在 Object.assign 時報錯、所有按鈕失效
+    function setActiveContext(ctx) {
+      activeContext = ctx;
+      if (ctx === 'me' || ctx === 'partner') actionTargetUser = ctx;
+
+      const activeStyle = {
+        both: 'bg-sky-500 text-slate-950',
+        me: 'bg-sky-500/25 text-sky-200',
+        partner: 'bg-rose-500/25 text-rose-200'
+      };
+      const base = 'px-2 sm:px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1 ';
+      ['both', 'me', 'partner'].forEach((k) => {
+        const btn = document.getElementById(`btn-ctx-${k}`);
+        if (!btn) return;
+        btn.className = base + (k === ctx ? activeStyle[k] : 'text-slate-400 hover:text-white');
+      });
+
+      if (activeTab === 'dashboard') renderDashboard();
+    }
+
+    // 【修正】原本缺少此函式（水份/蛋白質卡片的對象下拉選單）
+    function syncActionUser(userKey) {
+      actionTargetUser = userKey;
+      renderHydrationAndProtein();
+    }
+
     function switchTab(tabName, optionalSubCategory = null) {
       activeTab = tabName;
       ['home', 'vault', 'dashboard', 'log', 'query', 'profile'].forEach((t) => {
@@ -1931,7 +1965,7 @@
           <div class="bg-slate-900/75 border border-slate-800/90 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="font-bold text-sm ${nameColor}">${p.name}</span>
+                <span class="font-bold text-sm ${nameColor}">${escapeHtml(p.name)}</span>
                 <span class="text-xs font-mono text-slate-400">BMI ${bmi}</span>
               </div>
               <span class="px-2 py-0.5 rounded-full text-[11px] font-bold border ${bmiStatus.badgeClass}">${bmiStatus.label}</span>
@@ -1993,9 +2027,9 @@
             const pct = g.targetAmount > 0 ? Math.min(100, Math.round((Number(g.savedAmount || 0) / Number(g.targetAmount)) * 100)) : 0;
             return `
               <div class="bg-slate-900/75 border border-slate-800/80 rounded-xl p-3">
-                <div class="flex items-center justify-between text-xs mb-1.5">
-                  <span class="font-bold text-white">${escapeHtml(g.item)}</span>
-                  <span class="font-mono text-sky-300">${formatCurrency(g.savedAmount || 0)} / ${formatCurrency(g.targetAmount)} (${pct}%)</span>
+                <div class="flex items-center justify-between gap-2 text-xs mb-1.5">
+                  <span class="font-bold text-white truncate">${escapeHtml(g.item)}</span>
+                  <span class="font-mono text-sky-300 shrink-0">${formatCurrency(g.savedAmount || 0)} / ${formatCurrency(g.targetAmount)} (${pct}%)</span>
                 </div>
                 <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                   <div class="h-full bg-gradient-to-r from-sky-500 to-cyan-300 rounded-full" style="width: ${pct}%"></div>
@@ -2179,18 +2213,18 @@
         }
 
         return `
-          <div class="glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4">
+          <div class="glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0">
             <div class="space-y-2.5">
               <div class="flex items-start justify-between gap-2">
-                <div>
+                <div class="min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <h4 class="text-base font-bold text-white">${escapeHtml(g.item)}</h4>
+                    <h4 class="text-base font-bold text-white break-words">${escapeHtml(g.item)}</h4>
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-bold border ${ownerBadgeClass}">${escapeHtml(ownerLabel)}</span>
                   </div>
                   <div class="text-xs mt-1">${deadlineHtml}</div>
                 </div>
 
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 shrink-0">
                   <button type="button" onclick="startEditGoal('${g.id}')" title="調整目標金額、item 或時間" class="p-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-slate-700 transition-colors">
                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                   </button>
@@ -2201,7 +2235,7 @@
               </div>
 
               <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800/80 space-y-2">
-                <div class="flex items-baseline justify-between text-xs">
+                <div class="flex flex-wrap items-baseline justify-between gap-1 text-xs">
                   <span class="text-slate-400">已累積進度</span>
                   <span class="font-mono font-bold text-white">
                     <span class="text-sky-300">${formatCurrency(saved)}</span> / ${formatCurrency(target)}
@@ -2397,20 +2431,20 @@
         return `
           <div class="glass-card rounded-2xl p-5 border ${borderGlow} relative overflow-hidden">
             <div class="flex items-start justify-between gap-2">
-              <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl ${isMe ? 'bg-sky-500/15 text-sky-400 border-sky-500/30' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'} border flex items-center justify-center font-bold text-base">
-                  ${p.name.charAt(0)}
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl ${isMe ? 'bg-sky-500/15 text-sky-400 border-sky-500/30' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'} border flex items-center justify-center font-bold text-base shrink-0">
+                  ${escapeHtml(p.name.charAt(0))}
                 </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <h2 class="text-base font-bold text-white">${p.name}</h2>
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-x-2">
+                    <h2 class="text-base font-bold text-white">${escapeHtml(p.name)}</h2>
                     <span class="text-xs font-mono text-slate-400">${p.height} cm · ${p.weight} kg</span>
                   </div>
                   <p class="text-[11px] text-slate-400 mt-0.5">${status.advice}</p>
                 </div>
               </div>
 
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${status.badgeClass}">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold border shrink-0 ${status.badgeClass}">
                 ${status.label}
               </span>
             </div>
@@ -2538,7 +2572,7 @@
         return `
           <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${p.name}</span>
+              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(p.name)}</span>
               ${statusBadge}
             </div>
             <div class="flex items-baseline justify-between">
@@ -2573,7 +2607,7 @@
         return `
           <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 flex items-center justify-between">
             <div>
-              <div class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${p.name}</div>
+              <div class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(p.name)}</div>
               <div class="mt-1 flex items-baseline gap-1.5">
                 <span class="text-xl font-mono font-bold text-white">${count}</span>
                 <span class="text-xs text-slate-400 font-mono">/ 2 次目標</span>
@@ -2595,7 +2629,7 @@
       } else {
         tagsEl.innerHTML = Array.from(allMusclesSet).map((item) => {
           const [who, muscle] = item.split(':');
-          return `<span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">${who} · ${muscle}</span>`;
+          return `<span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">${escapeHtml(who)} · ${escapeHtml(muscle)}</span>`;
         }).join('');
       }
     }
@@ -2627,7 +2661,7 @@
         return `
           <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 space-y-1.5">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${p.name}</span>
+              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(p.name)}</span>
               ${statusHtml}
             </div>
             <div class="flex items-baseline justify-between">
@@ -2961,6 +2995,7 @@
       document.getElementById('filter-muscle').disabled = false;
       document.getElementById('filter-muscle').classList.remove('opacity-50');
       document.getElementById('custom-date-box').classList.add('hidden');
+      document.getElementById('custom-date-box').classList.remove('grid');
       runCompoundQuery();
     }
 
@@ -3068,24 +3103,24 @@
           const bmi = calculateBMI(r.weight, r.height);
           contentHtml = `<span class="text-white font-semibold">體態紀錄</span> · 身高 ${r.height}cm / 體重 <span class="font-mono text-sky-300">${r.weight}kg</span> (BMI ${bmi})`;
         } else if (r.type === 'cardio') {
-          contentHtml = `<span class="text-emerald-300 font-semibold">有氧運動 (${r.subType})</span> · <span class="font-mono text-white">${r.minutes} 分鐘</span> ${r.note ? `<span class="text-slate-400 text-xs">(${r.note})</span>` : ''}`;
+          contentHtml = `<span class="text-emerald-300 font-semibold">有氧運動 (${escapeHtml(r.subType)})</span> · <span class="font-mono text-white">${r.minutes} 分鐘</span> ${r.note ? `<span class="text-slate-400 text-xs">(${escapeHtml(r.note)})</span>` : ''}`;
         } else if (r.type === 'strength') {
-          const mTags = (r.muscles || []).map((m) => `<span class="px-1.5 py-0.5 rounded bg-indigo-500/25 text-indigo-200 text-[11px]">${m}</span>`).join(' ');
-          contentHtml = `<span class="text-indigo-300 font-semibold">肌力訓練</span> · ${mTags} ${r.note ? `<span class="text-slate-400 text-xs">(${r.note})</span>` : ''}`;
+          const mTags = (r.muscles || []).map((m) => `<span class="px-1.5 py-0.5 rounded bg-indigo-500/25 text-indigo-200 text-[11px]">${escapeHtml(m)}</span>`).join(' ');
+          contentHtml = `<span class="text-indigo-300 font-semibold">肌力訓練</span> · ${mTags} ${r.note ? `<span class="text-slate-400 text-xs">(${escapeHtml(r.note)})</span>` : ''}`;
         } else if (r.type === 'sleep') {
-          contentHtml = `<span class="text-violet-300 font-semibold">每日睡眠</span> · <span class="font-mono text-white">${r.hours} 小時</span> ${r.note ? `<span class="text-slate-400 text-xs">(${r.note})</span>` : ''}`;
+          contentHtml = `<span class="text-violet-300 font-semibold">每日睡眠</span> · <span class="font-mono text-white">${r.hours} 小時</span> ${r.note ? `<span class="text-slate-400 text-xs">(${escapeHtml(r.note)})</span>` : ''}`;
         }
 
         return `
           <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2">
-            <div class="space-y-1">
+            <div class="space-y-1 min-w-0">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-[11px] font-bold border ${whoBadge}">${who.name}</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-bold border ${whoBadge}">${escapeHtml(who.name)}</span>
                 <span class="text-xs font-mono text-slate-400">${r.date}</span>
               </div>
-              <div class="text-xs sm:text-sm text-slate-200">${contentHtml}</div>
+              <div class="text-xs sm:text-sm text-slate-200 break-words">${contentHtml}</div>
             </div>
-            <button type="button" onclick="deleteRecord('${r.id}')" title="刪除此筆紀錄" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+            <button type="button" onclick="deleteRecord('${r.id}')" title="刪除此筆紀錄" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
@@ -3114,12 +3149,13 @@
 
       const tabMe = document.getElementById('profile-tab-me');
       const tabPartner = document.getElementById('profile-tab-partner');
+      const tabBase = 'flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all ';
       if (profileTabUser === 'me') {
-        tabMe.className = 'flex-1 py-3 px-4 rounded-2xl border border-sky-400 bg-sky-500/15 text-sky-300 font-bold text-sm flex items-center justify-center gap-2 transition-all';
-        tabPartner.className = 'flex-1 py-3 px-4 rounded-2xl border border-slate-800 bg-slate-900/70 text-slate-400 font-bold text-sm flex items-center justify-center gap-2 transition-all';
+        tabMe.className = tabBase + 'border-sky-400 bg-sky-500/15 text-sky-300';
+        tabPartner.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
       } else {
-        tabPartner.className = 'flex-1 py-3 px-4 rounded-2xl border border-rose-400 bg-rose-500/15 text-rose-300 font-bold text-sm flex items-center justify-center gap-2 transition-all';
-        tabMe.className = 'flex-1 py-3 px-4 rounded-2xl border border-slate-800 bg-slate-900/70 text-slate-400 font-bold text-sm flex items-center justify-center gap-2 transition-all';
+        tabPartner.className = tabBase + 'border-rose-400 bg-rose-500/15 text-rose-300';
+        tabMe.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
       }
 
       const p = appState.profiles[profileTabUser];
@@ -3155,14 +3191,14 @@
       feedEl.innerHTML = personalLogs.map((r) => {
         let desc = '';
         if (r.type === 'body') desc = `身高 ${r.height}cm · 體重 ${r.weight}kg (BMI ${calculateBMI(r.weight, r.height)})`;
-        if (r.type === 'cardio') desc = `有氧：${r.subType} ${r.minutes} 分鐘`;
-        if (r.type === 'strength') desc = `肌力：${(r.muscles || []).join('、')}`;
+        if (r.type === 'cardio') desc = `有氧：${escapeHtml(r.subType)} ${r.minutes} 分鐘`;
+        if (r.type === 'strength') desc = `肌力：${(r.muscles || []).map(escapeHtml).join('、')}`;
         if (r.type === 'sleep') desc = `睡眠：${r.hours} 小時`;
 
         return `
-          <div class="flex items-center justify-between py-2 px-3 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs">
-            <span class="text-slate-200">${desc}</span>
-            <span class="font-mono text-slate-400">${r.date}</span>
+          <div class="flex items-center justify-between gap-2 py-2 px-3 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs">
+            <span class="text-slate-200 min-w-0 break-words">${desc}</span>
+            <span class="font-mono text-slate-400 shrink-0">${r.date}</span>
           </div>
         `;
       }).join('');
@@ -3266,7 +3302,8 @@
       resetDemoData
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
+    // module script 是延遲執行，DOMContentLoaded 可能已經觸發過，所以兩種情況都處理
+    function initApp() {
       setupPwaAssets();
       document.getElementById('log-date').value = getTodayStr(0);
       document.getElementById('filter-start-date').value = getTodayStr(-7);
@@ -3278,7 +3315,13 @@
       switchTab('home');
       lucide.createIcons();
       initCloudSync();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
   </script>
 </body>
 </html>
