@@ -1399,6 +1399,23 @@
     </div>
   </nav>
 
+  <!-- Message History Modal -->
+  <div id="msg-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-md max-h-[80vh] rounded-3xl p-5 flex flex-col border border-sky-500/30">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="history" class="w-5 h-5 text-sky-400"></i>
+          <span>歷史訊息</span>
+        </h3>
+        <button type="button" onclick="closeMsgHistory()" class="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-1">只保留最近 7 天，超過的訊息會自動清除</p>
+      <div id="msg-modal-list" class="mt-3 space-y-2 overflow-y-auto overflow-x-hidden pr-1"></div>
+    </div>
+  </div>
+
   <!-- Photo Lightbox -->
   <div id="photo-modal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-black/90 backdrop-blur-sm p-4">
     <button type="button" onclick="closePhotoModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white">
@@ -3889,6 +3906,7 @@
         messages = raw ? JSON.parse(raw) : [];
         if (!Array.isArray(messages)) messages = [];
       } catch (e) { messages = []; }
+      cleanupOldMessages();
       renderMessageBox();
     }
 
@@ -3954,12 +3972,13 @@
       const incoming = m.from !== msgSender;
       const nameColor = m.from === 'me' ? 'text-sky-300' : 'text-rose-300';
       latestEl.innerHTML = `
-        <div class="rounded-2xl p-4 border ${incoming ? 'bg-sky-500/10 border-sky-400/50' : 'bg-slate-900/80 border-slate-800'}">
+        <div onclick="openMsgHistory()" class="cursor-pointer rounded-2xl p-4 border ${incoming ? 'bg-sky-500/10 border-sky-400/50' : 'bg-slate-900/80 border-slate-800'}">
           <div class="flex items-center justify-between gap-2 text-xs">
             <span class="font-bold ${nameColor}">${escapeHtml(fromName)} 想跟你說…</span>
             <span class="font-mono text-slate-400 shrink-0">${incoming ? '<span class="text-amber-300 font-bold mr-1">新</span>' : ''}${timeAgo(m.createdAt)}${m.synced === false ? ' · 未同步' : ''}</span>
           </div>
           <div class="mt-1.5 text-lg sm:text-xl font-bold text-white break-words">${escapeHtml(m.text)}</div>
+          <div class="mt-1.5 text-[11px] text-sky-300/80">點一下查看歷史訊息 ›</div>
         </div>
       `;
 
@@ -4019,7 +4038,10 @@
         messages = [...messages.filter((m) => m.room !== room), ...cloud, ...unsynced];
         persistMessages();
         unsynced.forEach((m) => pushMessageToCloud(m));
+        cleanupOldMessages();
         renderMessageBox();
+        const histModal = document.getElementById('msg-modal');
+        if (histModal && !histModal.classList.contains('hidden')) renderMsgHistory();
       }, (err) => console.warn('Message snapshot error:', err));
     }
 
@@ -4119,7 +4141,72 @@
       }
     }
 
-    Object.assign(window, { setMsgSender, sendQuickMessage, sendCustomMessage, toggleMsgSound });
+    // ----- 歷史訊息與每週自動清理（只保留最近 7 天）-----
+    const MSG_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+    function cleanupOldMessages() {
+      const cutoff = Date.now() - MSG_RETENTION_MS;
+      const old = messages.filter((m) => m.createdAt < cutoff);
+      if (old.length === 0) return;
+      messages = messages.filter((m) => m.createdAt >= cutoff);
+      persistMessages();
+      if (db && currentUser) {
+        old.filter((m) => m.room !== LOCAL_ROOM).forEach((m) => {
+          deleteDoc(msgDocRef(m)).catch((err) => console.warn('Old message delete failed:', err));
+        });
+      }
+    }
+
+    function openMsgHistory() {
+      cleanupOldMessages();
+      renderMsgHistory();
+      const modal = document.getElementById('msg-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeMsgHistory() {
+      const modal = document.getElementById('msg-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderMsgHistory() {
+      const listEl = document.getElementById('msg-modal-list');
+      const list = messages
+        .filter((m) => m.room === currentRoomCode)
+        .sort((a, b) => b.createdAt - a.createdAt);
+      if (list.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-sm text-slate-500 py-8">最近 7 天沒有訊息</div>';
+        return;
+      }
+      let lastDay = '';
+      listEl.innerHTML = list.map((m) => {
+        const d = new Date(m.createdAt);
+        const day = `${d.getMonth() + 1}/${d.getDate()}`;
+        const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const head = day !== lastDay ? `<div class="text-[11px] font-mono font-bold text-sky-300 pt-2 px-1">${day}</div>` : '';
+        lastDay = day;
+        const name = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
+        const mine = m.from === msgSender;
+        const color = m.from === 'me' ? 'text-sky-300' : 'text-rose-300';
+        return `${head}
+          <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+            <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 ${mine ? 'bg-sky-500/15 border border-sky-500/30' : 'bg-slate-900/90 border border-slate-800'}">
+              <div class="flex items-center justify-between gap-3 text-[11px]">
+                <span class="font-bold ${color}">${escapeHtml(name)}</span>
+                <span class="font-mono text-slate-500">${time}</span>
+              </div>
+              <div class="mt-0.5 text-sm text-white break-words">${escapeHtml(m.text)}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    setInterval(cleanupOldMessages, 60 * 60 * 1000);
+
+    Object.assign(window, { setMsgSender, sendQuickMessage, sendCustomMessage, toggleMsgSound, openMsgHistory, closeMsgHistory });
     setInterval(() => { if (activeTab === 'home') renderMessageBox(); }, 60000);
 
     // ==================== 12. PWA MODAL & INITIALIZATION ====================
