@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SyncFit 情侶健康與體態追蹤</title>
+  <title>SyncFit 情侶主頁與健康財庫</title>
 
   <!-- Mobile Home Screen / PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="SyncFit健康" />
+  <meta name="apple-mobile-web-app-title" content="SyncFit主頁" />
   <meta name="theme-color" content="#070B14" />
   <link id="apple-touch-icon" rel="apple-touch-icon" href="" />
   <link id="app-manifest" rel="manifest" href="" />
@@ -122,6 +122,24 @@
       filter: invert(1) brightness(0.8);
       cursor: pointer;
     }
+
+    /* Mobile App-Style Bottom Dock */
+    .app-dock-item {
+      position: relative;
+      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .app-dock-item.is-active {
+      transform: translateY(-2px);
+    }
+    .app-dock-item.is-active .dock-icon-shell {
+      box-shadow: 0 0 18px rgba(14, 165, 233, 0.38), inset 0 0 0 1px rgba(34, 211, 238, 0.55);
+      border-color: rgba(34, 211, 238, 0.7);
+      background: linear-gradient(145deg, rgba(14, 165, 233, 0.24), rgba(15, 23, 42, 0.95));
+    }
+    .app-dock-item.is-active .dock-label {
+      color: #38BDF8;
+      font-weight: 800;
+    }
   </style>
 </head>
 <body class="min-h-screen pb-24 selection:bg-sky-500 selection:text-white">
@@ -172,6 +190,12 @@
           <i data-lucide="smartphone" class="w-4 h-4"></i>
           <span class="hidden md:inline">桌面圖示</span>
         </button>
+
+        <!-- Quick Log Header Shortcut -->
+        <button onclick="switchTab('log')" title="新增健康紀錄" class="px-2.5 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/35 text-sky-300 transition-colors flex items-center gap-1 text-xs font-bold">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">記一筆</span>
+        </button>
       </div>
     </div>
   </header>
@@ -179,307 +203,301 @@
   <!-- Main Content Area -->
   <main class="max-w-5xl mx-auto px-4 pt-5 space-y-6">
 
-    <!-- ==================== TAB 1: DASHBOARD (儀表板) ==================== -->
-    <section id="view-dashboard" class="space-y-6">
-
-      <!-- Context Banner & Quick Date -->
-      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/50 border border-slate-800/80 rounded-2xl px-4 py-3">
-        <div class="flex items-center gap-2.5">
-          <span id="dashboard-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">雙人同步模式</span>
-          <span class="text-xs sm:text-sm text-slate-300" id="dashboard-subtitle">檢視兩人的即時體態指標與本週運動進度</span>
+    <!-- ==================== TAB 0: HOME HUB (主頁) ==================== -->
+    <section id="view-home" class="space-y-6">
+      <!-- Welcome & Between App Quick Launcher -->
+      <div class="glass-card rounded-2xl p-5 sm:p-6 border border-sky-500/25 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1.5">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Chumi &amp; Weeki 專屬主頁</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">歡迎回來，今天也一起健康生活與存錢吧</h2>
+          <p class="text-xs sm:text-sm text-slate-400">快速切換 Between 情侶空間、查看即時健康數值與小財庫目標進度</p>
         </div>
-        <div class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-400"></i>
-          <span id="current-week-label">本週統計</span>
+
+        <!-- Between App Launcher Button -->
+        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+          <button onclick="openBetweenApp()" class="w-full sm:w-auto px-4 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:opacity-95 text-white font-bold text-sm shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all active:scale-95">
+            <i data-lucide="heart" class="w-4 h-4 fill-current"></i>
+            <span>開啟 Between App</span>
+            <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-90"></i>
+          </button>
         </div>
       </div>
 
-      <!-- SECTION 1: BMI & IDEAL WEIGHT CARDS (Dual or Single View) -->
-      <div id="bmi-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Rendered dynamically by JS -->
-      </div>
-
-      <!-- SECTION 2: DAILY WATER & PROTEIN TARGETS -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Hydration Card -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                  <i data-lucide="droplets" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-bold text-white">今日水份攝取目標</h3>
-                  <p class="text-[11px] text-slate-400">依體重動態計算 (<span id="water-multiplier-label">35</span> ml/kg)</p>
-                </div>
-              </div>
-              <select id="water-user-select" onchange="syncActionUser(this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-sky-500">
-                <option value="me">Chumi</option>
-                <option value="partner">Weeki</option>
-              </select>
+      <!-- Health Summary Card + Quick Entry -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
+              <i data-lucide="heart-pulse" class="w-5 h-5"></i>
             </div>
-
-            <!-- Numbers -->
-            <div class="flex items-baseline justify-between mt-2">
-              <div>
-                <span id="today-water-current" class="text-2xl sm:text-3xl font-bold font-mono text-cyan-400">0</span>
-                <span class="text-xs text-slate-400 font-mono"> / <span id="today-water-target">2450</span> ml</span>
-              </div>
-              <span id="today-water-pct" class="text-sm font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-lg border border-cyan-500/20">0%</span>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="w-full h-3 bg-slate-800/90 rounded-full overflow-hidden mt-3 p-0.5 border border-slate-700/50">
-              <div id="today-water-bar" class="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-300 transition-all duration-500" style="width: 0%"></div>
+            <div>
+              <h3 class="text-base font-bold text-white">健康與體態總覽摘要</h3>
+              <p class="text-xs text-slate-400">點擊進入完整健康面板、快速紀錄或複合查詢</p>
             </div>
           </div>
 
-          <!-- Quick Add Buttons -->
-          <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
-            <button onclick="quickAddWater(250)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-500/20 hover:border-cyan-500/40 border border-slate-700 text-xs font-mono font-semibold text-cyan-300 transition-all active:scale-95">
-              +250ml
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center gap-1 transition-colors">
+              <span>健康總覽</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </button>
-            <button onclick="quickAddWater(500)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-500/20 hover:border-cyan-500/40 border border-slate-700 text-xs font-mono font-semibold text-cyan-300 transition-all active:scale-95">
-              +500ml
+            <button onclick="switchTab('log')" class="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 text-xs font-bold flex items-center gap-1 transition-colors">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>快速紀錄</span>
             </button>
-            <div class="flex items-center gap-1 flex-1 min-w-[110px]">
-              <input type="number" id="custom-water-input" placeholder="自訂ml" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-cyan-400" />
-              <button onclick="addCustomWater()" class="p-2 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+            <button onclick="switchTab('query')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 transition-colors">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+              <span>紀錄查詢</span>
+            </button>
           </div>
         </div>
 
-        <!-- Protein Card -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
-                  <i data-lucide="beef" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-bold text-white">今日蛋白質攝取目標</h3>
-                  <p class="text-[11px] text-slate-400">依體重動態計算 (<span id="protein-multiplier-label">1.6</span> g/kg)</p>
-                </div>
-              </div>
-              <select id="protein-user-select" onchange="syncActionUser(this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-sky-500">
-                <option value="me">Chumi</option>
-                <option value="partner">Weeki</option>
-              </select>
-            </div>
-
-            <!-- Numbers -->
-            <div class="flex items-baseline justify-between mt-2">
-              <div>
-                <span id="today-protein-current" class="text-2xl sm:text-3xl font-bold font-mono text-sky-400">0</span>
-                <span class="text-xs text-slate-400 font-mono"> / <span id="today-protein-target">112</span> g</span>
-              </div>
-              <span id="today-protein-pct" class="text-sm font-mono font-bold text-sky-300 bg-sky-500/10 px-2.5 py-0.5 rounded-lg border border-sky-500/20">0%</span>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="w-full h-3 bg-slate-800/90 rounded-full overflow-hidden mt-3 p-0.5 border border-slate-700/50">
-              <div id="today-protein-bar" class="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-500" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <!-- Quick Add Buttons -->
-          <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
-            <button onclick="quickAddProtein(15)" class="flex-1 py-2 px-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 hover:border-sky-500/40 border border-slate-700 text-xs font-mono font-semibold text-sky-300 transition-all active:scale-95">
-              +15g <span class="text-[10px] text-slate-400 font-sans">(蛋/豆漿)</span>
-            </button>
-            <button onclick="quickAddProtein(25)" class="flex-1 py-2 px-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 hover:border-sky-500/40 border border-slate-700 text-xs font-mono font-semibold text-sky-300 transition-all active:scale-95">
-              +25g <span class="text-[10px] text-slate-400 font-sans">(乳清/雞胸)</span>
-            </button>
-            <div class="flex items-center gap-1 flex-1 min-w-[105px]">
-              <input type="number" id="custom-protein-input" placeholder="自訂g" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-sky-400" />
-              <button onclick="addCustomProtein()" class="p-2 rounded-xl bg-sky-500 text-slate-950 font-bold hover:bg-sky-400 transition-colors">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
+        <!-- Home Health Snapshot Grid -->
+        <div id="home-health-summary-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Populated dynamically by JS -->
         </div>
       </div>
 
-      <!-- SECTION 3: WEEKLY CARDIO (150-300 MINS), STRENGTH (2x/WK), & SLEEP (7-9 HRS) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-        <!-- Weekly Cardio 150-300 mins -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <i data-lucide="heart-pulse" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-bold text-white">每週有氧運動</h3>
-                  <p class="text-[11px] text-slate-400">WHO 建議 150～300 分鐘</p>
-                </div>
-              </div>
-              <button onclick="switchTab('log', 'cardio')" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors">
-                + 紀錄
-              </button>
+      <!-- Mini Vault Summary Preview Card -->
+      <div class="glass-card rounded-2xl p-5 space-y-4 border border-sky-500/20">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <i data-lucide="piggy-bank" class="w-5 h-5"></i>
             </div>
-
-            <!-- Dual Partner or Single Breakdown -->
-            <div id="cardio-status-list" class="space-y-4 mt-4">
-              <!-- Populated by JS -->
+            <div>
+              <h3 class="text-base font-bold text-white">情侶小財庫快覽</h3>
+              <p class="text-xs text-slate-400">共同總存款、尚待分配金額與目標進度</p>
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span>150分：基礎健康達標</span>
-            <span>300分：進階燃脂達標</span>
-          </div>
+          <button onclick="switchTab('vault')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1 shadow-md shadow-sky-500/20 hover:opacity-95 transition-all">
+            <span>管理小財庫</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
 
-        <!-- Weekly Strength Training (2x/week) -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                  <i data-lucide="dumbbell" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-bold text-white">每週肌力訓練</h3>
-                  <p class="text-[11px] text-slate-400">目標每週至少 2 次</p>
-                </div>
-              </div>
-              <button onclick="switchTab('log', 'strength')" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition-colors">
-                + 紀錄
-              </button>
-            </div>
-
-            <div id="strength-status-list" class="space-y-4 mt-4">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-
-          <div class="mt-4 pt-3 border-t border-slate-800/80">
-            <p class="text-[11px] text-slate-400 mb-1.5">本週已訓練肌群部位：</p>
-            <div id="weekly-muscles-tags" class="flex flex-wrap gap-1.5">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Daily Sleep Tracker (7-9 hrs) -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-400">
-                  <i data-lucide="moon-star" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-bold text-white">每日睡眠修復</h3>
-                  <p class="text-[11px] text-slate-400">黃金標準 7～9 小時</p>
-                </div>
-              </div>
-              <button onclick="switchTab('log', 'sleep')" class="text-xs px-2.5 py-1 rounded-lg bg-violet-500/15 text-violet-300 border border-violet-500/30 hover:bg-violet-500/25 transition-colors">
-                + 紀錄
-              </button>
-            </div>
-
-            <div id="sleep-status-list" class="space-y-4 mt-4">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-
-          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span>&lt;7h 不足</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>7-9h 理想</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span>&gt;9h 過長</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- SECTION 4: QUICK CHARTS PREVIEW -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="glass-card rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <i data-lucide="trending-down" class="w-4 h-4 text-sky-400"></i>
-              體重變化趨勢 (kg)
-            </h3>
-            <span class="text-[11px] text-slate-400">近期紀錄</span>
-          </div>
-          <div class="h-52 w-full">
-            <canvas id="dashboardWeightChart"></canvas>
-          </div>
-        </div>
-
-        <div class="glass-card rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <i data-lucide="bar-chart-3" class="w-4 h-4 text-violet-400"></i>
-              近 7 日睡眠時數對比 (小時)
-            </h3>
-            <span class="text-[11px] text-slate-400">目標 7-9h</span>
-          </div>
-          <div class="h-52 w-full">
-            <canvas id="dashboardSleepChart"></canvas>
-          </div>
+        <div id="home-vault-preview">
+          <!-- Populated dynamically by JS -->
         </div>
       </div>
-
     </section>
 
-    <!-- ==================== TAB 2: QUICK LOGGING (新增紀錄) ==================== -->
-    <section id="view-log" class="hidden space-y-5">
-      <div class="glass-card rounded-2xl p-5 sm:p-6">
+    <!-- ==================== TAB 0.5: COUPLE MINI VAULT (小財庫) ==================== -->
+    <section id="view-vault" class="hidden space-y-5">
+      <!-- Shared Total Deposit & Allocation Overview -->
+      <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-5 border border-sky-500/25">
         <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
-          <div>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <i data-lucide="plus-circle" class="w-5 h-5 text-sky-400"></i>
-              新增健康與運動紀錄
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">選擇記錄對象與項目，資料將即時同步至統計報表</p>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/35 flex items-center justify-center text-amber-400">
+              <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-white">Chumi &amp; Weeki 共同小財庫</h2>
+              <p class="text-xs text-slate-400">設定共同總存款與各項儲蓄目標，系統即時試算尚待分配與預算上限</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
+            雲端即時同步
+          </span>
+        </div>
+
+        <!-- Shared Total Deposit Input & Quick Adjust -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+          <div class="lg:col-span-5 space-y-1.5">
+            <label for="vault-total-deposit-input" class="block text-xs font-bold text-slate-300">
+              共同總存款金額 (NT$)
+            </label>
+            <div class="relative flex items-center">
+              <span class="absolute left-3.5 text-sm font-mono font-bold text-amber-400">$</span>
+              <input
+                type="number"
+                min="0"
+                step="100"
+                id="vault-total-deposit-input"
+                oninput="handleVaultTotalDepositInput(this.value)"
+                class="w-full bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl pl-8 pr-3.5 py-2.5 text-lg font-mono font-bold text-white focus:outline-none"
+                placeholder="輸入共同總存款"
+              />
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+              <button type="button" onclick="adjustVaultTotalDeposit(-5000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300">-5,000</button>
+              <button type="button" onclick="adjustVaultTotalDeposit(5000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-300">+5,000</button>
+              <button type="button" onclick="adjustVaultTotalDeposit(10000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-300">+10,000</button>
+              <button type="button" onclick="adjustVaultTotalDeposit(50000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-emerald-300">+50,000</button>
+            </div>
           </div>
 
-          <!-- Select Who is logging -->
-          <div class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-            <span class="text-xs text-slate-400 pl-2">紀錄對象：</span>
-            <button type="button" onclick="setLogFormUser('me')" id="form-user-me" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-500 text-slate-950">
-              Chumi
-            </button>
-            <button type="button" onclick="setLogFormUser('partner')" id="form-user-partner" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
-              Weeki
-            </button>
+          <!-- 3 Allocation KPI Cards -->
+          <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+              <div class="text-[11px] text-slate-400">共同總存款</div>
+              <div id="vault-kpi-total" class="text-lg sm:text-xl font-mono font-bold text-amber-400 mt-1">$0</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">可用資金池</div>
+            </div>
+
+            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+              <div class="text-[11px] text-slate-400">細項目標總和</div>
+              <div id="vault-kpi-allocated" class="text-lg sm:text-xl font-mono font-bold text-sky-400 mt-1">$0</div>
+              <div id="vault-kpi-goal-count" class="text-[11px] text-slate-500 mt-0.5">共 0 項目標</div>
+            </div>
+
+            <div id="vault-unallocated-card" class="bg-slate-950/90 border border-emerald-500/30 rounded-xl p-3.5">
+              <div id="vault-unallocated-label" class="text-[11px] text-emerald-300 font-semibold">尚待分配</div>
+              <div id="vault-kpi-unallocated" class="text-lg sm:text-xl font-mono font-bold text-emerald-400 mt-1">$0</div>
+              <div id="vault-unallocated-sub" class="text-[11px] text-slate-400 mt-0.5">可繼續分配至目標</div>
+            </div>
           </div>
         </div>
 
-        <!-- Category Sub-tabs -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 my-4">
-          <button type="button" onclick="setLogCategory('body')" id="cat-btn-body" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
-            <i data-lucide="scale" class="w-4 h-4"></i> 身高體重 BMI
-          </button>
-          <button type="button" onclick="setLogCategory('cardio')" id="cat-btn-cardio" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
-            <i data-lucide="flame" class="w-4 h-4"></i> 有氧運動
-          </button>
-          <button type="button" onclick="setLogCategory('strength')" id="cat-btn-strength" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
-            <i data-lucide="dumbbell" class="w-4 h-4"></i> 肌力訓練
-          </button>
-          <button type="button" onclick="setLogCategory('sleep')" id="cat-btn-sleep" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
-            <i data-lucide="moon" class="w-4 h-4"></i> 每日睡眠
+        <!-- Real-Time Budget Exceeded Alert Banner -->
+        <div id="vault-overbudget-alert" class="hidden p-4 rounded-2xl bg-rose-500/15 border border-rose-500/50 text-rose-200 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/25 border border-rose-400/40 flex items-center justify-center text-rose-300 shrink-0 mt-0.5">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          </div>
+          <div class="space-y-1 text-xs sm:text-sm">
+            <div class="font-bold text-rose-200">餘額不足，請檢查預算</div>
+            <p class="text-rose-200/90 text-xs leading-relaxed">
+              目前所有細項目標金額相加已超出共同總存款 <span id="vault-exceed-amount" class="font-mono font-bold text-white underline decoration-rose-400">$0</span>。請調降部分目標金額或增加共同總存款，以免分配超支。
+            </p>
+          </div>
+        </div>
+
+        <!-- Unallocated Funds Notice Banner (When sum < total deposit) -->
+        <div id="vault-unallocated-banner" class="hidden p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2">
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span>
+              目前細項分配小於共同總存款，尚有 <strong id="vault-banner-unallocated" class="font-mono text-emerald-300 text-sm">$0</strong> <strong>尚待分配</strong>。
+            </span>
+          </div>
+          <span class="text-[11px] text-emerald-300/80 hidden sm:inline">可建立新目標或調整現有目標金額</span>
+        </div>
+      </div>
+
+      <!-- Create / Edit Goal Form Card -->
+      <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 id="vault-form-title" class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="target" class="w-5 h-5 text-sky-400"></i>
+            <span>新增儲蓄目標 item</span>
+          </h3>
+          <button type="button" id="vault-cancel-edit-btn" onclick="cancelEditGoal()" class="hidden text-xs px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">
+            取消編輯
           </button>
         </div>
 
-        <!-- Common Date Input -->
-        <div class="mb-4">
-          <label class="block text-xs font-medium text-slate-300 mb-1.5">紀錄日期</label>
-          <input type="date" id="log-date" class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+        <form id="vault-goal-form" onsubmit="submitVaultGoalForm(event)" class="space-y-4">
+          <input type="hidden" id="vault-edit-goal-id" value="" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Required: Goal Item -->
+            <div>
+              <label for="vault-goal-item" class="block text-xs font-medium text-slate-300 mb-1.5">
+                目標 item <span class="text-rose-400">*</span>
+              </label>
+              <input
+                type="text"
+                id="vault-goal-item"
+                required
+                maxlength="30"
+                placeholder="例如：日本旅遊基金、婚禮基金"
+                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none"
+              />
+            </div>
+
+            <!-- Required: Target Amount -->
+            <div>
+              <label for="vault-goal-target" class="block text-xs font-medium text-slate-300 mb-1.5">
+                目標金額 (NT$) <span class="text-rose-400">*</span>
+              </label>
+              <input
+                type="number"
+                id="vault-goal-target"
+                required
+                min="1"
+                step="100"
+                oninput="updateLiveVaultDraftCheck()"
+                placeholder="例如 120000"
+                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+              />
+            </div>
+
+            <!-- Optional: Target Completion Date -->
+            <div>
+              <label for="vault-goal-deadline" class="block text-xs font-medium text-slate-300 mb-1.5">
+                預計完成日期 <span class="text-slate-500">(選填)</span>
+              </label>
+              <input
+                type="date"
+                id="vault-goal-deadline"
+                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+              />
+            </div>
+
+            <!-- Optional: Current Saved / Allocated Progress -->
+            <div>
+              <label for="vault-goal-saved" class="block text-xs font-medium text-slate-300 mb-1.5">
+                目前已累積金額 (NT$) <span class="text-slate-500">(選填)</span>
+              </label>
+              <input
+                type="number"
+                id="vault-goal-saved"
+                min="0"
+                step="100"
+                placeholder="預設 0"
+                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <!-- Owner Tag Selector -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">負責對象：</span>
+              <select id="vault-goal-owner" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-400">
+                <option value="both">共同 (Chumi &amp; Weeki)</option>
+                <option value="me">Chumi</option>
+                <option value="partner">Weeki</option>
+              </select>
+            </div>
+
+            <div id="vault-draft-preview-text" class="text-xs font-mono text-slate-400">
+              輸入目標金額將即時檢查總存款預算
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            id="vault-submit-btn"
+            class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/25 hover:opacity-95 transition-all"
+          >
+            新增小財庫目標
+          </button>
+        </form>
+      </div>
+
+      <!-- Goals List with Progress Bars & Inline Quick Adjust -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="list-checks" class="w-4 h-4 text-sky-400"></i>
+            <span>儲蓄目標清單與進度條</span>
+          </h3>
+          <span class="text-xs text-slate-400">可隨時編輯目標 item、金額與預計完成日期</span>
         </div>
 
-        <!-- FORM A: BODY WEIGHT & HEIGHT -->
-        <form id="form-body" onsubmit="submitBodyLog(event)" class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div id="vault-goals-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 1: DASHBOARD (健康儀表板) ==================== -->
+    <section id="view-dashboard" class="hidden space-y-6">
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-1.5">身高 (cm)</label>
               <input type="number" step="0.1" id="log-height" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-sky-500" placeholder="例如 175.0" oninput="updateLiveBmiPreview()" />
@@ -828,84 +846,89 @@
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-1.5">性別</label>
-              <select id="prof-gender" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
-                <option value="male">男性</option>
-                <option value="female">女性</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">目前身高 (cm)</label>
-              <input type="number" step="0.1" id="prof-height" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">目前體重 (kg)</label>
-              <input type="number" step="0.1" id="prof-weight" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">每日飲水係數 (ml / 每公斤體重)</label>
-              <select id="prof-water-mult" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
-                <option value="30">30 ml/kg (基礎日常)</option>
-                <option value="35">35 ml/kg (標準建議)</option>
-                <option value="40">40 ml/kg (高運動量/流汗多)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">每日蛋白質係數 (g / 每公斤體重)</label>
-              <select id="prof-protein-mult" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
-                <option value="1.2">1.2 g/kg (一般健康維持)</option>
-                <option value="1.6">1.6 g/kg (規律健身/增肌減脂)</option>
-                <option value="2.0">2.0 g/kg (高強度重訓期)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="pt-2 flex flex-wrap items-center justify-between gap-3">
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm transition-colors">
-              儲存個人設定
-            </button>
-
-            <button type="button" onclick="resetDemoData()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/40 text-xs text-slate-400 hover:text-rose-300 transition-colors">
-              重置為預設範例資料
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Individual Personal Metrics & History -->
-      <div class="glass-card rounded-2xl p-5 space-y-3">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="history" class="w-4 h-4 text-sky-400"></i>
-          <span id="profile-history-title">個人近期身體與運動足跡</span>
-        </h3>
-        <div id="profile-personal-feed" class="space-y-2">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Bottom Mobile Navigation Bar -->
-  <nav class="fixed bottom-0 inset-x-0 z-30 bg-[#070B14]/92 backdrop-blur-xl border-t border-slate-800/90 pb-safe">
-    <div class="max-w-xl mx-auto px-2 py-2 grid grid-cols-4 gap-1">
-      <button onclick="switchTab('dashboard')" id="nav-tab-dashboard" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-sky-400 bg-sky-500/10 transition-all">
-        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-        <span class="text-[11px] font-bold mt-1">總覽看板</span>
+  <!-- Bottom Mobile App-Style Navigation Bar -->
+  <nav aria-label="主頁底部導覽列" class="fixed bottom-0 inset-x-0 z-30 bg-[#070B14]/95 backdrop-blur-2xl border-t border-slate-800/90 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.65)]">
+    <div class="max-w-xl mx-auto px-3 py-1.5 grid grid-cols-4 gap-1.5">
+      <!-- 1. 主頁 (Couple Illustration Badge Icon in Dark Tech-Blue Frame) -->
+      <button type="button" onclick="switchTab('home')" id="nav-tab-home" class="app-dock-item is-active flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
+        <span class="dock-icon-shell w-10 h-10 rounded-full p-0.5 bg-slate-900 border border-sky-400/50 shadow-md flex items-center justify-center overflow-hidden transition-all">
+          <svg viewBox="0 0 64 64" class="w-full h-full rounded-full" aria-hidden="true">
+            <defs>
+              <linearGradient id="homeBadgeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0F172A"/>
+                <stop offset="100%" stop-color="#070B14"/>
+              </linearGradient>
+              <linearGradient id="homeWarmSkin" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F7DFC2"/>
+                <stop offset="100%" stop-color="#E6BA95"/>
+              </linearGradient>
+            </defs>
+            <rect width="64" height="64" rx="32" fill="url(#homeBadgeBg)"/>
+            <circle cx="32" cy="32" r="29" fill="none" stroke="#22D3EE" stroke-opacity="0.35" stroke-width="1.5"/>
+            <!-- Left curly-haired partner silhouette -->
+            <path d="M12 58 C12 46, 18 41, 26 40 L31 46 L36 40 C42 41, 46 45, 48 54" fill="#475569" opacity="0.85"/>
+            <path d="M17 24 C16 16, 22 10, 29 11 C35 10, 41 15, 40 23 C41 29, 37 36, 29 37 C21 37, 17 31, 17 24 Z" fill="url(#homeWarmSkin)"/>
+            <path d="M16 22 C15 15, 21 9, 28 10 C32 8, 38 11, 40 16 C42 19, 41 24, 39 26 C37 20, 32 16, 26 17 C21 18, 18 22, 16 22 Z" fill="#0B1120"/>
+            <!-- Right bangs partner -->
+            <path d="M31 60 C31 48, 38 42, 49 42 C55 42, 59 48, 60 60 Z" fill="#0F172A"/>
+            <path d="M35 31 C35 22, 41 17, 48 18 C54 19, 57 26, 56 35 C55 42, 49 46, 42 45 C37 44, 35 38, 35 31 Z" fill="url(#homeWarmSkin)"/>
+            <path d="M35 29 C34 21, 40 16, 48 17 C54 18, 57 24, 57 34 L54 39 C53 31, 52 26, 50 23 L48 29 L46 23 L44 30 L42 23 L40 30 L38 24 C36 28, 35 34, 35 41 Z" fill="#090D16"/>
+            <!-- Embracing arm & peace sign accent in warm tone -->
+            <path d="M21 44 C28 42, 37 43, 46 45 L33 48 L24 51 L34 51 L25 54 Z" fill="url(#homeWarmSkin)" stroke="#1E293B" stroke-width="1" stroke-linejoin="round"/>
+            <circle cx="51" cy="14" r="3" fill="#22D3EE"/>
+          </svg>
+        </span>
+        <span class="dock-label text-[11px] font-bold mt-1 text-sky-400 tracking-wide">主頁</span>
       </button>
 
-      <button onclick="switchTab('log')" id="nav-tab-log" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
-        <i data-lucide="plus-square" class="w-5 h-5"></i>
-        <span class="text-[11px] font-medium mt-1">快速紀錄</span>
+      <!-- 2. Between App Launcher Icon -->
+      <button type="button" onclick="openBetweenApp()" id="nav-tab-between" class="app-dock-item flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
+        <span class="dock-icon-shell w-10 h-10 rounded-2xl bg-slate-900/90 border border-slate-700/90 flex items-center justify-center transition-all">
+          <svg viewBox="0 0 48 48" class="w-6 h-6" aria-hidden="true">
+            <defs>
+              <linearGradient id="betweenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="55%" stop-color="#0EA5E9"/>
+                <stop offset="100%" stop-color="#F43F5E"/>
+              </linearGradient>
+            </defs>
+            <!-- Stylized Between Ribbon / Couple Knot Emblem -->
+            <path d="M24 39 C24 39, 9 29.5, 9 18.5 C9 13.2, 13.1 9.5, 18 9.5 C21.1 9.5, 23.1 11.2, 24 13.1 C24.9 11.2, 26.9 9.5, 30 9.5 C34.9 9.5, 39 13.2, 39 18.5 C39 29.5, 24 39, 24 39 Z" fill="none" stroke="url(#betweenGrad)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18 18 H25.5 C28.2 18 30 19.6 30 21.8 C30 23.5 28.8 24.7 27.1 25 C29.1 25.3 30.5 26.7 30.5 28.7 C30.5 31.1 28.5 32.8 25.6 32.8 H18 Z" fill="none" stroke="#22D3EE" stroke-width="2.4" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="dock-label text-[11px] font-medium mt-1 text-slate-400 tracking-wide">Between</span>
       </button>
 
-      <button onclick="switchTab('query')" id="nav-tab-query" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
-        <i data-lucide="search" class="w-5 h-5"></i>
-        <span class="text-[11px] font-medium mt-1">複合查詢</span>
+      <!-- 3. 健康 (Sports / Fitness Icon) -->
+      <button type="button" onclick="switchTab('dashboard')" id="nav-tab-dashboard" class="app-dock-item flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
+        <span class="dock-icon-shell w-10 h-10 rounded-2xl bg-slate-900/90 border border-slate-700/90 flex items-center justify-center transition-all">
+          <svg viewBox="0 0 48 48" class="w-6 h-6" aria-hidden="true">
+            <!-- Sports Dumbbell + Pulse Wave -->
+            <path d="M7 26 H14.5 L18 17 L23.5 34 L28.5 21 L31.5 26 H41" fill="none" stroke="#22D3EE" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="10" y="11" width="4" height="8" rx="1.5" fill="#38BDF8"/>
+            <rect x="34" y="11" width="4" height="8" rx="1.5" fill="#38BDF8"/>
+            <line x1="14" y1="15" x2="34" y2="15" stroke="#0EA5E9" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="dock-label text-[11px] font-medium mt-1 text-slate-400 tracking-wide">健康</span>
       </button>
 
-      <button onclick="switchTab('profile')" id="nav-tab-profile" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
-        <i data-lucide="user-circle" class="w-5 h-5"></i>
-        <span class="text-[11px] font-medium mt-1">個人頁面</span>
+      <!-- 4. 財庫 (Piggy Bank Icon in Dark Tech-Blue / Amber Theme) -->
+      <button type="button" onclick="switchTab('vault')" id="nav-tab-vault" class="app-dock-item flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
+        <span class="dock-icon-shell w-10 h-10 rounded-2xl bg-slate-900/90 border border-slate-700/90 flex items-center justify-center transition-all">
+          <svg viewBox="0 0 48 48" class="w-6 h-6" aria-hidden="true">
+            <!-- Coin Slot & Coin -->
+            <line x1="21" y1="10" x2="27" y2="10" stroke="#22D3EE" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="24" cy="14" r="2.2" fill="#FBBF24"/>
+            <!-- Piggy Bank Body -->
+            <path d="M12 25 C12 19.5 17.2 16 24 16 C30.5 16 35.5 19.2 36.3 24 L40 25.2 V30.5 L36.2 31.5 C35.2 33.4 33.5 34.7 31.5 35.3 V39 H27.5 V36 H20.5 V39 H16.5 V35.1 C13.8 33.6 12 29.8 12 25 Z" fill="none" stroke="#38BDF8" stroke-width="2.4" stroke-linejoin="round"/>
+            <!-- Piggy Ear & Eye -->
+            <path d="M17.5 17.5 L15.5 13.5 L21 16.2" fill="none" stroke="#22D3EE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="32.5" cy="24.5" r="1.6" fill="#FBBF24"/>
+          </svg>
+        </span>
+        <span class="dock-label text-[11px] font-medium mt-1 text-slate-400 tracking-wide">財庫</span>
       </button>
     </div>
   </nav>
@@ -1018,15 +1041,25 @@
               <stop offset="0%" stop-color="#0F172A"/>
               <stop offset="100%" stop-color="#070B14"/>
             </linearGradient>
-            <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38BDF8"/>
-              <stop offset="100%" stop-color="#0284C7"/>
+            <linearGradient id="skin" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#F7DFC2"/>
+              <stop offset="100%" stop-color="#E5B791"/>
             </linearGradient>
           </defs>
-          <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-          <circle cx="256" cy="256" r="185" fill="none" stroke="#1E293B" stroke-width="24"/>
-          <path d="M130 265 L195 265 L225 185 L275 335 L310 245 L382 245" fill="none" stroke="url(#accent)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="365" cy="155" r="24" fill="#F43F5E"/>
+          <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+          <rect x="18" y="18" width="476" height="476" rx="102" fill="none" stroke="#22D3EE" stroke-opacity="0.35" stroke-width="6"/>
+          <!-- Left partner with curly hair -->
+          <path d="M96 475 C96 378, 148 336, 218 330 L262 378 L304 330 C354 336, 388 370, 404 440" fill="#475569"/>
+          <path d="M136 196 C134 126, 182 82, 240 86 C294 82, 338 124, 334 192 C338 246, 304 298, 238 302 C172 302, 138 252, 136 196 Z" fill="url(#skin)"/>
+          <path d="M128 180 C124 118, 174 72, 236 76 C276 66, 326 88, 340 132 C352 162, 344 202, 330 218 C318 164, 276 134, 224 140 C178 146, 148 176, 128 180 Z" fill="#090D16"/>
+          <!-- Right partner with bangs -->
+          <path d="M254 485 C254 388, 312 340, 404 340 C454 340, 488 388, 496 485 Z" fill="#0F172A"/>
+          <path d="M284 252 C284 176, 334 134, 396 140 C448 146, 474 204, 466 284 C458 344, 406 376, 344 368 C302 362, 284 312, 284 252 Z" fill="url(#skin)"/>
+          <path d="M282 232 C280 164, 332 124, 398 130 C448 136, 476 192, 474 274 L452 318 C446 250, 438 206, 422 182 L406 238 L390 182 L374 242 L358 182 L342 242 L326 186 C308 220, 298 272, 296 330 Z" fill="#070A12"/>
+          <!-- Embracing arm -->
+          <path d="M168 364 C228 348, 304 356, 382 372 L272 396 L194 422 L282 420 L204 446" fill="url(#skin)" stroke="#1E293B" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Tech accent dot -->
+          <circle cx="428" cy="96" r="18" fill="#22D3EE"/>
         </svg>
       `.trim();
 
@@ -1110,6 +1143,33 @@
       const today = getTodayStr(0);
       return {
         updatedAt: Date.now(),
+        vaultTotalDeposit: 150000,
+        vaultGoals: [
+          {
+            id: 'g1',
+            item: '東京 & 河口湖雙人旅行',
+            targetAmount: 80000,
+            savedAmount: 52000,
+            deadline: getTodayStr(90),
+            owner: 'both'
+          },
+          {
+            id: 'g2',
+            item: '居家健身與家電升級',
+            targetAmount: 35000,
+            savedAmount: 24500,
+            deadline: getTodayStr(45),
+            owner: 'me'
+          },
+          {
+            id: 'g3',
+            item: '週年紀念禮物基金',
+            targetAmount: 20000,
+            savedAmount: 15000,
+            deadline: '',
+            owner: 'partner'
+          }
+        ],
         profiles: {
           me: {
             id: 'me',
@@ -1168,7 +1228,15 @@
     function loadLocalCache() {
       try {
         const raw = localStorage.getItem(LOCAL_CACHE_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return {
+            ...createDefaultState(),
+            ...parsed,
+            vaultTotalDeposit: typeof parsed.vaultTotalDeposit === 'number' ? parsed.vaultTotalDeposit : 150000,
+            vaultGoals: Array.isArray(parsed.vaultGoals) ? parsed.vaultGoals : createDefaultState().vaultGoals
+          };
+        }
       } catch (e) {
         console.warn('Cache load error:', e);
       }
@@ -1233,6 +1301,8 @@
         const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'couple_rooms', currentRoomCode);
         await setDoc(roomDocRef, {
           updatedAt: appState.updatedAt,
+          vaultTotalDeposit: appState.vaultTotalDeposit,
+          vaultGoalsJson: JSON.stringify(appState.vaultGoals),
           profilesJson: JSON.stringify(appState.profiles),
           dailyIntakeJson: JSON.stringify(appState.dailyIntake),
           recordsJson: JSON.stringify(appState.records)
@@ -1270,10 +1340,14 @@
               const parsedProfiles = data.profilesJson ? JSON.parse(data.profilesJson) : null;
               const parsedIntake = data.dailyIntakeJson ? JSON.parse(data.dailyIntakeJson) : null;
               const parsedRecords = data.recordsJson ? JSON.parse(data.recordsJson) : null;
+              const parsedGoals = data.vaultGoalsJson ? JSON.parse(data.vaultGoalsJson) : appState.vaultGoals;
+              const parsedTotal = typeof data.vaultTotalDeposit === 'number' ? data.vaultTotalDeposit : appState.vaultTotalDeposit;
 
               if (parsedProfiles && parsedIntake && parsedRecords) {
                 appState = {
                   updatedAt: data.updatedAt || Date.now(),
+                  vaultTotalDeposit: parsedTotal,
+                  vaultGoals: Array.isArray(parsedGoals) ? parsedGoals : [],
                   profiles: parsedProfiles,
                   dailyIntake: parsedIntake,
                   records: parsedRecords
@@ -1371,7 +1445,7 @@
     }
 
     // ==================== 3. UI & NAVIGATION STATE ====================
-    let activeTab = 'dashboard';
+    let activeTab = 'home';
     let activeContext = 'both'; // 'both' | 'me' | 'partner'
     let actionTargetUser = 'me'; // for water/protein quick buttons
     let logFormUser = 'me';
@@ -1460,19 +1534,35 @@
     // ==================== 6. NAVIGATION & CONTEXT SWITCHERS ====================
     function switchTab(tabName, optionalSubCategory = null) {
       activeTab = tabName;
-      ['dashboard', 'log', 'query', 'profile'].forEach((t) => {
+      ['home', 'vault', 'dashboard', 'log', 'query', 'profile'].forEach((t) => {
         document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tabName);
-        const navBtn = document.getElementById(`nav-tab-${t}`);
-        if (t === tabName) {
-          navBtn.classList.add('text-sky-400', 'bg-sky-500/10');
-          navBtn.classList.remove('text-slate-400');
-        } else {
-          navBtn.classList.remove('text-sky-400', 'bg-sky-500/10');
-          navBtn.classList.add('text-slate-400');
+      });
+
+      const dockMap = {
+        home: 'nav-tab-home',
+        dashboard: 'nav-tab-dashboard',
+        vault: 'nav-tab-vault'
+      };
+
+      Object.entries(dockMap).forEach(([tabKey, btnId]) => {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        const label = btn.querySelector('.dock-label');
+        const isCurrent = activeTab === tabKey || (tabKey === 'dashboard' && (activeTab === 'log' || activeTab === 'query' || activeTab === 'profile'));
+        btn.classList.toggle('is-active', isCurrent);
+        if (label) {
+          label.classList.toggle('text-sky-400', isCurrent);
+          label.classList.toggle('font-bold', isCurrent);
+          label.classList.toggle('text-slate-400', !isCurrent);
+          label.classList.toggle('font-medium', !isCurrent);
         }
       });
 
-      if (tabName === 'log') {
+      if (tabName === 'home') {
+        renderHomeHub();
+      } else if (tabName === 'vault') {
+        renderVaultPage();
+      } else if (tabName === 'log') {
         if (optionalSubCategory) setLogCategory(optionalSubCategory);
         prefillBodyForm();
       } else if (tabName === 'query') {
@@ -1484,34 +1574,463 @@
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    // ==================== 6.5 BETWEEN APP LAUNCHER & HOME HUB ====================
+    function openBetweenApp() {
+      showToast('正在嘗試開啟 Between App...');
+      const betweenSchemeUrl = 'between://';
+      const betweenWebUrl = 'https://between.us/';
+      const openedAt = Date.now();
 
-    function setActiveContext(ctx) {
-      activeContext = ctx;
-      ['both', 'me', 'partner'].forEach((c) => {
-        const btn = document.getElementById(`btn-ctx-${c}`);
-        if (c === ctx) {
-          btn.classList.add('bg-sky-500', 'text-slate-950', 'shadow');
-          btn.classList.remove('text-slate-400', 'hover:text-white');
-        } else {
-          btn.classList.remove('bg-sky-500', 'text-slate-950', 'shadow');
-          btn.classList.add('text-slate-400', 'hover:text-white');
+      // Attempt native Between app deep link first
+      window.location.href = betweenSchemeUrl;
+
+      // Fallback to web/store if app does not intercept within 1.2s
+      setTimeout(() => {
+        if (Date.now() - openedAt < 1800 && !document.hidden) {
+          window.open(betweenWebUrl, '_blank', 'noopener,noreferrer');
         }
-      });
-
-      if (ctx === 'me' || ctx === 'partner') {
-        actionTargetUser = ctx;
-        logFormUser = ctx;
-        profileTabUser = ctx;
-      }
-
-      refreshAllUI();
+      }, 1200);
     }
 
-    function syncActionUser(userKey) {
-      actionTargetUser = userKey;
-      document.getElementById('water-user-select').value = userKey;
-      document.getElementById('protein-user-select').value = userKey;
-      renderHydrationAndProtein();
+    function renderHomeHub() {
+      const weekStart = getWeekStartStr();
+      const healthGrid = document.getElementById('home-health-summary-grid');
+
+      healthGrid.innerHTML = ['me', 'partner'].map((uKey) => {
+        const p = appState.profiles[uKey];
+        const bmi = calculateBMI(p.weight, p.height);
+        const bmiStatus = getBMIStatus(bmi);
+        const { waterTarget, proteinTarget } = getDailyTargets(uKey);
+        const intake = getTodayIntake(uKey);
+
+        const cardioMins = appState.records
+          .filter((r) => r.userId === uKey && r.type === 'cardio' && r.date >= weekStart)
+          .reduce((sum, r) => sum + Number(r.minutes || 0), 0);
+
+        const strengthCount = appState.records
+          .filter((r) => r.userId === uKey && r.type === 'strength' && r.date >= weekStart).length;
+
+        const latestSleep = appState.records
+          .filter((r) => r.userId === uKey && r.type === 'sleep')
+          .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+        const nameColor = uKey === 'me' ? 'text-sky-400' : 'text-rose-400';
+
+        return `
+          <div class="bg-slate-900/75 border border-slate-800/90 rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-sm ${nameColor}">${p.name}</span>
+                <span class="text-xs font-mono text-slate-400">BMI ${bmi}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold border ${bmiStatus.badgeClass}">${bmiStatus.label}</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-950/80 rounded-xl p-2.5 border border-slate-800/80">
+                <div class="text-[11px] text-slate-400">今日水份 / 蛋白</div>
+                <div class="font-mono font-semibold text-cyan-300 mt-0.5">${intake.water}/${waterTarget}ml</div>
+                <div class="font-mono font-semibold text-sky-300">${intake.protein}/${proteinTarget}g</div>
+              </div>
+              <div class="bg-slate-950/80 rounded-xl p-2.5 border border-slate-800/80">
+                <div class="text-[11px] text-slate-400">本週有氧 / 肌力</div>
+                <div class="font-mono font-semibold text-emerald-300 mt-0.5">有氧 ${cardioMins}分</div>
+                <div class="font-mono font-semibold text-indigo-300">肌力 ${strengthCount}/2次</div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-800/70">
+              <span class="text-slate-400">最新睡眠 (目標7-9h)</span>
+              <span class="font-mono font-bold text-violet-300">${latestSleep ? `${latestSleep.hours} 小時` : '尚未紀錄'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render Mini Vault Preview on Home
+      const { totalDeposit, allocatedSum, unallocated, overBudget, exceedAmount } = computeVaultAllocation();
+      const previewEl = document.getElementById('home-vault-preview');
+      const topGoals = (appState.vaultGoals || []).slice(0, 3);
+
+      previewEl.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3">
+            <div class="text-[11px] text-slate-400">共同總存款</div>
+            <div class="text-lg font-mono font-bold text-amber-400 mt-0.5">${formatCurrency(totalDeposit)}</div>
+          </div>
+          <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3">
+            <div class="text-[11px] text-slate-400">已規劃目標總和</div>
+            <div class="text-lg font-mono font-bold text-sky-400 mt-0.5">${formatCurrency(allocatedSum)}</div>
+          </div>
+          <div class="bg-slate-900/85 border ${overBudget ? 'border-rose-500/40' : 'border-emerald-500/30'} rounded-xl p-3">
+            <div class="text-[11px] ${overBudget ? 'text-rose-300' : 'text-emerald-300'}">${overBudget ? '超出預算金額' : '尚待分配'}</div>
+            <div class="text-lg font-mono font-bold ${overBudget ? 'text-rose-400' : 'text-emerald-400'} mt-0.5">
+              ${overBudget ? formatCurrency(exceedAmount) : formatCurrency(unallocated)}
+            </div>
+          </div>
+        </div>
+
+        ${overBudget ? `
+          <div class="mb-3 p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-200 font-medium">
+            餘額不足，請檢查預算（細項目標總和已超出共同總存款 ${formatCurrency(exceedAmount)}）
+          </div>
+        ` : ''}
+
+        <div class="space-y-2.5">
+          ${topGoals.length === 0 ? `
+            <div class="text-xs text-slate-400 py-2">尚未建立儲蓄目標，點擊「管理小財庫」新增第一個目標 item。</div>
+          ` : topGoals.map((g) => {
+            const pct = g.targetAmount > 0 ? Math.min(100, Math.round((Number(g.savedAmount || 0) / Number(g.targetAmount)) * 100)) : 0;
+            return `
+              <div class="bg-slate-900/75 border border-slate-800/80 rounded-xl p-3">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="font-bold text-white">${escapeHtml(g.item)}</span>
+                  <span class="font-mono text-sky-300">${formatCurrency(g.savedAmount || 0)} / ${formatCurrency(g.targetAmount)} (${pct}%)</span>
+                </div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-sky-500 to-cyan-300 rounded-full" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      lucide.createIcons();
+    }
+
+    // ==================== 6.8 COUPLE MINI VAULT LOGIC ====================
+    function formatCurrency(num) {
+      const n = Number(num || 0);
+      return '$' + n.toLocaleString('zh-Hant-TW');
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function computeVaultAllocation(overrideTotal = null, overrideGoals = null) {
+      const totalDeposit = Math.max(0, Number(overrideTotal !== null ? overrideTotal : appState.vaultTotalDeposit || 0));
+      const goals = overrideGoals !== null ? overrideGoals : (appState.vaultGoals || []);
+      const allocatedSum = goals.reduce((sum, g) => sum + Math.max(0, Number(g.targetAmount || 0)), 0);
+      const diff = totalDeposit - allocatedSum;
+      const overBudget = diff < 0;
+      const unallocated = diff > 0 ? diff : 0;
+      const exceedAmount = diff < 0 ? Math.abs(diff) : 0;
+      return { totalDeposit, allocatedSum, unallocated, overBudget, exceedAmount };
+    }
+
+    function renderVaultAllocationStatus(overrideTotal = null, overrideGoals = null) {
+      const { totalDeposit, allocatedSum, unallocated, overBudget, exceedAmount } = computeVaultAllocation(overrideTotal, overrideGoals);
+      const goals = overrideGoals !== null ? overrideGoals : (appState.vaultGoals || []);
+
+      const totalEl = document.getElementById('vault-kpi-total');
+      const allocEl = document.getElementById('vault-kpi-allocated');
+      const countEl = document.getElementById('vault-kpi-goal-count');
+      const unallocEl = document.getElementById('vault-kpi-unallocated');
+      const unallocLabel = document.getElementById('vault-unallocated-label');
+      const unallocSub = document.getElementById('vault-unallocated-sub');
+      const unallocCard = document.getElementById('vault-unallocated-card');
+
+      if (!totalEl) return;
+
+      totalEl.textContent = formatCurrency(totalDeposit);
+      allocEl.textContent = formatCurrency(allocatedSum);
+      countEl.textContent = `共 ${goals.length} 項目標`;
+
+      const overBanner = document.getElementById('vault-overbudget-alert');
+      const unallocBanner = document.getElementById('vault-unallocated-banner');
+      const bannerUnallocVal = document.getElementById('vault-banner-unallocated');
+      const exceedVal = document.getElementById('vault-exceed-amount');
+
+      if (overBudget) {
+        unallocCard.className = 'bg-slate-950/90 border border-rose-500/40 rounded-xl p-3.5';
+        unallocLabel.className = 'text-[11px] text-rose-300 font-semibold';
+        unallocLabel.textContent = '超出預算金額';
+        unallocEl.className = 'text-lg sm:text-xl font-mono font-bold text-rose-400 mt-1';
+        unallocEl.textContent = formatCurrency(exceedAmount);
+        unallocSub.textContent = '餘額不足，請檢查預算';
+
+        overBanner.classList.remove('hidden');
+        exceedVal.textContent = formatCurrency(exceedAmount);
+        unallocBanner.classList.add('hidden');
+      } else {
+        unallocCard.className = 'bg-slate-950/90 border border-emerald-500/30 rounded-xl p-3.5';
+        unallocLabel.className = 'text-[11px] text-emerald-300 font-semibold';
+        unallocLabel.textContent = '尚待分配';
+        unallocEl.className = 'text-lg sm:text-xl font-mono font-bold text-emerald-400 mt-1';
+        unallocEl.textContent = formatCurrency(unallocated);
+        unallocSub.textContent = unallocated > 0 ? '細項小於總存款' : '已全數分配完畢';
+
+        overBanner.classList.add('hidden');
+        if (unallocated > 0) {
+          unallocBanner.classList.remove('hidden');
+          bannerUnallocVal.textContent = formatCurrency(unallocated);
+        } else {
+          unallocBanner.classList.add('hidden');
+        }
+      }
+    }
+
+    function handleVaultTotalDepositInput(val) {
+      const parsed = Math.max(0, parseFloat(val) || 0);
+      appState.vaultTotalDeposit = parsed;
+      renderVaultAllocationStatus(parsed);
+      saveState();
+    }
+
+    function adjustVaultTotalDeposit(delta) {
+      const nextVal = Math.max(0, Number(appState.vaultTotalDeposit || 0) + Number(delta || 0));
+      appState.vaultTotalDeposit = nextVal;
+      const input = document.getElementById('vault-total-deposit-input');
+      if (input) input.value = nextVal;
+      renderVaultAllocationStatus(nextVal);
+      saveState();
+      showToast(`共同總存款已更新為 ${formatCurrency(nextVal)}`);
+    }
+
+    function updateLiveVaultDraftCheck() {
+      const editId = document.getElementById('vault-edit-goal-id').value;
+      const draftTarget = Math.max(0, parseFloat(document.getElementById('vault-goal-target').value) || 0);
+      const currentTotal = Math.max(0, parseFloat(document.getElementById('vault-total-deposit-input').value) || appState.vaultTotalDeposit || 0);
+
+      const baseGoals = (appState.vaultGoals || []).map((g) => {
+        if (editId && g.id === editId) {
+          return { ...g, targetAmount: draftTarget };
+        }
+        return g;
+      });
+
+      if (!editId && draftTarget > 0) {
+        baseGoals.push({ id: '__draft__', targetAmount: draftTarget });
+      }
+
+      const { allocatedSum, overBudget, exceedAmount, unallocated } = computeVaultAllocation(currentTotal, baseGoals);
+      renderVaultAllocationStatus(currentTotal, baseGoals);
+
+      const previewText = document.getElementById('vault-draft-preview-text');
+      if (!previewText) return;
+
+      if (overBudget) {
+        previewText.className = 'text-xs font-mono font-bold text-rose-400';
+        previewText.textContent = `餘額不足，請檢查預算（細項總和 ${formatCurrency(allocatedSum)} 超出 ${formatCurrency(exceedAmount)}）`;
+      } else {
+        previewText.className = 'text-xs font-mono text-emerald-300';
+        previewText.textContent = `細項總和 ${formatCurrency(allocatedSum)} · 尚待分配 ${formatCurrency(unallocated)}`;
+      }
+    }
+
+    function renderVaultPage() {
+      const totalInput = document.getElementById('vault-total-deposit-input');
+      if (totalInput && document.activeElement !== totalInput) {
+        totalInput.value = Number(appState.vaultTotalDeposit || 0);
+      }
+
+      renderVaultAllocationStatus();
+
+      const listEl = document.getElementById('vault-goals-list');
+      const goals = appState.vaultGoals || [];
+
+      if (goals.length === 0) {
+        listEl.innerHTML = `
+          <div class="glass-card rounded-2xl p-8 text-center text-slate-400 text-sm md:col-span-2">
+            目前還沒有儲蓄目標，請在上方填寫「目標 item」與「目標金額」建立第一個目標。
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      listEl.innerHTML = goals.map((g) => {
+        const target = Math.max(1, Number(g.targetAmount || 0));
+        const saved = Math.max(0, Number(g.savedAmount || 0));
+        const pct = Math.min(100, Math.round((saved / target) * 100));
+
+        let ownerLabel = '共同';
+        let ownerBadgeClass = 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+        if (g.owner === 'me') {
+          ownerLabel = appState.profiles.me.name;
+          ownerBadgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/40';
+        } else if (g.owner === 'partner') {
+          ownerLabel = appState.profiles.partner.name;
+          ownerBadgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+        }
+
+        let deadlineHtml = '<span class="text-slate-500">未設定完成日期</span>';
+        if (g.deadline) {
+          const todayStr = getTodayStr(0);
+          const diffDays = Math.ceil((new Date(g.deadline) - new Date(todayStr)) / (1000 * 60 * 60 * 24));
+          const daysText = diffDays >= 0 ? `剩 ${diffDays} 天` : `已逾期 ${Math.abs(diffDays)} 天`;
+          deadlineHtml = `<span class="font-mono text-slate-300">預計完成：${escapeHtml(g.deadline)} (${daysText})</span>`;
+        }
+
+        return `
+          <div class="glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4">
+            <div class="space-y-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h4 class="text-base font-bold text-white">${escapeHtml(g.item)}</h4>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold border ${ownerBadgeClass}">${escapeHtml(ownerLabel)}</span>
+                  </div>
+                  <div class="text-xs mt-1">${deadlineHtml}</div>
+                </div>
+
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="startEditGoal('${g.id}')" title="調整目標金額、item 或時間" class="p-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-slate-700 transition-colors">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" onclick="deleteVaultGoal('${g.id}')" title="刪除目標" class="p-2 rounded-xl bg-slate-800/90 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700 transition-colors">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Progress Numbers & Bar -->
+              <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800/80 space-y-2">
+                <div class="flex items-baseline justify-between text-xs">
+                  <span class="text-slate-400">已累積進度</span>
+                  <span class="font-mono font-bold text-white">
+                    <span class="text-sky-300">${formatCurrency(saved)}</span> / ${formatCurrency(target)}
+                    <span class="ml-1.5 px-2 py-0.5 rounded bg-sky-500/15 text-sky-300">${pct}%</span>
+                  </span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-400 rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Saved Progress Adjustment -->
+            <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+              <span class="text-[11px] text-slate-400">快速存入進度：</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="quickAdjustGoalSaved('${g.id}', 1000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-sky-500/20 border border-slate-700 text-xs font-mono text-sky-300">
+                  +$1,000
+                </button>
+                <button type="button" onclick="quickAdjustGoalSaved('${g.id}', 5000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 border border-slate-700 text-xs font-mono text-emerald-300">
+                  +$5,000
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function submitVaultGoalForm(e) {
+      e.preventDefault();
+      const editId = document.getElementById('vault-edit-goal-id').value;
+      const item = document.getElementById('vault-goal-item').value.trim();
+      const targetAmount = parseFloat(document.getElementById('vault-goal-target').value);
+      const deadline = document.getElementById('vault-goal-deadline').value || '';
+      const savedAmount = Math.max(0, parseFloat(document.getElementById('vault-goal-saved').value) || 0);
+      const owner = document.getElementById('vault-goal-owner').value || 'both';
+
+      if (!item || !targetAmount || targetAmount <= 0) {
+        showToast('請填寫有效的目標 item 與目標金額');
+        return;
+      }
+
+      if (editId) {
+        const idx = appState.vaultGoals.findIndex((g) => g.id === editId);
+        if (idx !== -1) {
+          appState.vaultGoals[idx] = {
+            ...appState.vaultGoals[idx],
+            item,
+            targetAmount,
+            deadline,
+            savedAmount,
+            owner
+          };
+        }
+        showToast(`已更新目標「${item}」`);
+      } else {
+        appState.vaultGoals.push({
+          id: 'goal_' + Date.now(),
+          item,
+          targetAmount,
+          deadline,
+          savedAmount,
+          owner
+        });
+        showToast(`已新增目標「${item}」`);
+      }
+
+      const { overBudget, exceedAmount } = computeVaultAllocation();
+      saveState();
+      cancelEditGoal();
+      renderVaultPage();
+
+      if (overBudget) {
+        showToast(`餘額不足，請檢查預算（已超出 ${formatCurrency(exceedAmount)}）`);
+      }
+    }
+
+    function startEditGoal(goalId) {
+      const goal = (appState.vaultGoals || []).find((g) => g.id === goalId);
+      if (!goal) return;
+
+      document.getElementById('vault-edit-goal-id').value = goal.id;
+      document.getElementById('vault-goal-item').value = goal.item;
+      document.getElementById('vault-goal-target').value = goal.targetAmount;
+      document.getElementById('vault-goal-deadline').value = goal.deadline || '';
+      document.getElementById('vault-goal-saved').value = goal.savedAmount || 0;
+      document.getElementById('vault-goal-owner').value = goal.owner || 'both';
+
+      document.getElementById('vault-form-title').innerHTML = `
+        <i data-lucide="pencil" class="w-5 h-5 text-amber-400"></i>
+        <span>調整儲蓄目標：${escapeHtml(goal.item)}</span>
+      `;
+      document.getElementById('vault-submit-btn').textContent = '儲存目標調整';
+      document.getElementById('vault-cancel-edit-btn').classList.remove('hidden');
+
+      updateLiveVaultDraftCheck();
+      lucide.createIcons();
+      document.getElementById('vault-goal-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cancelEditGoal() {
+      document.getElementById('vault-edit-goal-id').value = '';
+      document.getElementById('vault-goal-form').reset();
+      document.getElementById('vault-form-title').innerHTML = `
+        <i data-lucide="target" class="w-5 h-5 text-sky-400"></i>
+        <span>新增儲蓄目標 item</span>
+      `;
+      document.getElementById('vault-submit-btn').textContent = '新增小財庫目標';
+      document.getElementById('vault-cancel-edit-btn').classList.add('hidden');
+      const previewText = document.getElementById('vault-draft-preview-text');
+      if (previewText) {
+        previewText.className = 'text-xs font-mono text-slate-400';
+        previewText.textContent = '輸入目標金額將即時檢查總存款預算';
+      }
+      renderVaultAllocationStatus();
+      lucide.createIcons();
+    }
+
+    function quickAdjustGoalSaved(goalId, delta) {
+      const goal = (appState.vaultGoals || []).find((g) => g.id === goalId);
+      if (!goal) return;
+      goal.savedAmount = Math.max(0, Number(goal.savedAmount || 0) + Number(delta));
+      saveState();
+      renderVaultPage();
+      showToast(`已為「${goal.item}」累積 ${formatCurrency(delta)}`);
+    }
+
+    function deleteVaultGoal(goalId) {
+      appState.vaultGoals = (appState.vaultGoals || []).filter((g) => g.id !== goalId);
+      if (document.getElementById('vault-edit-goal-id').value === goalId) {
+        cancelEditGoal();
+      }
+      saveState();
+      renderVaultPage();
+      showToast('已刪除該儲蓄目標');
     }
 
     // ==================== 7. DASHBOARD RENDERERS ====================
@@ -2403,6 +2922,8 @@
     function refreshAllUI() {
       document.getElementById('nav-name-me').textContent = appState.profiles.me.name;
       document.getElementById('nav-name-partner').textContent = appState.profiles.partner.name;
+      if (activeTab === 'home') renderHomeHub();
+      if (activeTab === 'vault') renderVaultPage();
       if (activeTab === 'dashboard') renderDashboard();
       if (activeTab === 'log') setLogFormUser(logFormUser);
       if (activeTab === 'query') runCompoundQuery();
@@ -2418,6 +2939,15 @@
       copyShareInvite,
       openPwaModal,
       closePwaModal,
+      openBetweenApp,
+      handleVaultTotalDepositInput,
+      adjustVaultTotalDeposit,
+      updateLiveVaultDraftCheck,
+      submitVaultGoalForm,
+      startEditGoal,
+      cancelEditGoal,
+      quickAdjustGoalSaved,
+      deleteVaultGoal,
       syncActionUser,
       quickAddWater,
       addCustomWater,
@@ -2453,6 +2983,7 @@
       setActiveContext('both');
       setLogFormUser('me');
       setLogCategory('body');
+      switchTab('home');
       lucide.createIcons();
       initCloudSync();
     });
