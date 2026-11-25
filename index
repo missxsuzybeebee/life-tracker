@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SyncFit 情侶健康與體態追蹤</title>
+
+  <!-- Mobile Home Screen / PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SyncFit健康" />
+  <meta name="theme-color" content="#070B14" />
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="" />
+  <link id="app-manifest" rel="manifest" href="" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Noto Sans TC & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Microsoft JhengHei"', '"微軟正黑體"', '"Noto Sans TC"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            bgDeep: '#070B14',
+            cardDark: '#0F172A',
+            cardElevated: '#162036',
+            techBlue: '#0EA5E9',
+            techCyan: '#22D3EE',
+            partnerPink: '#F43F5E',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #070B14;
+      color: #F1F5F9;
+      font-family: "Microsoft JhengHei", "微軟正黑體", "Noto Sans TC", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070B14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0EA5E9;
+    }
+
+    /* Glassmorphism & Glow Utilities */
+    .glass-card {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(11, 18, 33, 0.96));
+      border: 1px solid rgba(56, 189, 248, 0.14);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+    }
+
+    .tech-glow {
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.22);
+    }
+
+    .pink-glow {
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.22);
+    }
+
+    /* Hide scrollbar for horizontal chips */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Custom Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+      background: #1E293B;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #0EA5E9;
+      margin-top: -7px;
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
+      cursor: pointer;
+    }
+
+    /* Date input dark theme icon fix */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(0.8);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-24 selection:bg-sky-500 selection:text-white">
+
+  <!-- Toast Notification Banner (Replaces alert) -->
+  <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 -translate-y-4">
+    <div id="toast-box" class="px-4 py-2.5 rounded-2xl bg-slate-900/95 border border-sky-500/40 text-slate-100 text-sm font-medium shadow-2xl flex items-center gap-2 backdrop-blur-md">
+      <i data-lucide="check-circle-2" class="w-4 h-4 text-sky-400"></i>
+      <span id="toast-message">已儲存紀錄</span>
+    </div>
+  </div>
+
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-30 bg-[#070B14]/85 backdrop-blur-xl border-b border-slate-800/80">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-sky-500/25">
+          <i data-lucide="activity" class="w-5 h-5 text-slate-950 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight flex items-center gap-1.5">
+      <!-- Right Actions: Sync Room, User Switcher & PWA Install Guide -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Cloud Sync Status Button -->
+        <button onclick="openSyncModal()" id="sync-status-btn" title="設定情侶即時同步配對碼" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-medium flex items-center gap-1.5 transition-all">
+          <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="sync-status-text" class="text-slate-300 max-w-[84px] sm:max-w-[120px] truncate">連線中...</span>
+        </button>
+
+        <!-- Segmented User Switcher -->
+        <div class="bg-slate-900/90 p-1 rounded-xl border border-slate-800 flex items-center text-xs font-bold">
+          <button onclick="setActiveContext('both')" id="btn-ctx-both" class="px-2 sm:px-2.5 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+            雙人總覽
+          </button>
+          <button onclick="setActiveContext('me')" id="btn-ctx-me" class="px-2 sm:px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span id="nav-name-me">Chumi</span>
+          </button>
+          <button onclick="setActiveContext('partner')" id="btn-ctx-partner" class="px-2 sm:px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            <span id="nav-name-partner">Weeki</span>
+          </button>
+        </div>
+
+        <!-- Home Screen Install Button -->
+        <button onclick="openPwaModal()" title="加入手機桌面 Icon" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-sky-400 transition-colors flex items-center gap-1 text-xs font-medium">
+          <i data-lucide="smartphone" class="w-4 h-4"></i>
+          <span class="hidden md:inline">桌面圖示</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="max-w-5xl mx-auto px-4 pt-5 space-y-6">
+
+    <!-- ==================== TAB 1: DASHBOARD (儀表板) ==================== -->
+    <section id="view-dashboard" class="space-y-6">
+
+      <!-- Context Banner & Quick Date -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/50 border border-slate-800/80 rounded-2xl px-4 py-3">
+        <div class="flex items-center gap-2.5">
+          <span id="dashboard-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">雙人同步模式</span>
+          <span class="text-xs sm:text-sm text-slate-300" id="dashboard-subtitle">檢視兩人的即時體態指標與本週運動進度</span>
+        </div>
+        <div class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span id="current-week-label">本週統計</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: BMI & IDEAL WEIGHT CARDS (Dual or Single View) -->
+      <div id="bmi-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+      <!-- SECTION 2: DAILY WATER & PROTEIN TARGETS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Hydration Card -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                  <i data-lucide="droplets" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">今日水份攝取目標</h3>
+                  <p class="text-[11px] text-slate-400">依體重動態計算 (<span id="water-multiplier-label">35</span> ml/kg)</p>
+                </div>
+              </div>
+              <select id="water-user-select" onchange="syncActionUser(this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-sky-500">
+                <option value="me">Chumi</option>
+                <option value="partner">Weeki</option>
+              </select>
+            </div>
+
+            <!-- Numbers -->
+            <div class="flex items-baseline justify-between mt-2">
+              <div>
+                <span id="today-water-current" class="text-2xl sm:text-3xl font-bold font-mono text-cyan-400">0</span>
+                <span class="text-xs text-slate-400 font-mono"> / <span id="today-water-target">2450</span> ml</span>
+              </div>
+              <span id="today-water-pct" class="text-sm font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-lg border border-cyan-500/20">0%</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full h-3 bg-slate-800/90 rounded-full overflow-hidden mt-3 p-0.5 border border-slate-700/50">
+              <div id="today-water-bar" class="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-300 transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Quick Add Buttons -->
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
+            <button onclick="quickAddWater(250)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-500/20 hover:border-cyan-500/40 border border-slate-700 text-xs font-mono font-semibold text-cyan-300 transition-all active:scale-95">
+              +250ml
+            </button>
+            <button onclick="quickAddWater(500)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-500/20 hover:border-cyan-500/40 border border-slate-700 text-xs font-mono font-semibold text-cyan-300 transition-all active:scale-95">
+              +500ml
+            </button>
+            <div class="flex items-center gap-1 flex-1 min-w-[110px]">
+              <input type="number" id="custom-water-input" placeholder="自訂ml" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-cyan-400" />
+              <button onclick="addCustomWater()" class="p-2 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Protein Card -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
+                  <i data-lucide="beef" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">今日蛋白質攝取目標</h3>
+                  <p class="text-[11px] text-slate-400">依體重動態計算 (<span id="protein-multiplier-label">1.6</span> g/kg)</p>
+                </div>
+              </div>
+              <select id="protein-user-select" onchange="syncActionUser(this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-sky-500">
+                <option value="me">Chumi</option>
+                <option value="partner">Weeki</option>
+              </select>
+            </div>
+
+            <!-- Numbers -->
+            <div class="flex items-baseline justify-between mt-2">
+              <div>
+                <span id="today-protein-current" class="text-2xl sm:text-3xl font-bold font-mono text-sky-400">0</span>
+                <span class="text-xs text-slate-400 font-mono"> / <span id="today-protein-target">112</span> g</span>
+              </div>
+              <span id="today-protein-pct" class="text-sm font-mono font-bold text-sky-300 bg-sky-500/10 px-2.5 py-0.5 rounded-lg border border-sky-500/20">0%</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full h-3 bg-slate-800/90 rounded-full overflow-hidden mt-3 p-0.5 border border-slate-700/50">
+              <div id="today-protein-bar" class="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Quick Add Buttons -->
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
+            <button onclick="quickAddProtein(15)" class="flex-1 py-2 px-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 hover:border-sky-500/40 border border-slate-700 text-xs font-mono font-semibold text-sky-300 transition-all active:scale-95">
+              +15g <span class="text-[10px] text-slate-400 font-sans">(蛋/豆漿)</span>
+            </button>
+            <button onclick="quickAddProtein(25)" class="flex-1 py-2 px-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 hover:border-sky-500/40 border border-slate-700 text-xs font-mono font-semibold text-sky-300 transition-all active:scale-95">
+              +25g <span class="text-[10px] text-slate-400 font-sans">(乳清/雞胸)</span>
+            </button>
+            <div class="flex items-center gap-1 flex-1 min-w-[105px]">
+              <input type="number" id="custom-protein-input" placeholder="自訂g" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-sky-400" />
+              <button onclick="addCustomProtein()" class="p-2 rounded-xl bg-sky-500 text-slate-950 font-bold hover:bg-sky-400 transition-colors">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: WEEKLY CARDIO (150-300 MINS), STRENGTH (2x/WK), & SLEEP (7-9 HRS) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- Weekly Cardio 150-300 mins -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <i data-lucide="heart-pulse" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">每週有氧運動</h3>
+                  <p class="text-[11px] text-slate-400">WHO 建議 150～300 分鐘</p>
+                </div>
+              </div>
+              <button onclick="switchTab('log', 'cardio')" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors">
+                + 紀錄
+              </button>
+            </div>
+
+            <!-- Dual Partner or Single Breakdown -->
+            <div id="cardio-status-list" class="space-y-4 mt-4">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+            <span>150分：基礎健康達標</span>
+            <span>300分：進階燃脂達標</span>
+          </div>
+        </div>
+
+        <!-- Weekly Strength Training (2x/week) -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                  <i data-lucide="dumbbell" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">每週肌力訓練</h3>
+                  <p class="text-[11px] text-slate-400">目標每週至少 2 次</p>
+                </div>
+              </div>
+              <button onclick="switchTab('log', 'strength')" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition-colors">
+                + 紀錄
+              </button>
+            </div>
+
+            <div id="strength-status-list" class="space-y-4 mt-4">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80">
+            <p class="text-[11px] text-slate-400 mb-1.5">本週已訓練肌群部位：</p>
+            <div id="weekly-muscles-tags" class="flex flex-wrap gap-1.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Sleep Tracker (7-9 hrs) -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-400">
+                  <i data-lucide="moon-star" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">每日睡眠修復</h3>
+                  <p class="text-[11px] text-slate-400">黃金標準 7～9 小時</p>
+                </div>
+              </div>
+              <button onclick="switchTab('log', 'sleep')" class="text-xs px-2.5 py-1 rounded-lg bg-violet-500/15 text-violet-300 border border-violet-500/30 hover:bg-violet-500/25 transition-colors">
+                + 紀錄
+              </button>
+            </div>
+
+            <div id="sleep-status-list" class="space-y-4 mt-4">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span>&lt;7h 不足</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>7-9h 理想</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span>&gt;9h 過長</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION 4: QUICK CHARTS PREVIEW -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="trending-down" class="w-4 h-4 text-sky-400"></i>
+              體重變化趨勢 (kg)
+            </h3>
+            <span class="text-[11px] text-slate-400">近期紀錄</span>
+          </div>
+          <div class="h-52 w-full">
+            <canvas id="dashboardWeightChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 text-violet-400"></i>
+              近 7 日睡眠時數對比 (小時)
+            </h3>
+            <span class="text-[11px] text-slate-400">目標 7-9h</span>
+          </div>
+          <div class="h-52 w-full">
+            <canvas id="dashboardSleepChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: QUICK LOGGING (新增紀錄) ==================== -->
+    <section id="view-log" class="hidden space-y-5">
+      <div class="glass-card rounded-2xl p-5 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="plus-circle" class="w-5 h-5 text-sky-400"></i>
+              新增健康與運動紀錄
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">選擇記錄對象與項目，資料將即時同步至統計報表</p>
+          </div>
+
+          <!-- Select Who is logging -->
+          <div class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+            <span class="text-xs text-slate-400 pl-2">紀錄對象：</span>
+            <button type="button" onclick="setLogFormUser('me')" id="form-user-me" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-500 text-slate-950">
+              Chumi
+            </button>
+            <button type="button" onclick="setLogFormUser('partner')" id="form-user-partner" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
+              Weeki
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Sub-tabs -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 my-4">
+          <button type="button" onclick="setLogCategory('body')" id="cat-btn-body" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+            <i data-lucide="scale" class="w-4 h-4"></i> 身高體重 BMI
+          </button>
+          <button type="button" onclick="setLogCategory('cardio')" id="cat-btn-cardio" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+            <i data-lucide="flame" class="w-4 h-4"></i> 有氧運動
+          </button>
+          <button type="button" onclick="setLogCategory('strength')" id="cat-btn-strength" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+            <i data-lucide="dumbbell" class="w-4 h-4"></i> 肌力訓練
+          </button>
+          <button type="button" onclick="setLogCategory('sleep')" id="cat-btn-sleep" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+            <i data-lucide="moon" class="w-4 h-4"></i> 每日睡眠
+          </button>
+        </div>
+
+        <!-- Common Date Input -->
+        <div class="mb-4">
+          <label class="block text-xs font-medium text-slate-300 mb-1.5">紀錄日期</label>
+          <input type="date" id="log-date" class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+        </div>
+
+        <!-- FORM A: BODY WEIGHT & HEIGHT -->
+        <form id="form-body" onsubmit="submitBodyLog(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">身高 (cm)</label>
+              <input type="number" step="0.1" id="log-height" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-sky-500" placeholder="例如 175.0" oninput="updateLiveBmiPreview()" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">體重 (kg)</label>
+              <input type="number" step="0.1" id="log-weight" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-sky-500" placeholder="例如 68.5" oninput="updateLiveBmiPreview()" />
+            </div>
+          </div>
+
+          <!-- Live BMI Preview Box -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-sky-500/25 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs text-slate-400">即時試算 BMI 與狀態</span>
+              <div class="flex items-center gap-2.5 mt-1">
+                <span id="preview-bmi-val" class="text-2xl font-mono font-bold text-sky-400">--</span>
+                <span id="preview-bmi-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300">請輸入數值</span>
+              </div>
+            </div>
+            <div class="text-right text-xs text-slate-400 space-y-0.5">
+              <div>衛福部適中 BMI：<span class="font-mono text-emerald-400 font-semibold">18.5 ~ 23.9</span></div>
+              <div>此身高理想體重：<span id="preview-ideal-weight" class="font-mono text-slate-200">-- ~ -- kg</span></div>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/25 hover:opacity-95 transition-all">
+            儲存體態紀錄並更新個人檔案
+          </button>
+        </form>
+
+        <!-- FORM B: CARDIO EXERCISE -->
+        <form id="form-cardio" onsubmit="submitCardioLog(event)" class="hidden space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">有氧運動項目</label>
+              <select id="log-cardio-type" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+                <option value="慢跑 / 路跑">慢跑 / 路跑</option>
+                <option value="快走 / 坡度健走">快走 / 坡度健走</option>
+                <option value="室內飛輪 / 單車">室內飛輪 / 單車</option>
+                <option value="游泳">游泳</option>
+                <option value="HIIT 間歇有氧">HIIT 間歇有氧</option>
+                <option value="羽球 / 球類運動">羽球 / 球類運動</option>
+                <option value="跳繩 / 登階機">跳繩 / 登階機</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">運動時間 (分鐘)</label>
+              <input type="number" min="1" max="600" id="log-cardio-mins" required value="40" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-emerald-500" />
+            </div>
+          </div>
+
+          <!-- Quick Duration Presets -->
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs text-slate-400 self-center mr-1">快速選擇：</span>
+            <button type="button" onclick="document.getElementById('log-cardio-mins').value=20" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-emerald-300">20 分鐘</button>
+            <button type="button" onclick="document.getElementById('log-cardio-mins').value=30" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-emerald-300">30 分鐘</button>
+            <button type="button" onclick="document.getElementById('log-cardio-mins').value=45" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-emerald-300">45 分鐘</button>
+            <button type="button" onclick="document.getElementById('log-cardio-mins').value=60" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-emerald-300">60 分鐘</button>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">備註 (選填)</label>
+            <input type="text" id="log-cardio-note" placeholder="例如：河濱公園夜跑、心率145" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/25 hover:opacity-95 transition-all">
+            儲存有氧運動紀錄
+          </button>
+        </form>
+
+        <!-- FORM C: STRENGTH TRAINING (MULTI-SELECT MUSCLES) -->
+        <form id="form-strength" onsubmit="submitStrengthLog(event)" class="hidden space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-medium text-slate-300">訓練肌群部位（可複選） <span class="text-rose-400">*</span></label>
+              <button type="button" onclick="clearMuscleSelection()" class="text-[11px] text-slate-400 hover:text-sky-400">清除全選</button>
+            </div>
+
+            <!-- 7 Required Muscle Checkboxes/Chips -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="muscle-checkbox-grid">
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="muscles" value="背部" class="peer sr-only" />
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-center text-sm font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200 transition-all flex items-center justify-center gap-2">
+                  <span>背部</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="muscles" value="肩膀" class="peer sr-only" />
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-center text-sm font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200 transition-all flex items-center justify-center gap-2">
+                  <span>肩膀</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="muscles" value="手臂" class="peer sr-only" />
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-center text-sm font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200 transition-all flex items-center justify-center gap-2">
+                  <span>手臂</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="muscles" value="腹部" class="peer sr-only" />
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-center text-sm font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200 transition-all flex items-center justify-center gap-2">
+                  <span>腹部</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="muscles" value="臀部" class="peer sr-only" />
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-center text-sm font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200 transition-all flex items-center justify-center gap-2">
+                  <span>臀部</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="muscles" value="腿部" class="peer sr-only" />
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-center text-sm font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200 transition-all flex items-center justify-center gap-2">
+                  <span>腿部</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="muscles" value="核心" class="peer sr-only" />
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-center text-sm font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200 transition-all flex items-center justify-center gap-2">
+                  <span>核心</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">訓練時長 (分鐘，選填)</label>
+              <input type="number" id="log-strength-mins" value="50" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm font-mono text-white focus:outline-none focus:border-indigo-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">訓練動作 / 備註</label>
+              <input type="text" id="log-strength-note" placeholder="例如：深蹲、硬舉、滑輪下拉 4組" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:opacity-95 transition-all">
+            儲存本次肌力訓練 (+1次)
+          </button>
+        </form>
+
+        <!-- FORM D: DAILY SLEEP -->
+        <form id="form-sleep" onsubmit="submitSleepLog(event)" class="hidden space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-medium text-slate-300">睡眠時數 (小時)</label>
+              <div class="flex items-center gap-2">
+                <span id="sleep-slider-display" class="text-2xl font-mono font-bold text-violet-400">7.5</span>
+                <span class="text-xs text-slate-400">小時</span>
+                <span id="sleep-preview-badge" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">理想範圍 (7-9h)</span>
+              </div>
+            </div>
+
+            <input type="range" id="log-sleep-range" min="3" max="13" step="0.5" value="7.5" oninput="syncSleepInput(this.value)" class="w-full my-3" />
+
+            <div class="flex justify-between text-[11px] font-mono text-slate-500">
+              <span>3h</span>
+              <span>6h</span>
+              <span class="text-emerald-400 font-bold">7h - 9h (理想)</span>
+              <span>11h</span>
+              <span>13h</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">睡眠品質備註 (選填)</label>
+            <input type="text" id="log-sleep-note" placeholder="例如：深層睡眠充足、睡前無滑手機" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-violet-500" />
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold text-sm shadow-lg shadow-violet-500/25 hover:opacity-95 transition-all">
+            儲存每日睡眠紀錄
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: COMPOUND QUERY & STATS (複合查詢與統計) ==================== -->
+    <section id="view-query" class="hidden space-y-5">
+
+      <!-- Compound Filter Panel -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="filter" class="w-5 h-5 text-sky-400"></i>
+            多條件複合查詢與統計分析
+          </h2>
+          <button onclick="resetFilters()" class="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 重置篩選
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- Filter 1: User -->
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">對象篩選</label>
+            <select id="filter-user" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+              <option value="all">全部人員 (Chumi + Weeki)</option>
+              <option value="me">僅限：Chumi</option>
+              <option value="partner">僅限：Weeki</option>
+            </select>
+          </div>
+
+          <!-- Filter 2: Record Type -->
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">紀錄類型</label>
+            <select id="filter-type" onchange="toggleMuscleFilterVisibility(); runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+              <option value="all">全部類型</option>
+              <option value="body">身高體重 / BMI</option>
+              <option value="cardio">有氧運動</option>
+              <option value="strength">肌力訓練</option>
+              <option value="sleep">每日睡眠</option>
+            </select>
+          </div>
+
+          <!-- Filter 3: Date Preset -->
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">時間區間</label>
+            <select id="filter-range" onchange="handleRangePresetChange()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+              <option value="week">本週紀錄</option>
+              <option value="month">近 30 天</option>
+              <option value="all">所有歷史紀錄</option>
+              <option value="custom">自訂起訖日期</option>
+            </select>
+          </div>
+
+          <!-- Filter 4: Muscle Group -->
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">肌力部位篩選</label>
+            <select id="filter-muscle" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+              <option value="all">不限肌群部位</option>
+              <option value="背部">背部</option>
+              <option value="肩膀">肩膀</option>
+              <option value="手臂">手臂</option>
+              <option value="腹部">腹部</option>
+              <option value="臀部">臀部</option>
+              <option value="腿部">腿部</option>
+              <option value="核心">核心</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Custom Date Range Inputs (Hidden unless custom selected) -->
+        <div id="custom-date-box" class="hidden grid-cols-2 gap-3 pt-2 border-t border-slate-800/80">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">開始日期</label>
+            <input type="date" id="filter-start-date" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">結束日期</label>
+            <input type="date" id="filter-end-date" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-white" />
+          </div>
+        </div>
+
+        <!-- Compound Summary KPI Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+            <div class="text-[11px] text-slate-400">符合筆數</div>
+            <div id="stat-count" class="text-lg font-mono font-bold text-white mt-0.5">0 筆</div>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+            <div class="text-[11px] text-slate-400">區間累計有氧</div>
+            <div id="stat-cardio" class="text-lg font-mono font-bold text-emerald-400 mt-0.5">0 分鐘</div>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+            <div class="text-[11px] text-slate-400">區間肌力次數</div>
+            <div id="stat-strength" class="text-lg font-mono font-bold text-indigo-400 mt-0.5">0 次</div>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+            <div class="text-[11px] text-slate-400">區間平均睡眠</div>
+            <div id="stat-sleep" class="text-lg font-mono font-bold text-violet-400 mt-0.5">-- 小時</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Muscle Distribution Chart + History List -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Muscle Breakdown Chart -->
+        <div class="glass-card rounded-2xl p-5">
+          <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i>
+            肌力訓練部位分佈
+          </h3>
+          <p class="text-[11px] text-slate-400 mb-3">統計符合篩選條件的部位次數</p>
+          <div class="h-56 w-full flex items-center justify-center">
+            <canvas id="queryMuscleChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Filtered Records Feed -->
+        <div class="glass-card rounded-2xl p-5 lg:col-span-2 flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white">查詢明細列表</h3>
+            <span id="query-result-badge" class="text-[11px] font-mono text-slate-400">顯示最新紀錄</span>
+          </div>
+          <div id="query-records-list" class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: PERSONAL PROFILE PAGE (個人頁面) ==================== -->
+    <section id="view-profile" class="hidden space-y-5">
+      <!-- Profile Selector Pills -->
+      <div class="flex items-center gap-3">
+        <button onclick="selectProfileTab('me')" id="profile-tab-me" class="flex-1 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span class="w-3 h-3 rounded-full bg-sky-400"></span>
+          <span id="profile-btn-label-me">Chumi 的個人檔案</span>
+        </button>
+        <button onclick="selectProfileTab('partner')" id="profile-tab-partner" class="flex-1 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+          <span id="profile-btn-label-partner">Weeki 的個人檔案</span>
+        </button>
+      </div>
+
+      <!-- Profile Editor & Summary Card -->
+      <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-3.5">
+            <div id="profile-avatar-circle" class="w-14 h-14 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-2xl font-bold text-sky-300">
+              C
+            </div>
+            <div>
+              <h2 id="profile-header-name" class="text-lg font-bold text-white">Chumi</h2>
+              <p id="profile-header-meta" class="text-xs text-slate-400 font-mono mt-0.5">175 cm · 70.0 kg · BMI 22.9</p>
+            </div>
+          </div>
+
+          <div id="profile-bmi-pill" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            BMI 適中 (18.5-23.9)
+          </div>
+        </div>
+
+        <!-- Edit Form -->
+        <form onsubmit="saveProfileSettings(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">顯示暱稱</label>
+              <input type="text" id="prof-name" required maxlength="10" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">性別</label>
+              <select id="prof-gender" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
+                <option value="male">男性</option>
+                <option value="female">女性</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">目前身高 (cm)</label>
+              <input type="number" step="0.1" id="prof-height" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">目前體重 (kg)</label>
+              <input type="number" step="0.1" id="prof-weight" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">每日飲水係數 (ml / 每公斤體重)</label>
+              <select id="prof-water-mult" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
+                <option value="30">30 ml/kg (基礎日常)</option>
+                <option value="35">35 ml/kg (標準建議)</option>
+                <option value="40">40 ml/kg (高運動量/流汗多)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">每日蛋白質係數 (g / 每公斤體重)</label>
+              <select id="prof-protein-mult" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
+                <option value="1.2">1.2 g/kg (一般健康維持)</option>
+                <option value="1.6">1.6 g/kg (規律健身/增肌減脂)</option>
+                <option value="2.0">2.0 g/kg (高強度重訓期)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-2 flex flex-wrap items-center justify-between gap-3">
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm transition-colors">
+              儲存個人設定
+            </button>
+
+            <button type="button" onclick="resetDemoData()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/40 text-xs text-slate-400 hover:text-rose-300 transition-colors">
+              重置為預設範例資料
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Individual Personal Metrics & History -->
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="history" class="w-4 h-4 text-sky-400"></i>
+          <span id="profile-history-title">個人近期身體與運動足跡</span>
+        </h3>
+        <div id="profile-personal-feed" class="space-y-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Mobile Navigation Bar -->
+  <nav class="fixed bottom-0 inset-x-0 z-30 bg-[#070B14]/92 backdrop-blur-xl border-t border-slate-800/90 pb-safe">
+    <div class="max-w-xl mx-auto px-2 py-2 grid grid-cols-4 gap-1">
+      <button onclick="switchTab('dashboard')" id="nav-tab-dashboard" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-sky-400 bg-sky-500/10 transition-all">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span class="text-[11px] font-bold mt-1">總覽看板</span>
+      </button>
+
+      <button onclick="switchTab('log')" id="nav-tab-log" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
+        <i data-lucide="plus-square" class="w-5 h-5"></i>
+        <span class="text-[11px] font-medium mt-1">快速紀錄</span>
+      </button>
+
+      <button onclick="switchTab('query')" id="nav-tab-query" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
+        <i data-lucide="search" class="w-5 h-5"></i>
+        <span class="text-[11px] font-medium mt-1">複合查詢</span>
+      </button>
+
+      <button onclick="switchTab('profile')" id="nav-tab-profile" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
+        <i data-lucide="user-circle" class="w-5 h-5"></i>
+        <span class="text-[11px] font-medium mt-1">個人頁面</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PWA Add to Home Screen Modal -->
+  <div id="pwa-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="glass-card max-w-md w-full rounded-3xl p-6 border border-sky-500/30 space-y-4 relative">
+      <button onclick="closePwaModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <img id="modal-icon-preview" src="" alt="App Icon" class="w-14 h-14 rounded-2xl shadow-lg border border-sky-400/30" />
+        <div>
+          <h3 class="text-base font-bold text-white">加入手機桌面主畫面</h3>
+          <p class="text-xs text-slate-400">像原生 App 一樣一鍵開啟情侶健康紀錄</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300 bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
+        <div>
+          <p class="font-bold text-sky-400 mb-1 flex items-center gap-1.5">
+            <i data-lucide="compass" class="w-4 h-4"></i> iPhone / iPad (Safari 瀏覽器)
+          </p>
+          <ol class="list-decimal list-inside space-y-1 text-slate-300">
+            <li>點擊下方工具列的 <span class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-bold">分享按鈕 (方框向上箭頭)</span></li>
+            <li>往下滑動選單，點選 <span class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-bold">「加入主畫面」</span></li>
+            <li>點擊右上角「新增」，桌面即會出現 <span class="text-sky-300 font-bold">SyncFit健康</span> 圖示！</li>
+          </ol>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800">
+          <p class="font-bold text-emerald-400 mb-1 flex items-center gap-1.5">
+            <i data-lucide="chrome" class="w-4 h-4"></i> Android (Chrome 瀏覽器)
+          </p>
+          <ol class="list-decimal list-inside space-y-1 text-slate-300">
+            <li>點擊右上角 <span class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-bold">「⋮」選單圖示</span></li>
+            <li>點選 <span class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-bold">「加到主畫面」</span> 或「安裝應用程式」即可完成。</li>
+          </ol>
+        </div>
+      </div>
+
+      <button onclick="closePwaModal()" class="w-full py-2.5 rounded-xl bg-sky-500 text-slate-950 font-bold text-sm">
+        我知道了
+      </button>
+    </div>
+  </div>
+
+  <!-- Couple Cloud Sync Room Modal -->
+  <div id="sync-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="glass-card max-w-md w-full rounded-3xl p-6 border border-sky-500/30 space-y-4 relative">
+      <button onclick="closeSyncModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center text-sky-400">
+          <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">情侶雲端即時同步設定</h3>
+          <p class="text-xs text-slate-400">雙方輸入相同的專屬配對碼，手機畫面即時連動</p>
+        </div>
+      </div>
+
+      <!-- Current Sync Status Box -->
+      <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <span id="modal-sync-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <div>
+            <div id="modal-sync-title" class="text-xs font-bold text-emerald-300">已連線即時同步</div>
+            <div id="modal-sync-desc" class="text-[11px] text-slate-400 font-mono mt-0.5">目前配對碼：Chumi0419weeki</div>
+          </div>
+        </div>
+        <button type="button" onclick="copyShareInvite()" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center gap-1 transition-colors shrink-0">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i> 複製邀請
+        </button>
+      </div>
+
+      <!-- Change / Join Room Form -->
+      <form onsubmit="handleJoinRoomSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1.5">自訂情侶專屬配對碼（建議英文或數字）</label>
+          <div class="flex gap-2">
+            <input type="text" id="room-code-input" required minlength="4" maxlength="32" placeholder="例如：Chumi0419weeki" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-sky-500/20 hover:opacity-95 transition-all shrink-0">
+              切換 / 連線
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+            提示：Chumi 與 Weeki 只要在各自手機輸入完全相同的配對碼，任何一方更新喝水、體重或運動紀錄，另一方畫面會在 1 秒內自動更新。
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase Cloud Sync & Application Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ==================== 1. PWA ICON & MANIFEST GENERATION ====================
+    function setupPwaAssets() {
+      const svgIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+          <defs>
+            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0F172A"/>
+              <stop offset="100%" stop-color="#070B14"/>
+            </linearGradient>
+            <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38BDF8"/>
+              <stop offset="100%" stop-color="#0284C7"/>
+            </linearGradient>
+          </defs>
+          <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+          <circle cx="256" cy="256" r="185" fill="none" stroke="#1E293B" stroke-width="24"/>
+          <path d="M130 265 L195 265 L225 185 L275 335 L310 245 L382 245" fill="none" stroke="url(#accent)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="365" cy="155" r="24" fill="#F43F5E"/>
+        </svg>
+      `.trim();
+
+      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgIcon);
+
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 512, 512);
+        const pngDataUrl = canvas.toDataURL('image/png');
+        document.getElementById('apple-touch-icon').href = pngDataUrl;
+        document.getElementById('modal-icon-preview').src = pngDataUrl;
+
+        const manifest = {
+          name: 'SyncFit 情侶健康與體態追蹤',
+          short_name: 'SyncFit健康',
+          start_url: '.',
+          display: 'standalone',
+          background_color: '#070B14',
+          theme_color: '#070B14',
+          icons: [{ src: pngDataUrl, sizes: '512x512', type: 'image/png' }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        document.getElementById('app-manifest').href = URL.createObjectURL(manifestBlob);
+      };
+      img.src = svgDataUrl;
+    }
+
+    // ==================== 2. STATE, CLOUD SYNC & DEFAULT DATA ====================
+    const ROOM_STORAGE_KEY = 'syncfit_couple_room_code_v1';
+    const LOCAL_CACHE_KEY = 'syncfit_couple_health_chumi_weeki_v1';
+
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let unsubscribeRoom = null;
+    let isRemoteApplying = false;
+
+    const DEFAULT_ROOM_CODE = 'Chumi0419weeki';
+
+    function sanitizeRoomCode(raw) {
+      const cleaned = (raw || '').trim().replace(/[^a-zA-Z0-9\-_]/g, '');
+      return cleaned.length >= 4 ? cleaned : DEFAULT_ROOM_CODE;
+    }
+
+    function getInitialRoomCode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramRoom = urlParams.get('room');
+      if (paramRoom && paramRoom.trim().length >= 4) {
+        const clean = sanitizeRoomCode(paramRoom);
+        localStorage.setItem(ROOM_STORAGE_KEY, clean);
+        return clean;
+      }
+      const saved = localStorage.getItem(ROOM_STORAGE_KEY);
+      if (saved && saved.trim().length >= 4) {
+        return sanitizeRoomCode(saved);
+      }
+      return DEFAULT_ROOM_CODE;
+    }
+
+    let currentRoomCode = getInitialRoomCode();
+
+    function getTodayStr(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().split('T')[0];
+    }
+
+    function getWeekStartStr() {
+      const d = new Date();
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.setDate(diff));
+      return monday.toISOString().split('T')[0];
+    }
+
+    function createDefaultState() {
+      const today = getTodayStr(0);
+      return {
+        updatedAt: Date.now(),
+        profiles: {
+          me: {
+            id: 'me',
+            name: 'Chumi',
+            gender: 'male',
+            height: 175,
+            weight: 71.5,
+            waterMult: 35,
+            proteinMult: 1.6,
+            color: 'sky'
+          },
+          partner: {
+            id: 'partner',
+            name: 'Weeki',
+            gender: 'female',
+            height: 162,
+            weight: 53.0,
+            waterMult: 35,
+            proteinMult: 1.6,
+            color: 'rose'
+          }
+        },
+        dailyIntake: {
+          [`me_${today}`]: { water: 1250, protein: 65 },
+          [`partner_${today}`]: { water: 1000, protein: 48 }
+        },
+        records: [
+          { id: 'r1', userId: 'me', type: 'body', date: getTodayStr(-14), height: 175, weight: 72.8 },
+          { id: 'r2', userId: 'me', type: 'body', date: getTodayStr(-7), height: 175, weight: 72.0 },
+          { id: 'r3', userId: 'me', type: 'body', date: today, height: 175, weight: 71.5 },
+          { id: 'r4', userId: 'partner', type: 'body', date: getTodayStr(-14), height: 162, weight: 53.8 },
+          { id: 'r5', userId: 'partner', type: 'body', date: getTodayStr(-7), height: 162, weight: 53.4 },
+          { id: 'r6', userId: 'partner', type: 'body', date: today, height: 162, weight: 53.0 },
+
+          { id: 'r7', userId: 'me', type: 'cardio', date: getTodayStr(-2), subType: '慢跑 / 路跑', minutes: 45, note: '河濱公園慢跑' },
+          { id: 'r8', userId: 'me', type: 'cardio', date: today, subType: '室內飛輪 / 單車', minutes: 50, note: '間歇心肺訓練' },
+          { id: 'r9', userId: 'partner', type: 'cardio', date: getTodayStr(-1), subType: '快走 / 坡度健走', minutes: 60, note: '跑步機坡度10' },
+          { id: 'r10', userId: 'partner', type: 'cardio', date: today, subType: '羽球 / 球類運動', minutes: 60, note: '雙人羽球對打' },
+
+          { id: 'r11', userId: 'me', type: 'strength', date: getTodayStr(-2), muscles: ['背部', '手臂', '核心'], minutes: 60, note: '引體向上、划船' },
+          { id: 'r12', userId: 'partner', type: 'strength', date: getTodayStr(-1), muscles: ['臀部', '腿部', '腹部'], minutes: 55, note: '深蹲、臀推' },
+
+          { id: 'r13', userId: 'me', type: 'sleep', date: getTodayStr(-3), hours: 6.5, note: '稍微晚睡' },
+          { id: 'r14', userId: 'me', type: 'sleep', date: getTodayStr(-2), hours: 7.5, note: '精神不錯' },
+          { id: 'r15', userId: 'me', type: 'sleep', date: getTodayStr(-1), hours: 8.0, note: '深層睡眠充足' },
+          { id: 'r16', userId: 'me', type: 'sleep', date: today, hours: 7.5, note: '準時起床' },
+
+          { id: 'r17', userId: 'partner', type: 'sleep', date: getTodayStr(-3), hours: 7.5, note: '' },
+          { id: 'r18', userId: 'partner', type: 'sleep', date: getTodayStr(-2), hours: 8.5, note: '睡得很香' },
+          { id: 'r19', userId: 'partner', type: 'sleep', date: getTodayStr(-1), hours: 7.0, note: '' },
+          { id: 'r20', userId: 'partner', type: 'sleep', date: today, hours: 8.0, note: '起床精神飽滿' }
+        ]
+      };
+    }
+
+    function loadLocalCache() {
+      try {
+        const raw = localStorage.getItem(LOCAL_CACHE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn('Cache load error:', e);
+      }
+      return createDefaultState();
+    }
+
+    let appState = loadLocalCache();
+
+    function updateSyncStatusUI(status, detailText = '') {
+      const dot = document.getElementById('sync-dot');
+      const text = document.getElementById('sync-status-text');
+      const modalDot = document.getElementById('modal-sync-dot');
+      const modalTitle = document.getElementById('modal-sync-title');
+      const modalDesc = document.getElementById('modal-sync-desc');
+
+      if (!dot || !text) return;
+
+      if (status === 'connected') {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]';
+        text.textContent = `同步:${currentRoomCode}`;
+        text.className = 'text-emerald-300 max-w-[84px] sm:max-w-[130px] truncate font-mono';
+        if (modalDot) {
+          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+          modalTitle.textContent = '已連線雲端即時同步';
+          modalTitle.className = 'text-xs font-bold text-emerald-300';
+          modalDesc.textContent = `目前配對碼：${currentRoomCode}`;
+        }
+      } else if (status === 'connecting') {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+        text.textContent = '同步連線中...';
+        text.className = 'text-amber-300 max-w-[84px] sm:max-w-[130px] truncate';
+        if (modalDot) {
+          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping';
+          modalTitle.textContent = '正在連線雲端資料庫...';
+          modalTitle.className = 'text-xs font-bold text-amber-300';
+          modalDesc.textContent = `嘗試連線配對碼：${currentRoomCode}`;
+        }
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-rose-400';
+        text.textContent = '離線本機模式';
+        text.className = 'text-rose-300 max-w-[84px] sm:max-w-[130px] truncate';
+        if (modalDot) {
+          modalDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-400';
+          modalTitle.textContent = '離線本機模式';
+          modalTitle.className = 'text-xs font-bold text-rose-300';
+          modalDesc.textContent = detailText || '目前暫存於本機裝置';
+        }
+      }
+    }
+
+    async function saveState() {
+      appState.updatedAt = Date.now();
+      try {
+        localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.warn('Local cache save error:', e);
+      }
+
+      if (!db || !currentUser || isRemoteApplying) return;
+
+      try {
+        const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'couple_rooms', currentRoomCode);
+        await setDoc(roomDocRef, {
+          updatedAt: appState.updatedAt,
+          profilesJson: JSON.stringify(appState.profiles),
+          dailyIntakeJson: JSON.stringify(appState.dailyIntake),
+          recordsJson: JSON.stringify(appState.records)
+        });
+      } catch (err) {
+        console.error('Cloud sync write failed:', err);
+        updateSyncStatusUI('offline', '雲端寫入異常，已暫存本機');
+      }
+    }
+
+    function subscribeToRoom(roomCode) {
+      if (!db || !currentUser) return;
+      if (unsubscribeRoom) {
+        unsubscribeRoom();
+        unsubscribeRoom = null;
+      }
+
+      currentRoomCode = sanitizeRoomCode(roomCode);
+      localStorage.setItem(ROOM_STORAGE_KEY, currentRoomCode);
+      const roomInput = document.getElementById('room-code-input');
+      if (roomInput) roomInput.value = currentRoomCode;
+
+      updateSyncStatusUI('connecting');
+
+      const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'couple_rooms', currentRoomCode);
+
+      unsubscribeRoom = onSnapshot(
+        roomDocRef,
+        async (snapshot) => {
+          updateSyncStatusUI('connected');
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            try {
+              isRemoteApplying = true;
+              const parsedProfiles = data.profilesJson ? JSON.parse(data.profilesJson) : null;
+              const parsedIntake = data.dailyIntakeJson ? JSON.parse(data.dailyIntakeJson) : null;
+              const parsedRecords = data.recordsJson ? JSON.parse(data.recordsJson) : null;
+
+              if (parsedProfiles && parsedIntake && parsedRecords) {
+                appState = {
+                  updatedAt: data.updatedAt || Date.now(),
+                  profiles: parsedProfiles,
+                  dailyIntake: parsedIntake,
+                  records: parsedRecords
+                };
+                localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(appState));
+                refreshAllUI();
+              }
+            } catch (parseErr) {
+              console.error('Error parsing remote room state:', parseErr);
+            } finally {
+              isRemoteApplying = false;
+            }
+          } else {
+            // Room does not exist yet in cloud: initialize it with current state
+            await saveState();
+          }
+        },
+        (error) => {
+          console.error('Firestore onSnapshot error:', error);
+          updateSyncStatusUI('offline', '雲端連線中斷，已切換為本機模式');
+        }
+      );
+    }
+
+    async function initCloudSync() {
+      try {
+        if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+          updateSyncStatusUI('offline', '未偵測到雲端設定，使用本機儲存');
+          return;
+        }
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        currentUser = auth.currentUser;
+        if (currentUser) {
+          subscribeToRoom(currentRoomCode);
+        } else {
+          updateSyncStatusUI('offline', '驗證未完成，使用本機儲存');
+        }
+      } catch (err) {
+        console.error('Firebase init error:', err);
+        updateSyncStatusUI('offline', '雲端初始化失敗，使用本機儲存');
+      }
+    }
+
+    function openSyncModal() {
+      const modal = document.getElementById('sync-modal');
+      document.getElementById('room-code-input').value = currentRoomCode;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeSyncModal() {
+      const modal = document.getElementById('sync-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleJoinRoomSubmit(e) {
+      e.preventDefault();
+      const inputVal = document.getElementById('room-code-input').value;
+      const cleanCode = sanitizeRoomCode(inputVal);
+      if (cleanCode.length < 4) {
+        showToast('配對碼請至少輸入 4 個英數字元');
+        return;
+      }
+      subscribeToRoom(cleanCode);
+      showToast(`已切換至情侶配對碼：${cleanCode}`);
+    }
+
+    function copyShareInvite() {
+      const baseUrl = window.location.href.split('?')[0];
+      const shareText = `SyncFit 情侶健康即時同步配對碼：【${currentRoomCode}】\n開啟網址或輸入配對碼即可與我同步健康進度！\n${baseUrl}?room=${encodeURIComponent(currentRoomCode)}`;
+
+      const tempInput = document.createElement('textarea');
+      tempInput.value = shareText;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast(`已複製配對碼「${currentRoomCode}」與邀請訊息！`);
+      } catch (err) {
+        showToast(`配對碼：${currentRoomCode}（請手動複製）`);
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    // ==================== 3. UI & NAVIGATION STATE ====================
+    let activeTab = 'dashboard';
+    let activeContext = 'both'; // 'both' | 'me' | 'partner'
+    let actionTargetUser = 'me'; // for water/protein quick buttons
+    let logFormUser = 'me';
+    let logCategory = 'body';
+    let profileTabUser = 'me';
+
+    // Chart instances
+    let weightChartInstance = null;
+    let sleepChartInstance = null;
+    let muscleChartInstance = null;
+
+    // ==================== 4. HEALTH CALCULATION HELPERS ====================
+    function calculateBMI(weightKg, heightCm) {
+      if (!weightKg || !heightCm || heightCm <= 0) return 0;
+      const hMeters = heightCm / 100;
+      return +(weightKg / (hMeters * hMeters)).toFixed(1);
+    }
+
+    function getBMIStatus(bmi) {
+      // Taiwan MOHW (衛福部) Adult BMI Standards: 18.5 ~ 23.9 Normal
+      if (bmi < 18.5) {
+        return {
+          label: '體重過輕',
+          badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+          barColor: '#FBBF24',
+          advice: '建議適度增加優質蛋白質與肌力訓練'
+        };
+      } else if (bmi < 24.0) {
+        return {
+          label: '體重適中',
+          badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+          barColor: '#34D399',
+          advice: '體態維持在理想健康區間，繼續保持！'
+        };
+      } else if (bmi < 27.0) {
+        return {
+          label: '體重過重',
+          badgeClass: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
+          barColor: '#FB923C',
+          advice: '建議每週累積 150-300 分鐘有氧並控制熱量'
+        };
+      } else {
+        return {
+          label: '輕度以上肥胖',
+          badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+          barColor: '#F43F5E',
+          advice: '建議循序漸進增加有氧運動與飲食調整'
+        };
+      }
+    }
+
+    function getIdealWeightRange(heightCm) {
+      const hM = heightCm / 100;
+      const minW = (18.5 * hM * hM).toFixed(1);
+      const maxW = (23.9 * hM * hM).toFixed(1);
+      return `${minW} ~ ${maxW} kg`;
+    }
+
+    function getDailyTargets(userKey) {
+      const p = appState.profiles[userKey];
+      const waterTarget = Math.round(p.weight * p.waterMult);
+      const proteinTarget = Math.round(p.weight * p.proteinMult);
+      return { waterTarget, proteinTarget };
+    }
+
+    function getTodayIntake(userKey) {
+      const key = `${userKey}_${getTodayStr(0)}`;
+      return appState.dailyIntake[key] || { water: 0, protein: 0 };
+    }
+
+    // ==================== 5. TOAST NOTIFICATION ====================
+    let toastTimer = null;
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      document.getElementById('toast-message').textContent = msg;
+      container.classList.remove('opacity-0', '-translate-y-4');
+      container.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        container.classList.remove('opacity-100', 'translate-y-0');
+        container.classList.add('opacity-0', '-translate-y-4');
+      }, 2500);
+    }
+
+    // ==================== 6. NAVIGATION & CONTEXT SWITCHERS ====================
+    function switchTab(tabName, optionalSubCategory = null) {
+      activeTab = tabName;
+      ['dashboard', 'log', 'query', 'profile'].forEach((t) => {
+        document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tabName);
+        const navBtn = document.getElementById(`nav-tab-${t}`);
+        if (t === tabName) {
+          navBtn.classList.add('text-sky-400', 'bg-sky-500/10');
+          navBtn.classList.remove('text-slate-400');
+        } else {
+          navBtn.classList.remove('text-sky-400', 'bg-sky-500/10');
+          navBtn.classList.add('text-slate-400');
+        }
+      });
+
+      if (tabName === 'log') {
+        if (optionalSubCategory) setLogCategory(optionalSubCategory);
+        prefillBodyForm();
+      } else if (tabName === 'query') {
+        runCompoundQuery();
+      } else if (tabName === 'profile') {
+        renderProfilePage();
+      } else if (tabName === 'dashboard') {
+        renderDashboard();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setActiveContext(ctx) {
+      activeContext = ctx;
+      ['both', 'me', 'partner'].forEach((c) => {
+        const btn = document.getElementById(`btn-ctx-${c}`);
+        if (c === ctx) {
+          btn.classList.add('bg-sky-500', 'text-slate-950', 'shadow');
+          btn.classList.remove('text-slate-400', 'hover:text-white');
+        } else {
+          btn.classList.remove('bg-sky-500', 'text-slate-950', 'shadow');
+          btn.classList.add('text-slate-400', 'hover:text-white');
+        }
+      });
+
+      if (ctx === 'me' || ctx === 'partner') {
+        actionTargetUser = ctx;
+        logFormUser = ctx;
+        profileTabUser = ctx;
+      }
+
+      refreshAllUI();
+    }
+
+    function syncActionUser(userKey) {
+      actionTargetUser = userKey;
+      document.getElementById('water-user-select').value = userKey;
+      document.getElementById('protein-user-select').value = userKey;
+      renderHydrationAndProtein();
+    }
+
+    // ==================== 7. DASHBOARD RENDERERS ====================
+    function renderDashboard() {
+      const meName = appState.profiles.me.name;
+      const partnerName = appState.profiles.partner.name;
+
+      document.getElementById('nav-name-me').textContent = meName;
+      document.getElementById('nav-name-partner').textContent = partnerName;
+
+      // Update context banner
+      const badge = document.getElementById('dashboard-badge');
+      const subtitle = document.getElementById('dashboard-subtitle');
+      if (activeContext === 'both') {
+        badge.textContent = '雙人同步總覽';
+        badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30';
+        subtitle.textContent = `即時對比 ${meName} 與 ${partnerName} 的身體指標與本週運動進度`;
+      } else {
+        const activeP = appState.profiles[activeContext];
+        badge.textContent = `${activeP.name} 專屬檢視`;
+        badge.className = activeContext === 'me'
+          ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30'
+          : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        subtitle.textContent = `專注檢視 ${activeP.name} 的每日營養、有氧、肌力與睡眠狀態`;
+      }
+
+      document.getElementById('current-week-label').textContent = `本週起算：${getWeekStartStr()}`;
+
+      renderBmiCards();
+      renderHydrationAndProtein();
+      renderWeeklyCardio();
+      renderWeeklyStrength();
+      renderDailySleep();
+      renderDashboardCharts();
+      lucide.createIcons();
+    }
+
+    function renderBmiCards() {
+      const container = document.getElementById('bmi-cards-container');
+      const usersToShow = activeContext === 'both' ? ['me', 'partner'] : [activeContext];
+      container.className = usersToShow.length === 1
+        ? 'grid grid-cols-1 gap-4'
+        : 'grid grid-cols-1 md:grid-cols-2 gap-4';
+
+      container.innerHTML = usersToShow.map((uKey) => {
+        const p = appState.profiles[uKey];
+        const bmi = calculateBMI(p.weight, p.height);
+        const status = getBMIStatus(bmi);
+        const idealWeight = getIdealWeightRange(p.height);
+        const isMe = uKey === 'me';
+        const accentColor = isMe ? 'text-sky-400' : 'text-rose-400';
+        const borderGlow = isMe ? 'border-sky-500/25' : 'border-rose-500/25';
+
+        // Calculate marker position on 15 to 32 BMI scale
+        const clampedBmi = Math.max(15, Math.min(32, bmi));
+        const markerPct = ((clampedBmi - 15) / (32 - 15)) * 100;
+
+        return `
+          <div class="glass-card rounded-2xl p-5 border ${borderGlow} relative overflow-hidden">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl ${isMe ? 'bg-sky-500/15 text-sky-400 border-sky-500/30' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'} border flex items-center justify-center font-bold text-base">
+                  ${p.name.charAt(0)}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-base font-bold text-white">${p.name}</h2>
+                    <span class="text-xs font-mono text-slate-400">${p.height} cm · ${p.weight} kg</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">${status.advice}</p>
+                </div>
+              </div>
+
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${status.badgeClass}">
+                ${status.label}
+              </span>
+            </div>
+
+            <!-- Main BMI Metric & Ideal Range -->
+            <div class="mt-4 grid grid-cols-2 gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800/90">
+              <div>
+                <div class="text-[11px] text-slate-400">當前 BMI 指數</div>
+                <div class="text-3xl font-mono font-bold ${accentColor} mt-0.5">${bmi}</div>
+              </div>
+              <div class="border-l border-slate-800 pl-3 flex flex-col justify-center">
+                <div class="text-[11px] text-slate-400">衛福部適中 BMI 範圍</div>
+                <div class="text-sm font-mono font-bold text-emerald-400 mt-0.5">18.5 ~ 23.9</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">適中體重：<span class="font-mono text-slate-200">${idealWeight}</span></div>
+              </div>
+            </div>
+
+            <!-- Visual BMI Gauge Bar -->
+            <div class="mt-4">
+              <div class="relative h-2.5 w-full rounded-full overflow-hidden flex bg-slate-800">
+                <div style="width: 20.6%" class="bg-amber-400/75" title="過輕 <18.5"></div>
+                <div style="width: 31.8%" class="bg-emerald-400/85" title="適中 18.5-23.9"></div>
+                <div style="width: 17.6%" class="bg-orange-400/80" title="過重 24.0-26.9"></div>
+                <div style="width: 30%" class="bg-rose-500/80" title="肥胖 >=27"></div>
+              </div>
+              <!-- Marker -->
+              <div class="relative h-3 w-full">
+                <div style="left: calc(${markerPct}% - 6px)" class="absolute -top-1 w-3 h-3 rotate-45 bg-white border-2 border-slate-950 shadow"></div>
+              </div>
+              <div class="flex justify-between text-[10px] font-mono text-slate-500 -mt-1">
+                <span>過輕 &lt;18.5</span>
+                <span class="text-emerald-400 font-semibold">適中 18.5 - 23.9</span>
+                <span>過重 ≥24</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHydrationAndProtein() {
+      const wSelect = document.getElementById('water-user-select');
+      const pSelect = document.getElementById('protein-user-select');
+      wSelect.options[0].text = appState.profiles.me.name;
+      wSelect.options[1].text = appState.profiles.partner.name;
+      pSelect.options[0].text = appState.profiles.me.name;
+      pSelect.options[1].text = appState.profiles.partner.name;
+
+      wSelect.value = actionTargetUser;
+      pSelect.value = actionTargetUser;
+
+      const profile = appState.profiles[actionTargetUser];
+      const { waterTarget, proteinTarget } = getDailyTargets(actionTargetUser);
+      const intake = getTodayIntake(actionTargetUser);
+
+      // Hydration
+      document.getElementById('water-multiplier-label').textContent = profile.waterMult;
+      document.getElementById('today-water-current').textContent = intake.water;
+      document.getElementById('today-water-target').textContent = waterTarget;
+      const waterPct = Math.min(100, Math.round((intake.water / waterTarget) * 100));
+      document.getElementById('today-water-pct').textContent = `${waterPct}%`;
+      document.getElementById('today-water-bar').style.width = `${waterPct}%`;
+
+      // Protein
+      document.getElementById('protein-multiplier-label').textContent = profile.proteinMult;
+      document.getElementById('today-protein-current').textContent = intake.protein;
+      document.getElementById('today-protein-target').textContent = proteinTarget;
+      const proteinPct = Math.min(100, Math.round((intake.protein / proteinTarget) * 100));
+      document.getElementById('today-protein-pct').textContent = `${proteinPct}%`;
+      document.getElementById('today-protein-bar').style.width = `${proteinPct}%`;
+    }
+
+    function quickAddWater(amount) {
+      const key = `${actionTargetUser}_${getTodayStr(0)}`;
+      if (!appState.dailyIntake[key]) appState.dailyIntake[key] = { water: 0, protein: 0 };
+      appState.dailyIntake[key].water += amount;
+      saveState();
+      renderHydrationAndProtein();
+      showToast(`${appState.profiles[actionTargetUser].name} 已記錄飲水 +${amount} ml`);
+    }
+
+    function addCustomWater() {
+      const input = document.getElementById('custom-water-input');
+      const val = parseInt(input.value, 10);
+      if (!val || val <= 0) return;
+      quickAddWater(val);
+      input.value = '';
+    }
+
+    function quickAddProtein(grams) {
+      const key = `${actionTargetUser}_${getTodayStr(0)}`;
+      if (!appState.dailyIntake[key]) appState.dailyIntake[key] = { water: 0, protein: 0 };
+      appState.dailyIntake[key].protein += grams;
+      saveState();
+      renderHydrationAndProtein();
+      showToast(`${appState.profiles[actionTargetUser].name} 已記錄蛋白質 +${grams} g`);
+    }
+
+    function addCustomProtein() {
+      const input = document.getElementById('custom-protein-input');
+      const val = parseInt(input.value, 10);
+      if (!val || val <= 0) return;
+      quickAddProtein(val);
+      input.value = '';
+    }
+
+    function renderWeeklyCardio() {
+      const weekStart = getWeekStartStr();
+      const users = activeContext === 'both' ? ['me', 'partner'] : [activeContext];
+      const container = document.getElementById('cardio-status-list');
+
+      container.innerHTML = users.map((uKey) => {
+        const p = appState.profiles[uKey];
+        const totalMins = appState.records
+          .filter((r) => r.userId === uKey && r.type === 'cardio' && r.date >= weekStart)
+          .reduce((sum, r) => sum + Number(r.minutes || 0), 0);
+
+        const pct150 = Math.round((totalMins / 150) * 100);
+        const barWidth300 = Math.min(100, Math.round((totalMins / 300) * 100));
+
+        let statusBadge = '';
+        if (totalMins >= 300) {
+          statusBadge = '<span class="text-[11px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">進階300分達成</span>';
+        } else if (totalMins >= 150) {
+          statusBadge = '<span class="text-[11px] font-bold text-sky-300 bg-sky-500/20 px-2 py-0.5 rounded">基礎150分達成</span>';
+        } else {
+          statusBadge = `<span class="text-[11px] font-mono text-slate-400">距150分還差 ${150 - totalMins}分</span>`;
+        }
+
+        return `
+          <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${p.name}</span>
+              ${statusBadge}
+            </div>
+            <div class="flex items-baseline justify-between">
+              <div>
+                <span class="text-xl font-mono font-bold text-white">${totalMins}</span>
+                <span class="text-xs text-slate-400 font-mono"> / 150~300 分鐘</span>
+              </div>
+              <span class="text-xs font-mono font-bold text-emerald-400">基礎比例 ${pct150}%</span>
+            </div>
+            <div class="relative w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-300 rounded-full transition-all duration-500" style="width: ${barWidth300}%"></div>
+              <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/70" title="150分鐘基準線"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderWeeklyStrength() {
+      const weekStart = getWeekStartStr();
+      const users = activeContext === 'both' ? ['me', 'partner'] : [activeContext];
+      const container = document.getElementById('strength-status-list');
+      const allMusclesSet = new Set();
+
+      container.innerHTML = users.map((uKey) => {
+        const p = appState.profiles[uKey];
+        const logs = appState.records.filter((r) => r.userId === uKey && r.type === 'strength' && r.date >= weekStart);
+        const count = logs.length;
+        logs.forEach((l) => (l.muscles || []).forEach((m) => allMusclesSet.add(`${p.name}:${m}`)));
+
+        const reached = count >= 2;
+        return `
+          <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${p.name}</div>
+              <div class="mt-1 flex items-baseline gap-1.5">
+                <span class="text-xl font-mono font-bold text-white">${count}</span>
+                <span class="text-xs text-slate-400 font-mono">/ 2 次目標</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold ${count >= 1 ? 'bg-indigo-500 text-white shadow shadow-indigo-500/40' : 'bg-slate-800 text-slate-500'}">1</span>
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold ${count >= 2 ? 'bg-indigo-500 text-white shadow shadow-indigo-500/40' : 'bg-slate-800 text-slate-500'}">2</span>
+              ${reached ? '<span class="ml-1 text-[11px] font-bold text-emerald-400">達標!</span>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const tagsEl = document.getElementById('weekly-muscles-tags');
+      if (allMusclesSet.size === 0) {
+        tagsEl.innerHTML = '<span class="text-xs text-slate-500">本週尚未登錄肌群部位</span>';
+      } else {
+        tagsEl.innerHTML = Array.from(allMusclesSet).map((item) => {
+          const [who, muscle] = item.split(':');
+          return `<span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">${who} · ${muscle}</span>`;
+        }).join('');
+      }
+    }
+
+    function renderDailySleep() {
+      const users = activeContext === 'both' ? ['me', 'partner'] : [activeContext];
+      const container = document.getElementById('sleep-status-list');
+
+      container.innerHTML = users.map((uKey) => {
+        const p = appState.profiles[uKey];
+        const sleepLogs = appState.records
+          .filter((r) => r.userId === uKey && r.type === 'sleep')
+          .sort((a, b) => b.date.localeCompare(a.date));
+
+        const latest = sleepLogs[0];
+        const hrs = latest ? Number(latest.hours) : 0;
+
+        let statusHtml = '<span class="text-[11px] text-slate-500">尚無紀錄</span>';
+        if (latest) {
+          if (hrs >= 7 && hrs <= 9) {
+            statusHtml = '<span class="text-[11px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">理想睡眠 (7-9h)</span>';
+          } else if (hrs < 7) {
+            statusHtml = '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded">睡眠不足 (&lt;7h)</span>';
+          } else {
+            statusHtml = '<span class="text-[11px] font-bold text-sky-300 bg-sky-500/20 px-2 py-0.5 rounded">睡眠偏長 (&gt;9h)</span>';
+          }
+        }
+
+        return `
+          <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${p.name}</span>
+              ${statusHtml}
+            </div>
+            <div class="flex items-baseline justify-between">
+              <div>
+                <span class="text-xl font-mono font-bold text-white">${latest ? hrs : '--'}</span>
+                <span class="text-xs text-slate-400"> 小時</span>
+              </div>
+              <span class="text-[11px] font-mono text-slate-400">${latest ? latest.date : ''}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== 8. CHARTS RENDERING ====================
+    function renderDashboardCharts() {
+      const meName = appState.profiles.me.name;
+      const partnerName = appState.profiles.partner.name;
+
+      // 1. Weight Trend Chart
+      const bodyLogs = appState.records
+        .filter((r) => r.type === 'body')
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      const uniqueDates = Array.from(new Set(bodyLogs.map((r) => r.date))).slice(-7);
+      const meWeights = uniqueDates.map((d) => {
+        const found = bodyLogs.filter((r) => r.userId === 'me' && r.date === d).pop();
+        return found ? found.weight : null;
+      });
+      const partnerWeights = uniqueDates.map((d) => {
+        const found = bodyLogs.filter((r) => r.userId === 'partner' && r.date === d).pop();
+        return found ? found.weight : null;
+      });
+
+      const wCtx = document.getElementById('dashboardWeightChart').getContext('2d');
+      if (weightChartInstance) weightChartInstance.destroy();
+      weightChartInstance = new Chart(wCtx, {
+        type: 'line',
+        data: {
+          labels: uniqueDates.map((d) => d.slice(5)),
+          datasets: [
+            ...(activeContext !== 'partner' ? [{
+              label: meName,
+              data: meWeights,
+              borderColor: '#0EA5E9',
+              backgroundColor: 'rgba(14, 165, 233, 0.15)',
+              tension: 0.35,
+              spanGaps: true,
+              pointRadius: 4
+            }] : []),
+            ...(activeContext !== 'me' ? [{
+              label: partnerName,
+              data: partnerWeights,
+              borderColor: '#F43F5E',
+              backgroundColor: 'rgba(244, 63, 94, 0.15)',
+              tension: 0.35,
+              spanGaps: true,
+              pointRadius: 4
+            }] : [])
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#CBD5E1', font: { size: 11 } } }
+          },
+          scales: {
+            x: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.08)' } },
+            y: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.08)' } }
+          }
+        }
+      });
+
+      // 2. Last 7 Days Sleep Chart
+      const last7Days = [];
+      for (let i = 6; i >= 0; i--) {
+        last7Days.push(getTodayStr(-i));
+      }
+      const meSleep = last7Days.map((d) => {
+        const found = appState.records.filter((r) => r.userId === 'me' && r.type === 'sleep' && r.date === d).pop();
+        return found ? found.hours : 0;
+      });
+      const partnerSleep = last7Days.map((d) => {
+        const found = appState.records.filter((r) => r.userId === 'partner' && r.type === 'sleep' && r.date === d).pop();
+        return found ? found.hours : 0;
+      });
+
+      const sCtx = document.getElementById('dashboardSleepChart').getContext('2d');
+      if (sleepChartInstance) sleepChartInstance.destroy();
+      sleepChartInstance = new Chart(sCtx, {
+        type: 'bar',
+        data: {
+          labels: last7Days.map((d) => d.slice(5)),
+          datasets: [
+            ...(activeContext !== 'partner' ? [{
+              label: meName,
+              data: meSleep,
+              backgroundColor: 'rgba(14, 165, 233, 0.8)',
+              borderRadius: 6
+            }] : []),
+            ...(activeContext !== 'me' ? [{
+              label: partnerName,
+              data: partnerSleep,
+              backgroundColor: 'rgba(244, 63, 94, 0.8)',
+              borderRadius: 6
+            }] : [])
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#CBD5E1', font: { size: 11 } } }
+          },
+          scales: {
+            x: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { display: false } },
+            y: {
+              min: 0,
+              max: 12,
+              ticks: { color: '#94A3B8', font: { size: 10 } },
+              grid: { color: 'rgba(148,163,184,0.08)' }
+            }
+          }
+        }
+      });
+    }
+
+    // ==================== 9. QUICK LOGGING FORMS ====================
+    function setLogFormUser(userKey) {
+      logFormUser = userKey;
+      const btnMe = document.getElementById('form-user-me');
+      const btnPartner = document.getElementById('form-user-partner');
+      btnMe.textContent = appState.profiles.me.name;
+      btnPartner.textContent = appState.profiles.partner.name;
+
+      if (userKey === 'me') {
+        btnMe.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-500 text-slate-950';
+        btnPartner.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+      } else {
+        btnPartner.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-500 text-white';
+        btnMe.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+      }
+
+      if (logCategory === 'body') prefillBodyForm();
+    }
+
+    function setLogCategory(cat) {
+      logCategory = cat;
+      ['body', 'cardio', 'strength', 'sleep'].forEach((c) => {
+        const form = document.getElementById(`form-${c}`);
+        const btn = document.getElementById(`cat-btn-${c}`);
+        if (c === cat) {
+          form.classList.remove('hidden');
+          btn.classList.add('bg-sky-500/20', 'border-sky-400', 'text-sky-300');
+          btn.classList.remove('bg-slate-900', 'border-slate-800', 'text-slate-400');
+        } else {
+          form.classList.add('hidden');
+          btn.classList.remove('bg-sky-500/20', 'border-sky-400', 'text-sky-300');
+          btn.classList.add('bg-slate-900', 'border-slate-800', 'text-slate-400');
+        }
+      });
+    }
+
+    function prefillBodyForm() {
+      const p = appState.profiles[logFormUser];
+      document.getElementById('log-height').value = p.height;
+      document.getElementById('log-weight').value = p.weight;
+      updateLiveBmiPreview();
+    }
+
+    function updateLiveBmiPreview() {
+      const h = parseFloat(document.getElementById('log-height').value);
+      const w = parseFloat(document.getElementById('log-weight').value);
+      if (!h || !w) return;
+      const bmi = calculateBMI(w, h);
+      const status = getBMIStatus(bmi);
+      document.getElementById('preview-bmi-val').textContent = bmi;
+      const badge = document.getElementById('preview-bmi-badge');
+      badge.textContent = status.label;
+      badge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold border ${status.badgeClass}`;
+      document.getElementById('preview-ideal-weight').textContent = getIdealWeightRange(h);
+    }
+
+    function submitBodyLog(e) {
+      e.preventDefault();
+      const date = document.getElementById('log-date').value || getTodayStr(0);
+      const height = parseFloat(document.getElementById('log-height').value);
+      const weight = parseFloat(document.getElementById('log-weight').value);
+
+      appState.profiles[logFormUser].height = height;
+      appState.profiles[logFormUser].weight = weight;
+
+      appState.records.push({
+        id: 'rec_' + Date.now(),
+        userId: logFormUser,
+        type: 'body',
+        date,
+        height,
+        weight
+      });
+
+      saveState();
+      showToast(`已更新 ${appState.profiles[logFormUser].name} 的身高體重與 BMI`);
+      switchTab('dashboard');
+    }
+
+    function submitCardioLog(e) {
+      e.preventDefault();
+      const date = document.getElementById('log-date').value || getTodayStr(0);
+      const subType = document.getElementById('log-cardio-type').value;
+      const minutes = parseInt(document.getElementById('log-cardio-mins').value, 10);
+      const note = document.getElementById('log-cardio-note').value.trim();
+
+      appState.records.push({
+        id: 'rec_' + Date.now(),
+        userId: logFormUser,
+        type: 'cardio',
+        date,
+        subType,
+        minutes,
+        note
+      });
+
+      document.getElementById('log-cardio-note').value = '';
+      saveState();
+      showToast(`已新增 ${appState.profiles[logFormUser].name} 有氧運動 ${minutes} 分鐘`);
+      switchTab('dashboard');
+    }
+
+    function clearMuscleSelection() {
+      document.querySelectorAll('input[name="muscles"]').forEach((cb) => (cb.checked = false));
+    }
+
+    function submitStrengthLog(e) {
+      e.preventDefault();
+      const checked = Array.from(document.querySelectorAll('input[name="muscles"]:checked')).map((cb) => cb.value);
+      if (checked.length === 0) {
+        showToast('請至少勾選一個訓練肌群部位！');
+        return;
+      }
+
+      const date = document.getElementById('log-date').value || getTodayStr(0);
+      const minutes = parseInt(document.getElementById('log-strength-mins').value, 10) || 45;
+      const note = document.getElementById('log-strength-note').value.trim();
+
+      appState.records.push({
+        id: 'rec_' + Date.now(),
+        userId: logFormUser,
+        type: 'strength',
+        date,
+        muscles: checked,
+        minutes,
+        note
+      });
+
+      clearMuscleSelection();
+      document.getElementById('log-strength-note').value = '';
+      saveState();
+      showToast(`已紀錄 ${appState.profiles[logFormUser].name} 肌力訓練 (${checked.join('、')})`);
+      switchTab('dashboard');
+    }
+
+    function syncSleepInput(val) {
+      const hrs = parseFloat(val);
+      document.getElementById('sleep-slider-display').textContent = hrs.toFixed(1);
+      const badge = document.getElementById('sleep-preview-badge');
+      if (hrs >= 7 && hrs <= 9) {
+        badge.textContent = '理想範圍 (7-9h)';
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      } else if (hrs < 7) {
+        badge.textContent = '睡眠偏少 (<7h)';
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+      } else {
+        badge.textContent = '睡眠偏長 (>9h)';
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30';
+      }
+    }
+
+    function submitSleepLog(e) {
+      e.preventDefault();
+      const date = document.getElementById('log-date').value || getTodayStr(0);
+      const hours = parseFloat(document.getElementById('log-sleep-range').value);
+      const note = document.getElementById('log-sleep-note').value.trim();
+
+      appState.records.push({
+        id: 'rec_' + Date.now(),
+        userId: logFormUser,
+        type: 'sleep',
+        date,
+        hours,
+        note
+      });
+
+      document.getElementById('log-sleep-note').value = '';
+      saveState();
+      showToast(`已紀錄 ${appState.profiles[logFormUser].name} 睡眠 ${hours} 小時`);
+      switchTab('dashboard');
+    }
+
+    // ==================== 10. COMPOUND QUERY & ANALYTICS ====================
+    function handleRangePresetChange() {
+      const val = document.getElementById('filter-range').value;
+      const customBox = document.getElementById('custom-date-box');
+      if (val === 'custom') {
+        customBox.classList.remove('hidden');
+        customBox.classList.add('grid');
+      } else {
+        customBox.classList.add('hidden');
+        customBox.classList.remove('grid');
+      }
+      runCompoundQuery();
+    }
+
+    function toggleMuscleFilterVisibility() {
+      const fType = document.getElementById('filter-type').value;
+      const fMuscle = document.getElementById('filter-muscle');
+      if (fType !== 'all' && fType !== 'strength') {
+        fMuscle.value = 'all';
+        fMuscle.disabled = true;
+        fMuscle.classList.add('opacity-50');
+      } else {
+        fMuscle.disabled = false;
+        fMuscle.classList.remove('opacity-50');
+      }
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-user').value = 'all';
+      document.getElementById('filter-type').value = 'all';
+      document.getElementById('filter-range').value = 'week';
+      document.getElementById('filter-muscle').value = 'all';
+      document.getElementById('filter-muscle').disabled = false;
+      document.getElementById('filter-muscle').classList.remove('opacity-50');
+      document.getElementById('custom-date-box').classList.add('hidden');
+      runCompoundQuery();
+    }
+
+    function runCompoundQuery() {
+      const fUserSel = document.getElementById('filter-user');
+      fUserSel.options[0].text = `全部人員 (${appState.profiles.me.name} + ${appState.profiles.partner.name})`;
+      fUserSel.options[1].text = `僅限：${appState.profiles.me.name}`;
+      fUserSel.options[2].text = `僅限：${appState.profiles.partner.name}`;
+
+      const fUser = fUserSel.value;
+      const fType = document.getElementById('filter-type').value;
+      const fRange = document.getElementById('filter-range').value;
+      const fMuscle = document.getElementById('filter-muscle').value;
+
+      let startDate = '1970-01-01';
+      let endDate = '2999-12-31';
+
+      if (fRange === 'week') {
+        startDate = getWeekStartStr();
+      } else if (fRange === 'month') {
+        startDate = getTodayStr(-30);
+      } else if (fRange === 'custom') {
+        startDate = document.getElementById('filter-start-date').value || '1970-01-01';
+        endDate = document.getElementById('filter-end-date').value || '2999-12-31';
+      }
+
+      const filtered = appState.records
+        .filter((r) => {
+          if (fUser !== 'all' && r.userId !== fUser) return false;
+          if (fType !== 'all' && r.type !== fType) return false;
+          if (r.date < startDate || r.date > endDate) return false;
+          if (fMuscle !== 'all') {
+            if (r.type !== 'strength') return false;
+            if (!r.muscles || !r.muscles.includes(fMuscle)) return false;
+          }
+          return true;
+        })
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      // Compute KPIs
+      const cardioMins = filtered
+        .filter((r) => r.type === 'cardio')
+        .reduce((sum, r) => sum + Number(r.minutes || 0), 0);
+
+      const strengthLogs = filtered.filter((r) => r.type === 'strength');
+      const sleepLogs = filtered.filter((r) => r.type === 'sleep');
+      const avgSleep = sleepLogs.length
+        ? (sleepLogs.reduce((sum, r) => sum + Number(r.hours || 0), 0) / sleepLogs.length).toFixed(1)
+        : '--';
+
+      document.getElementById('stat-count').textContent = `${filtered.length} 筆`;
+      document.getElementById('stat-cardio').textContent = `${cardioMins} 分鐘`;
+      document.getElementById('stat-strength').textContent = `${strengthLogs.length} 次`;
+      document.getElementById('stat-sleep').textContent = avgSleep === '--' ? '-- 小時' : `${avgSleep} 小時`;
+
+      // Render Muscle Distribution Chart
+      const allMuscleNames = ['背部', '肩膀', '手臂', '腹部', '臀部', '腿部', '核心'];
+      const muscleCounts = allMuscleNames.map((mName) =>
+        strengthLogs.filter((l) => (l.muscles || []).includes(mName)).length
+      );
+
+      const mCtx = document.getElementById('queryMuscleChart').getContext('2d');
+      if (muscleChartInstance) muscleChartInstance.destroy();
+      muscleChartInstance = new Chart(mCtx, {
+        type: 'doughnut',
+        data: {
+          labels: allMuscleNames,
+          datasets: [{
+            data: muscleCounts,
+            backgroundColor: [
+              '#0EA5E9', '#38BDF8', '#818CF8', '#A78BFA', '#F43F5E', '#34D399', '#FBBF24'
+            ],
+            borderColor: '#0F172A',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: '#CBD5E1', font: { size: 11 }, boxWidth: 12 }
+            }
+          }
+        }
+      });
+
+      // Render Records Feed
+      const listEl = document.getElementById('query-records-list');
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-10 text-slate-500 text-sm">
+            沒有符合目前複合篩選條件的紀錄，請嘗試放寬條件或新增紀錄。
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map((r) => {
+        const who = appState.profiles[r.userId];
+        const whoBadge = r.userId === 'me'
+          ? 'bg-sky-500/20 text-sky-300 border-sky-500/30'
+          : 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+
+        let contentHtml = '';
+        if (r.type === 'body') {
+          const bmi = calculateBMI(r.weight, r.height);
+          contentHtml = `<span class="text-white font-semibold">體態紀錄</span> · 身高 ${r.height}cm / 體重 <span class="font-mono text-sky-300">${r.weight}kg</span> (BMI ${bmi})`;
+        } else if (r.type === 'cardio') {
+          contentHtml = `<span class="text-emerald-300 font-semibold">有氧運動 (${r.subType})</span> · <span class="font-mono text-white">${r.minutes} 分鐘</span> ${r.note ? `<span class="text-slate-400 text-xs">(${r.note})</span>` : ''}`;
+        } else if (r.type === 'strength') {
+          const mTags = (r.muscles || []).map((m) => `<span class="px-1.5 py-0.5 rounded bg-indigo-500/25 text-indigo-200 text-[11px]">${m}</span>`).join(' ');
+          contentHtml = `<span class="text-indigo-300 font-semibold">肌力訓練</span> · ${mTags} ${r.note ? `<span class="text-slate-400 text-xs">(${r.note})</span>` : ''}`;
+        } else if (r.type === 'sleep') {
+          contentHtml = `<span class="text-violet-300 font-semibold">每日睡眠</span> · <span class="font-mono text-white">${r.hours} 小時</span> ${r.note ? `<span class="text-slate-400 text-xs">(${r.note})</span>` : ''}`;
+        }
+
+        return `
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[11px] font-bold border ${whoBadge}">${who.name}</span>
+                <span class="text-xs font-mono text-slate-400">${r.date}</span>
+              </div>
+              <div class="text-xs sm:text-sm text-slate-200">${contentHtml}</div>
+            </div>
+            <button onclick="deleteRecord('${r.id}')" title="刪除此筆紀錄" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function deleteRecord(recId) {
+      appState.records = appState.records.filter((r) => r.id !== recId);
+      saveState();
+      runCompoundQuery();
+      showToast('已刪除該筆紀錄');
+    }
+
+    // ==================== 11. PERSONAL PROFILE PAGE ====================
+    function selectProfileTab(userKey) {
+      profileTabUser = userKey;
+      renderProfilePage();
+    }
+
+    function renderProfilePage() {
+      document.getElementById('profile-btn-label-me').textContent = `${appState.profiles.me.name} 的個人檔案`;
+      document.getElementById('profile-btn-label-partner').textContent = `${appState.profiles.partner.name} 的個人檔案`;
+
+      const tabMe = document.getElementById('profile-tab-me');
+      const tabPartner = document.getElementById('profile-tab-partner');
+      if (profileTabUser === 'me') {
+        tabMe.className = 'flex-1 py-3 px-4 rounded-2xl border border-sky-400 bg-sky-500/15 text-sky-300 font-bold text-sm flex items-center justify-center gap-2 transition-all';
+        tabPartner.className = 'flex-1 py-3 px-4 rounded-2xl border border-slate-800 bg-slate-900/70 text-slate-400 font-bold text-sm flex items-center justify-center gap-2 transition-all';
+      } else {
+        tabPartner.className = 'flex-1 py-3 px-4 rounded-2xl border border-rose-400 bg-rose-500/15 text-rose-300 font-bold text-sm flex items-center justify-center gap-2 transition-all';
+        tabMe.className = 'flex-1 py-3 px-4 rounded-2xl border border-slate-800 bg-slate-900/70 text-slate-400 font-bold text-sm flex items-center justify-center gap-2 transition-all';
+      }
+
+      const p = appState.profiles[profileTabUser];
+      const bmi = calculateBMI(p.weight, p.height);
+      const status = getBMIStatus(bmi);
+
+      const avatar = document.getElementById('profile-avatar-circle');
+      avatar.textContent = p.name.charAt(0);
+      avatar.className = profileTabUser === 'me'
+        ? 'w-14 h-14 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-2xl font-bold text-sky-300'
+        : 'w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-2xl font-bold text-rose-300';
+
+      document.getElementById('profile-header-name').textContent = p.name;
+      document.getElementById('profile-header-meta').textContent = `${p.height} cm · ${p.weight} kg · BMI ${bmi}`;
+      const pill = document.getElementById('profile-bmi-pill');
+      pill.textContent = `${status.label} (適中 18.5-23.9)`;
+      pill.className = `px-3 py-1.5 rounded-xl text-xs font-bold border ${status.badgeClass}`;
+
+      // Fill inputs
+      document.getElementById('prof-name').value = p.name;
+      document.getElementById('prof-gender').value = p.gender;
+      document.getElementById('prof-height').value = p.height;
+      document.getElementById('prof-weight').value = p.weight;
+      document.getElementById('prof-water-mult').value = String(p.waterMult);
+      document.getElementById('prof-protein-mult').value = String(p.proteinMult);
+
+      // Personal feed
+      document.getElementById('profile-history-title').textContent = `${p.name} 的近期身體與運動足跡`;
+      const personalLogs = appState.records
+        .filter((r) => r.userId === profileTabUser)
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 8);
+
+      const feedEl = document.getElementById('profile-personal-feed');
+      feedEl.innerHTML = personalLogs.map((r) => {
+        let desc = '';
+        if (r.type === 'body') desc = `身高 ${r.height}cm · 體重 ${r.weight}kg (BMI ${calculateBMI(r.weight, r.height)})`;
+        if (r.type === 'cardio') desc = `有氧：${r.subType} ${r.minutes} 分鐘`;
+        if (r.type === 'strength') desc = `肌力：${(r.muscles || []).join('、')}`;
+        if (r.type === 'sleep') desc = `睡眠：${r.hours} 小時`;
+
+        return `
+          <div class="flex items-center justify-between py-2 px-3 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs">
+            <span class="text-slate-200">${desc}</span>
+            <span class="font-mono text-slate-400">${r.date}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function saveProfileSettings(e) {
+      e.preventDefault();
+      const p = appState.profiles[profileTabUser];
+      p.name = document.getElementById('prof-name').value.trim() || p.name;
+      p.gender = document.getElementById('prof-gender').value;
+      p.height = parseFloat(document.getElementById('prof-height').value);
+      p.weight = parseFloat(document.getElementById('prof-weight').value);
+      p.waterMult = parseInt(document.getElementById('prof-water-mult').value, 10);
+      p.proteinMult = parseFloat(document.getElementById('prof-protein-mult').value);
+
+      appState.records.push({
+        id: 'rec_' + Date.now(),
+        userId: profileTabUser,
+        type: 'body',
+        date: getTodayStr(0),
+        height: p.height,
+        weight: p.weight
+      });
+
+      saveState();
+      refreshAllUI();
+      showToast(`已儲存 ${p.name} 的個人檔案設定`);
+    }
+
+    function resetDemoData() {
+      appState = createDefaultState();
+      saveState();
+      refreshAllUI();
+      showToast('已重置為預設範例資料');
+    }
+
+    // ==================== 12. PWA MODAL & INITIALIZATION ====================
+    function openPwaModal() {
+      const modal = document.getElementById('pwa-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closePwaModal() {
+      const modal = document.getElementById('pwa-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function refreshAllUI() {
+      document.getElementById('nav-name-me').textContent = appState.profiles.me.name;
+      document.getElementById('nav-name-partner').textContent = appState.profiles.partner.name;
+      if (activeTab === 'dashboard') renderDashboard();
+      if (activeTab === 'log') setLogFormUser(logFormUser);
+      if (activeTab === 'query') runCompoundQuery();
+      if (activeTab === 'profile') renderProfilePage();
+    }
+
+    // Expose functions to global window for inline HTML event handlers
+    Object.assign(window, {
+      setActiveContext,
+      openSyncModal,
+      closeSyncModal,
+      handleJoinRoomSubmit,
+      copyShareInvite,
+      openPwaModal,
+      closePwaModal,
+      syncActionUser,
+      quickAddWater,
+      addCustomWater,
+      quickAddProtein,
+      addCustomProtein,
+      switchTab,
+      setLogFormUser,
+      setLogCategory,
+      updateLiveBmiPreview,
+      submitBodyLog,
+      submitCardioLog,
+      clearMuscleSelection,
+      submitStrengthLog,
+      syncSleepInput,
+      submitSleepLog,
+      handleRangePresetChange,
+      toggleMuscleFilterVisibility,
+      resetFilters,
+      runCompoundQuery,
+      deleteRecord,
+      selectProfileTab,
+      saveProfileSettings,
+      resetDemoData
+    });
+
+    // Boot Application
+    window.addEventListener('DOMContentLoaded', () => {
+      setupPwaAssets();
+      document.getElementById('log-date').value = getTodayStr(0);
+      document.getElementById('filter-start-date').value = getTodayStr(-7);
+      document.getElementById('filter-end-date').value = getTodayStr(0);
+
+      setActiveContext('both');
+      setLogFormUser('me');
+      setLogCategory('body');
+      lucide.createIcons();
+      initCloudSync();
+    });
+  </script>
+</body>
+</html>
