@@ -118,10 +118,28 @@
       cursor: pointer;
     }
 
-    /* Date input dark theme icon fix */
+    /* Date input width & iOS Safari overflow fix */
+    input, select, textarea {
+      box-sizing: border-box;
+      max-width: 100%;
+    }
+    input[type="date"] {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      min-height: 42px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input[type="date"]::-webkit-date-and-time-value {
+      text-align: left;
+      min-width: 0;
+    }
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1) brightness(0.8);
       cursor: pointer;
+      margin-left: 0;
     }
 
     /* Mobile App-Style Bottom Dock */
@@ -389,7 +407,8 @@
               <input
                 type="number"
                 min="0"
-                step="100"
+                step="any"
+                inputmode="decimal"
                 id="vault-total-deposit-input"
                 oninput="handleVaultTotalDepositInput(this.value)"
                 class="w-full bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl pl-8 pr-3.5 py-2.5 text-lg font-mono font-bold text-white focus:outline-none"
@@ -413,7 +432,7 @@
             </div>
 
             <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
-              <div class="text-[11px] text-slate-400">細項目標總和</div>
+              <div class="text-[11px] text-slate-400">目前已累積總和</div>
               <div id="vault-kpi-allocated" class="text-lg sm:text-xl font-mono font-bold text-sky-400 mt-1">$0</div>
               <div id="vault-kpi-goal-count" class="text-[11px] text-slate-500 mt-0.5">共 0 項目標</div>
             </div>
@@ -421,7 +440,7 @@
             <div id="vault-unallocated-card" class="bg-slate-950/90 border border-emerald-500/30 rounded-xl p-3.5">
               <div id="vault-unallocated-label" class="text-[11px] text-emerald-300 font-semibold">尚待分配</div>
               <div id="vault-kpi-unallocated" class="text-lg sm:text-xl font-mono font-bold text-emerald-400 mt-1">$0</div>
-              <div id="vault-unallocated-sub" class="text-[11px] text-slate-400 mt-0.5">可繼續分配至目標</div>
+              <div id="vault-unallocated-sub" class="text-[11px] text-slate-400 mt-0.5">共同存款扣除已累積</div>
             </div>
           </div>
         </div>
@@ -432,9 +451,9 @@
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
           </div>
           <div class="space-y-1 text-xs sm:text-sm">
-            <div class="font-bold text-rose-200">小豬豬餘額不足，請檢查預算</div>
+            <div class="font-bold text-rose-200">小豬豬餘額不足，請檢查分配金額</div>
             <p class="text-rose-200/90 text-xs leading-relaxed">
-              目前所有細項目標金額相加已超出共同總存款，小豬豬不夠啦! <span id="vault-exceed-amount" class="font-mono font-bold text-white underline decoration-rose-400">$0</span>。請調降部分目標金額或增加共同總存款，以免分配超支。
+              目前所有細項目標的「已累積金額」相加已超出共同總存款 <span id="vault-exceed-amount" class="font-mono font-bold text-white underline decoration-rose-400">$0</span>。請調降部分已累積金額或增加共同總存款。
             </p>
           </div>
         </div>
@@ -444,15 +463,15 @@
           <div class="flex items-center gap-2">
             <i data-lucide="wallet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
             <span>
-              目前細項分配小於共同總存款，尚有 <strong id="vault-banner-unallocated" class="font-mono text-emerald-300 text-sm">$0</strong> <strong>尚待分配</strong>。
+              共同總存款扣除目前已累積金額後，尚有 <strong id="vault-banner-unallocated" class="font-mono text-emerald-300 text-sm">$0</strong> <strong>尚待分配</strong>。
             </span>
           </div>
-          <span class="text-[11px] text-emerald-300/80 hidden sm:inline">可建立新目標或調整現有目標金額</span>
+          <span class="text-[11px] text-emerald-300/80 hidden sm:inline">可將金額分配至各儲蓄目標</span>
         </div>
       </div>
 
       <!-- Create / Edit Goal Form Card -->
-      <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+      <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-4 overflow-hidden">
         <div class="flex items-center justify-between">
           <h3 id="vault-form-title" class="text-base font-bold text-white flex items-center gap-2">
             <i data-lucide="target" class="w-5 h-5 text-sky-400"></i>
@@ -468,7 +487,7 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Required: Goal Item -->
-            <div>
+            <div class="min-w-0">
               <label for="vault-goal-item" class="block text-xs font-medium text-slate-300 mb-1.5">
                 目標 item <span class="text-rose-400">*</span>
               </label>
@@ -478,12 +497,12 @@
                 required
                 maxlength="30"
                 placeholder="例如：日本旅遊基金、婚禮基金"
-                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none"
+                class="w-full min-w-0 bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none"
               />
             </div>
 
             <!-- Required: Target Amount -->
-            <div>
+            <div class="min-w-0">
               <label for="vault-goal-target" class="block text-xs font-medium text-slate-300 mb-1.5">
                 目標金額 (NT$) <span class="text-rose-400">*</span>
               </label>
@@ -492,27 +511,28 @@
                 id="vault-goal-target"
                 required
                 min="1"
-                step="100"
+                step="any"
+                inputmode="decimal"
                 oninput="updateLiveVaultDraftCheck()"
                 placeholder="例如 120000"
-                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+                class="w-full min-w-0 bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
               />
             </div>
 
             <!-- Optional: Target Completion Date -->
-            <div>
+            <div class="min-w-0">
               <label for="vault-goal-deadline" class="block text-xs font-medium text-slate-300 mb-1.5">
                 預計完成日期 <span class="text-slate-500">(選填)</span>
               </label>
               <input
                 type="date"
                 id="vault-goal-deadline"
-                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+                class="w-full min-w-0 max-w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
               />
             </div>
 
             <!-- Optional: Current Saved Progress -->
-            <div>
+            <div class="min-w-0">
               <label for="vault-goal-saved" class="block text-xs font-medium text-slate-300 mb-1.5">
                 目前已累積金額 (NT$) <span class="text-slate-500">(選填)</span>
               </label>
@@ -520,9 +540,11 @@
                 type="number"
                 id="vault-goal-saved"
                 min="0"
-                step="100"
+                step="any"
+                inputmode="decimal"
+                oninput="updateLiveVaultDraftCheck()"
                 placeholder="預設 0"
-                class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+                class="w-full min-w-0 bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
               />
             </div>
           </div>
@@ -539,7 +561,7 @@
             </div>
 
             <div id="vault-draft-preview-text" class="text-xs font-mono text-slate-400">
-              輸入目標金額將即時檢查總存款預算
+              輸入已累積金額將即時試算尚待分配餘額
             </div>
           </div>
 
@@ -809,7 +831,7 @@
 
     <!-- ==================== TAB 2: QUICK LOGGING (新增紀錄) ==================== -->
     <section id="view-log" class="hidden space-y-5">
-      <div class="glass-card rounded-2xl p-5 sm:p-6">
+      <div class="glass-card rounded-2xl p-5 sm:p-6 overflow-hidden">
         <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
           <div>
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -848,21 +870,21 @@
         </div>
 
         <!-- Common Date Input -->
-        <div class="mb-4">
-          <label class="block text-xs font-medium text-slate-300 mb-1.5">紀錄日期</label>
-          <input type="date" id="log-date" class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+        <div class="mb-4 min-w-0">
+          <label for="log-date" class="block text-xs font-medium text-slate-300 mb-1.5">紀錄日期</label>
+          <input type="date" id="log-date" class="w-full min-w-0 max-w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
         </div>
 
         <!-- FORM A: BODY WEIGHT & HEIGHT -->
         <form id="form-body" onsubmit="submitBodyLog(event)" class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">身高 (cm)</label>
-              <input type="number" step="0.1" id="log-height" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-sky-500" placeholder="例如 175.0" oninput="updateLiveBmiPreview()" />
+              <input type="number" step="0.1" id="log-height" required class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-sky-500" placeholder="例如 175.0" oninput="updateLiveBmiPreview()" />
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">體重 (kg)</label>
-              <input type="number" step="0.1" id="log-weight" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-sky-500" placeholder="例如 68.5" oninput="updateLiveBmiPreview()" />
+              <input type="number" step="0.1" id="log-weight" required class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-sky-500" placeholder="例如 68.5" oninput="updateLiveBmiPreview()" />
             </div>
           </div>
 
@@ -888,9 +910,9 @@
         <!-- FORM B: CARDIO EXERCISE -->
         <form id="form-cardio" onsubmit="submitCardioLog(event)" class="hidden space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">有氧運動項目</label>
-              <select id="log-cardio-type" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+              <select id="log-cardio-type" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
                 <option value="慢跑 / 路跑">慢跑 / 路跑</option>
                 <option value="快走 / 坡度健走">快走 / 坡度健走</option>
                 <option value="室內飛輪 / 單車">室內飛輪 / 單車</option>
@@ -900,9 +922,9 @@
                 <option value="跳繩 / 登階機">跳繩 / 登階機</option>
               </select>
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">運動時間 (分鐘)</label>
-              <input type="number" min="1" max="600" id="log-cardio-mins" required value="40" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-emerald-500" />
+              <input type="number" min="1" max="600" id="log-cardio-mins" required value="40" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-base font-mono text-white focus:outline-none focus:border-emerald-500" />
             </div>
           </div>
 
@@ -985,13 +1007,13 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">訓練時長 (分鐘，選填)</label>
-              <input type="number" id="log-strength-mins" value="50" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm font-mono text-white focus:outline-none focus:border-indigo-500" />
+              <input type="number" id="log-strength-mins" value="50" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm font-mono text-white focus:outline-none focus:border-indigo-500" />
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">訓練動作 / 備註</label>
-              <input type="text" id="log-strength-note" placeholder="例如：深蹲、硬舉、滑輪下拉 4組" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+              <input type="text" id="log-strength-note" placeholder="例如：深蹲、硬舉、滑輪下拉 4組" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
             </div>
           </div>
 
@@ -1038,7 +1060,7 @@
     <!-- ==================== TAB 3: COMPOUND QUERY & STATS (複合查詢與統計) ==================== -->
     <section id="view-query" class="hidden space-y-5">
       <!-- Compound Filter Panel -->
-      <div class="glass-card rounded-2xl p-5 space-y-4">
+      <div class="glass-card rounded-2xl p-5 space-y-4 overflow-hidden">
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
             <i data-lucide="filter" class="w-5 h-5 text-sky-400"></i>
@@ -1050,18 +1072,18 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div>
+          <div class="min-w-0">
             <label class="block text-[11px] text-slate-400 mb-1">對象篩選</label>
-            <select id="filter-user" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+            <select id="filter-user" onchange="runCompoundQuery()" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
               <option value="all">全部人員 (Chumi + Weeki)</option>
               <option value="me">僅限：Chumi</option>
               <option value="partner">僅限：Weeki</option>
             </select>
           </div>
 
-          <div>
+          <div class="min-w-0">
             <label class="block text-[11px] text-slate-400 mb-1">紀錄類型</label>
-            <select id="filter-type" onchange="toggleMuscleFilterVisibility(); runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+            <select id="filter-type" onchange="toggleMuscleFilterVisibility(); runCompoundQuery()" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
               <option value="all">全部類型</option>
               <option value="body">身高體重 / BMI</option>
               <option value="cardio">有氧運動</option>
@@ -1070,9 +1092,9 @@
             </select>
           </div>
 
-          <div>
+          <div class="min-w-0">
             <label class="block text-[11px] text-slate-400 mb-1">時間區間</label>
-            <select id="filter-range" onchange="handleRangePresetChange()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+            <select id="filter-range" onchange="handleRangePresetChange()" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
               <option value="week">本週紀錄</option>
               <option value="month">近 30 天</option>
               <option value="all">所有歷史紀錄</option>
@@ -1080,9 +1102,9 @@
             </select>
           </div>
 
-          <div>
+          <div class="min-w-0">
             <label class="block text-[11px] text-slate-400 mb-1">肌力部位篩選</label>
-            <select id="filter-muscle" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+            <select id="filter-muscle" onchange="runCompoundQuery()" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
               <option value="all">不限肌群部位</option>
               <option value="背部">背部</option>
               <option value="肩膀">肩膀</option>
@@ -1095,14 +1117,14 @@
           </div>
         </div>
 
-        <div id="custom-date-box" class="hidden grid-cols-2 gap-3 pt-2 border-t border-slate-800/80">
-          <div>
+        <div id="custom-date-box" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-800/80">
+          <div class="min-w-0">
             <label class="block text-[11px] text-slate-400 mb-1">開始日期</label>
-            <input type="date" id="filter-start-date" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-white" />
+            <input type="date" id="filter-start-date" onchange="runCompoundQuery()" class="w-full min-w-0 max-w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-white" />
           </div>
-          <div>
+          <div class="min-w-0">
             <label class="block text-[11px] text-slate-400 mb-1">結束日期</label>
-            <input type="date" id="filter-end-date" onchange="runCompoundQuery()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-white" />
+            <input type="date" id="filter-end-date" onchange="runCompoundQuery()" class="w-full min-w-0 max-w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-white" />
           </div>
         </div>
 
@@ -1164,7 +1186,7 @@
       </div>
 
       <!-- Upload card -->
-      <div class="glass-card rounded-2xl p-5 space-y-4">
+      <div class="glass-card rounded-2xl p-5 space-y-4 overflow-hidden">
         <div class="flex items-center justify-between gap-2">
           <h3 class="text-base font-bold text-white flex items-center gap-2">
             <i data-lucide="camera" class="w-5 h-5 text-sky-400"></i>
@@ -1177,17 +1199,17 @@
 
         <form onsubmit="submitAlbumPhoto(event)" class="space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">拍攝日期</label>
-              <input type="date" id="album-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+              <input type="date" id="album-date" class="w-full min-w-0 max-w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">當時體重 kg <span class="text-slate-500">(選填)</span></label>
-              <input type="number" step="0.1" id="album-weight" placeholder="例如 68.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+              <input type="number" step="0.1" id="album-weight" placeholder="例如 68.5" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">備註 <span class="text-slate-500">(選填)</span></label>
-              <input type="text" id="album-note" maxlength="40" placeholder="例如：正面、第 4 週" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500" />
+              <input type="text" id="album-note" maxlength="40" placeholder="例如：正面、第 4 週" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500" />
             </div>
           </div>
 
@@ -1261,36 +1283,36 @@
 
         <form onsubmit="saveProfileSettings(event)" class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">顯示暱稱</label>
-              <input type="text" id="prof-name" required maxlength="10" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500" />
+              <input type="text" id="prof-name" required maxlength="10" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500" />
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">性別</label>
-              <select id="prof-gender" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
+              <select id="prof-gender" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
                 <option value="male">男性</option>
                 <option value="female">女性</option>
               </select>
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">目前身高 (cm)</label>
-              <input type="number" step="0.1" id="prof-height" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+              <input type="number" step="0.1" id="prof-height" required class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">目前體重 (kg)</label>
-              <input type="number" step="0.1" id="prof-weight" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+              <input type="number" step="0.1" id="prof-weight" required class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">每日飲水係數 (ml / 每公斤體重)</label>
-              <select id="prof-water-mult" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
+              <select id="prof-water-mult" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
                 <option value="30">30 ml/kg (基礎日常)</option>
                 <option value="35">35 ml/kg (標準建議)</option>
                 <option value="40">40 ml/kg (高運動量/流汗多)</option>
               </select>
             </div>
-            <div>
+            <div class="min-w-0">
               <label class="block text-xs font-medium text-slate-300 mb-1.5">每日蛋白質係數 (g / 每公斤體重)</label>
-              <select id="prof-protein-mult" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
+              <select id="prof-protein-mult" class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-sky-500">
                 <option value="1.2">1.2 g/kg (一般健康維持)</option>
                 <option value="1.6">1.6 g/kg (規律健身/增肌減脂)</option>
                 <option value="2.0">2.0 g/kg (高強度重訓期)</option>
@@ -1609,7 +1631,6 @@
     let unsubscribeRoom = null;
     let isRemoteApplying = false;
 
-    // ===== 雲端同步設定：到 Firebase 建立專案後，把 firebaseConfig 的內容貼在這裡 =====
     const MY_FIREBASE_CONFIG = {
       apiKey: 'AIzaSyAB58KsG7yMW0zUyLanoiVvPyoN128lPao',
       authDomain: 'ume-0419.firebaseapp.com',
@@ -1619,7 +1640,6 @@
       appId: '1:328287607265:web:64d490bb4c6cbbb7b79aa0'
     };
 
-    // 沒有輸入配對碼時只使用本機資料，不會連到任何雲端房間
     const LOCAL_ROOM = 'local';
     const LEGACY_DEFAULT_ROOM = 'Chumi0419weeki';
 
@@ -1641,7 +1661,6 @@
       return LOCAL_ROOM;
     }
 
-    // 第一次設定配對碼時，把「本機」期間記錄的訊息與照片改掛到新的房間
     function adoptLocalRoom(newCode) {
       messages.forEach((m) => { if (m.room === LOCAL_ROOM) { m.room = newCode; m.synced = false; } });
       persistMessages();
@@ -1652,7 +1671,6 @@
 
     let currentRoomCode = getInitialRoomCode();
 
-    // 以「本地時區」格式化日期（原本用 toISOString 會變成 UTC，台灣凌晨會差一天）
     function formatLocalDate(d) {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1908,7 +1926,6 @@
 
     async function initCloudSync() {
       try {
-        // 1) 平台注入的設定（例如 Canvas）；2) 否則使用上方 MY_FIREBASE_CONFIG（自己貼）
         let firebaseConfig = null;
         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
           firebaseConfig = JSON.parse(__firebase_config);
@@ -1923,7 +1940,6 @@
         auth = getAuth(app);
         db = getFirestore(app);
 
-        // 平台（例如 Canvas）提供的登入憑證；否則使用 Google 登入
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
           currentUser = auth.currentUser;
@@ -2148,8 +2164,6 @@
     }
 
     // ==================== 6. NAVIGATION & CONTEXT SWITCHERS ====================
-
-    // 【修正】原本缺少此函式，導致整個 script 在 Object.assign 時報錯、所有按鈕失效
     function setActiveContext(ctx) {
       activeContext = ctx;
       if (ctx === 'me' || ctx === 'partner') actionTargetUser = ctx;
@@ -2169,7 +2183,6 @@
       if (activeTab === 'dashboard') renderDashboard();
     }
 
-    // 【修正】原本缺少此函式（水份/蛋白質卡片的對象下拉選單）
     function syncActionUser(userKey) {
       actionTargetUser = userKey;
       renderHydrationAndProtein();
@@ -2304,7 +2317,7 @@
             <div class="text-lg font-mono font-bold text-amber-400 mt-0.5">${formatCurrency(totalDeposit)}</div>
           </div>
           <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3">
-            <div class="text-[11px] text-slate-400">已規劃目標總和</div>
+            <div class="text-[11px] text-slate-400">目前已累積總和</div>
             <div class="text-lg font-mono font-bold text-sky-400 mt-0.5">${formatCurrency(allocatedSum)}</div>
           </div>
           <div class="bg-slate-900/85 border ${overBudget ? 'border-rose-500/40' : 'border-emerald-500/30'} rounded-xl p-3">
@@ -2317,13 +2330,13 @@
 
         ${overBudget ? `
           <div class="mb-3 p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-200 font-medium">
-            餘額不足，請檢查預算（細項目標總和已超出共同總存款 ${formatCurrency(exceedAmount)}）
+            餘額不足，請檢查分配金額（目前已累積金額總和已超出共同總存款 ${formatCurrency(exceedAmount)}）
           </div>
         ` : ''}
 
         <div class="space-y-2.5">
           ${topGoals.length === 0 ? `
-            <div class="text-xs text-slate-400 py-2">尚未建立儲蓄目標，點擊「管理小豬豬們」新增第一個目標 item。</div>
+            <div class="text-xs text-slate-400 py-2">尚未建立儲蓄目標，點擊「管理小豬豬」新增第一個目標 item。</div>
           ` : topGoals.map((g) => {
             const pct = g.targetAmount > 0 ? Math.min(100, Math.round((Number(g.savedAmount || 0) / Number(g.targetAmount)) * 100)) : 0;
             return `
@@ -2358,10 +2371,11 @@
         .replace(/"/g, '&quot;');
     }
 
+    // 尚待分配 = 共同總存款 - 各項目標「目前已累積金額 (savedAmount)」相加
     function computeVaultAllocation(overrideTotal = null, overrideGoals = null) {
       const totalDeposit = Math.max(0, Number(overrideTotal !== null ? overrideTotal : appState.vaultTotalDeposit || 0));
       const goals = overrideGoals !== null ? overrideGoals : (appState.vaultGoals || []);
-      const allocatedSum = goals.reduce((sum, g) => sum + Math.max(0, Number(g.targetAmount || 0)), 0);
+      const allocatedSum = goals.reduce((sum, g) => sum + Math.max(0, Number(g.savedAmount || 0)), 0);
       const diff = totalDeposit - allocatedSum;
       const overBudget = diff < 0;
       const unallocated = diff > 0 ? diff : 0;
@@ -2398,7 +2412,7 @@
         unallocLabel.textContent = '超出預算金額';
         unallocEl.className = 'text-lg sm:text-xl font-mono font-bold text-rose-400 mt-1';
         unallocEl.textContent = formatCurrency(exceedAmount);
-        unallocSub.textContent = '餘額不足，請檢查預算';
+        unallocSub.textContent = '已累積總和超出共同存款';
 
         overBanner.classList.remove('hidden');
         exceedVal.textContent = formatCurrency(exceedAmount);
@@ -2409,7 +2423,7 @@
         unallocLabel.textContent = '尚待分配';
         unallocEl.className = 'text-lg sm:text-xl font-mono font-bold text-emerald-400 mt-1';
         unallocEl.textContent = formatCurrency(unallocated);
-        unallocSub.textContent = unallocated > 0 ? '細項小於總存款' : '已全數分配完畢';
+        unallocSub.textContent = unallocated > 0 ? '共同存款扣除已累積' : '已全數分配完畢';
 
         overBanner.classList.add('hidden');
         if (unallocated > 0) {
@@ -2440,18 +2454,18 @@
 
     function updateLiveVaultDraftCheck() {
       const editId = document.getElementById('vault-edit-goal-id').value;
-      const draftTarget = Math.max(0, parseFloat(document.getElementById('vault-goal-target').value) || 0);
+      const draftSaved = Math.max(0, parseFloat(document.getElementById('vault-goal-saved').value) || 0);
       const currentTotal = Math.max(0, parseFloat(document.getElementById('vault-total-deposit-input').value) || appState.vaultTotalDeposit || 0);
 
       const baseGoals = (appState.vaultGoals || []).map((g) => {
         if (editId && g.id === editId) {
-          return { ...g, targetAmount: draftTarget };
+          return { ...g, savedAmount: draftSaved };
         }
         return g;
       });
 
-      if (!editId && draftTarget > 0) {
-        baseGoals.push({ id: '__draft__', targetAmount: draftTarget });
+      if (!editId && draftSaved > 0) {
+        baseGoals.push({ id: '__draft__', savedAmount: draftSaved });
       }
 
       const { allocatedSum, overBudget, exceedAmount, unallocated } = computeVaultAllocation(currentTotal, baseGoals);
@@ -2462,10 +2476,10 @@
 
       if (overBudget) {
         previewText.className = 'text-xs font-mono font-bold text-rose-400';
-        previewText.textContent = `餘額不足，請檢查預算（細項總和 ${formatCurrency(allocatedSum)} 超出 ${formatCurrency(exceedAmount)}）`;
+        previewText.textContent = `餘額不足（已累積總和 ${formatCurrency(allocatedSum)} 超出 ${formatCurrency(exceedAmount)}）`;
       } else {
         previewText.className = 'text-xs font-mono text-emerald-300';
-        previewText.textContent = `細項總和 ${formatCurrency(allocatedSum)} · 尚待分配 ${formatCurrency(unallocated)}`;
+        previewText.textContent = `已累積總和 ${formatCurrency(allocatedSum)} · 尚待分配 ${formatCurrency(unallocated)}`;
       }
     }
 
@@ -2571,15 +2585,26 @@
       e.preventDefault();
       const editId = document.getElementById('vault-edit-goal-id').value;
       const item = document.getElementById('vault-goal-item').value.trim();
-      const targetAmount = parseFloat(document.getElementById('vault-goal-target').value);
+      const rawTarget = String(document.getElementById('vault-goal-target').value || '').trim();
+      const targetAmount = Number(rawTarget);
       const deadline = document.getElementById('vault-goal-deadline').value || '';
-      const savedAmount = Math.max(0, parseFloat(document.getElementById('vault-goal-saved').value) || 0);
+      const rawSaved = String(document.getElementById('vault-goal-saved').value || '').trim();
+      const parsedSaved = rawSaved === '' ? 0 : Number(rawSaved);
       const owner = document.getElementById('vault-goal-owner').value || 'both';
 
-      if (!item || !targetAmount || targetAmount <= 0) {
-        showToast('請填寫有效的目標 item 與目標金額');
+      if (!item) {
+        showToast('請填寫目標 item 名稱');
         return;
       }
+      if (!Number.isFinite(targetAmount) || targetAmount <= 0) {
+        showToast('請填寫大於 0 的目標金額數字');
+        return;
+      }
+      if (!Number.isFinite(parsedSaved) || parsedSaved < 0) {
+        showToast('目前已累積金額請填寫 0 以上的數字');
+        return;
+      }
+      const savedAmount = Math.max(0, parsedSaved);
 
       if (editId) {
         const idx = appState.vaultGoals.findIndex((g) => g.id === editId);
@@ -2612,7 +2637,7 @@
       renderVaultPage();
 
       if (overBudget) {
-        showToast(`餘額不足，請檢查預算（已超出 ${formatCurrency(exceedAmount)}）`);
+        showToast(`餘額不足，請檢查分配金額（已超出 ${formatCurrency(exceedAmount)}）`);
       }
     }
 
@@ -2651,7 +2676,7 @@
       const previewText = document.getElementById('vault-draft-preview-text');
       if (previewText) {
         previewText.className = 'text-xs font-mono text-slate-400';
-        previewText.textContent = '輸入目標金額將即時檢查總存款預算';
+        previewText.textContent = '輸入已累積金額將即時試算尚待分配餘額';
       }
       renderVaultAllocationStatus();
       lucide.createIcons();
@@ -3537,7 +3562,6 @@
     }
 
     // ==================== 11.5 BODY PHOTO ALBUM (體態相簿) ====================
-    // 本機：IndexedDB（容量大）；雲端：每張照片一份獨立 Firestore 文件（避免超過單一文件 1MB 上限）
     let albumUser = 'me';
     let albumPhotos = [];
     let albumPendingFiles = [];
@@ -3934,78 +3958,89 @@
       renderMessageBox();
     }
 
-    function renderMessageBox() {
+    const MSG_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+    const MSG_SOUND_KEY = 'ume_msg_sound_v1';
+    let msgSoundOn = localStorage.getItem(MSG_SOUND_KEY) !== '0';
+
+    function msgDocRef(msg) {
+      return doc(db, 'artifacts', appId, 'public', 'data', 'couple_messages', `${msg.room}_${msg.id}`);
+    }
+
+    function cleanupOldMessages() {
+      const cutoff = Date.now() - MSG_TTL_MS;
+      const old = messages.filter((m) => (m.createdAt || 0) < cutoff);
+      if (old.length === 0) return;
+      messages = messages.filter((m) => (m.createdAt || 0) >= cutoff);
+      persistMessages();
+      if (db && currentUser) {
+        old.forEach((m) => {
+          if (m.room && m.room !== LOCAL_ROOM) {
+            deleteDoc(msgDocRef(m)).catch(() => {});
+          }
+        });
+      }
+    }
+
+    function toggleMsgSound() {
+      msgSoundOn = !msgSoundOn;
+      try { localStorage.setItem(MSG_SOUND_KEY, msgSoundOn ? '1' : '0'); } catch (e) {}
+      renderMessageBox();
+      if (msgSoundOn) {
+        playPing();
+        showToast('已開啟新訊息提示音與震動');
+      } else {
+        showToast('已靜音');
+      }
+    }
+
+    function playPing() {
+      if (!msgSoundOn) return;
+      try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) {}
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        const ctx = new AC();
+        const now = ctx.currentTime;
+        [659.25, 880].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.0001, now + i * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.12 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.28);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + i * 0.12);
+          osc.stop(now + i * 0.12 + 0.3);
+        });
+        setTimeout(() => ctx.close().catch(() => {}), 800);
+      } catch (e) {}
+    }
+
+    function flashMsgBox() {
       const box = document.getElementById('msg-box');
       if (!box) return;
-      const senderName = appState.profiles[msgSender].name;
-
-      const btnMe = document.getElementById('msg-who-me');
-      const btnPartner = document.getElementById('msg-who-partner');
-      btnMe.textContent = appState.profiles.me.name;
-      btnPartner.textContent = appState.profiles.partner.name;
-      const base = 'px-2.5 py-1 rounded-md font-bold transition-all ';
-      const off = base + 'text-slate-400 hover:text-white';
-      btnMe.className = msgSender === 'me' ? base + 'bg-sky-500 text-slate-950' : off;
-      btnPartner.className = msgSender === 'partner' ? base + 'bg-rose-500 text-white' : off;
-
-      document.getElementById('msg-prefix').textContent = `${senderName} 想跟你說…`;
-      updateSoundBtn();
-
-      document.getElementById('msg-chips').innerHTML = QUICK_MSGS.map((t, i) => `
-        <button type="button" onclick="sendQuickMessage(${i})" class="px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 border border-slate-700 hover:border-sky-500/40 text-sm font-medium text-slate-100 transition-all active:scale-95">${t}</button>
-      `).join('');
-
-      const list = messages
-        .filter((m) => m.room === currentRoomCode)
-        .sort((a, b) => b.createdAt - a.createdAt);
-      const latestEl = document.getElementById('msg-latest');
-      const histEl = document.getElementById('msg-history');
-
-      if (list.length === 0) {
-        latestEl.innerHTML = '<div class="text-xs text-slate-400 py-1">還沒有訊息，點下面的快速訊息或自己輸入，傳給對方吧。</div>';
-        histEl.innerHTML = '';
-        return;
-      }
-
-      const m = list[0];
-      const fromName = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
-      const incoming = m.from !== msgSender;
-      const nameColor = m.from === 'me' ? 'text-sky-300' : 'text-rose-300';
-      latestEl.innerHTML = `
-        <div onclick="openMsgHistory()" class="cursor-pointer rounded-2xl p-4 border ${incoming ? 'bg-sky-500/10 border-sky-400/50' : 'bg-slate-900/80 border-slate-800'}">
-          <div class="flex items-center justify-between gap-2 text-xs">
-            <span class="font-bold ${nameColor}">${escapeHtml(fromName)} 想跟你說…</span>
-            <span class="font-mono text-slate-400 shrink-0">${incoming ? '<span class="text-amber-300 font-bold mr-1">新</span>' : ''}${timeAgo(m.createdAt)}${m.synced === false ? ' · 未同步' : ''}</span>
-          </div>
-          <div class="mt-1.5 text-lg sm:text-xl font-bold text-white break-words">${escapeHtml(m.text)}</div>
-          <div class="mt-1.5 text-[11px] text-sky-300/80">點一下查看歷史訊息 ›</div>
-        </div>
-      `;
-
-      histEl.innerHTML = list.slice(1, 5).map((x) => {
-        const n = appState.profiles[x.from] ? appState.profiles[x.from].name : '';
-        return `
-          <div class="flex items-center justify-between gap-2 text-xs text-slate-400 px-1">
-            <span class="min-w-0 truncate"><span class="${x.from === 'me' ? 'text-sky-400' : 'text-rose-400'} font-bold">${escapeHtml(n)}</span>：${escapeHtml(x.text)}</span>
-            <span class="font-mono shrink-0">${timeAgo(x.createdAt)}</span>
-          </div>
-        `;
-      }).join('');
+      box.classList.add('ring-2', 'ring-sky-400', 'bg-sky-500/10');
+      setTimeout(() => box.classList.remove('ring-2', 'ring-sky-400', 'bg-sky-500/10'), 2000);
     }
 
-    function msgDocRef(m) {
-      return doc(db, 'artifacts', appId, 'public', 'data', 'couple_messages', `${m.room}_${m.id}`);
-    }
-
-    async function pushMessageToCloud(m) {
-      if (!db || !currentUser || m.room === LOCAL_ROOM) return false;
+    async function pushMessageToCloud(msg) {
+      if (!db || !currentUser || msg.room === LOCAL_ROOM) return false;
       try {
-        await setDoc(msgDocRef(m), { room: m.room, id: m.id, from: m.from, text: m.text, createdAt: m.createdAt });
-        m.synced = true;
+        await setDoc(msgDocRef(msg), {
+          room: msg.room,
+          id: msg.id,
+          from: msg.from,
+          text: msg.text,
+          createdAt: msg.createdAt,
+          readAt: msg.readAt ?? null
+        });
+        msg.synced = true;
         persistMessages();
         return true;
       } catch (err) {
-        console.warn('Message cloud send failed:', err);
+        console.error('Message cloud send failed:', err);
         return false;
       }
     }
@@ -4013,154 +4048,112 @@
     function subscribeMessages() {
       if (!db || !currentUser) return;
       if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
-      const room = currentRoomCode;
       msgFirstSnapshot = true;
+      const room = currentRoomCode;
       const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'couple_messages'), where('room', '==', room));
       unsubscribeMessages = onSnapshot(q, (snap) => {
         const cloud = [];
         snap.forEach((d) => cloud.push({ ...d.data(), synced: true }));
+        const prevRoom = messages.filter((m) => m.room === room);
+        const prevIds = new Set(prevRoom.map((m) => m.id));
         const cloudIds = new Set(cloud.map((m) => m.id));
-        const unsynced = messages.filter((m) => m.room === room && !m.synced && !cloudIds.has(m.id));
-
-        if (!msgFirstSnapshot) {
-          snap.docChanges().forEach((ch) => {
-            if (ch.type !== 'added') return;
-            const m = ch.doc.data();
-            if (m.from !== msgSender && Date.now() - m.createdAt < 120000) {
-              const who = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
-              showToast(`${who} 想跟你說… ${m.text}`);
-              playAlert(true);
-            }
-          });
-        }
-        msgFirstSnapshot = false;
-
+        const unsynced = prevRoom.filter((m) => !m.synced && !cloudIds.has(m.id));
         messages = [...messages.filter((m) => m.room !== room), ...cloud, ...unsynced];
+        cleanupOldMessages();
         persistMessages();
         unsynced.forEach((m) => pushMessageToCloud(m));
-        cleanupOldMessages();
-        renderMessageBox();
-        const histModal = document.getElementById('msg-modal');
-        if (histModal && !histModal.classList.contains('hidden')) renderMsgHistory();
+
+        const newlyArrived = !msgFirstSnapshot
+          ? cloud.filter((m) => !prevIds.has(m.id) && m.from !== msgSender).sort((a, b) => b.createdAt - a.createdAt)
+          : [];
+        msgFirstSnapshot = false;
+
+        if (activeTab === 'home') renderMessageBox();
+        if (newlyArrived.length > 0) {
+          const m = newlyArrived[0];
+          const fromName = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
+          playPing();
+          flashMsgBox();
+          showToast(`${fromName} 傳來：${m.text}`);
+        }
       }, (err) => console.warn('Message snapshot error:', err));
     }
 
-    function sendMessage(text) {
-      const clean = String(text || '').trim().slice(0, 60);
-      if (!clean) return false;
-      const m = {
-        id: `m_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    async function sendQuickMessage(rawText) {
+      const text = (rawText || '').trim();
+      if (!text) return;
+      const msg = {
+        id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         room: currentRoomCode,
         from: msgSender,
-        text: clean,
+        text: text.slice(0, 60),
         createdAt: Date.now(),
+        readAt: null,
         synced: false
       };
-      messages.push(m);
+      messages.unshift(msg);
       persistMessages();
       renderMessageBox();
-      pushMessageToCloud(m).then((ok) => { if (ok) renderMessageBox(); });
-      showToast(db && currentUser && currentRoomCode !== LOCAL_ROOM ? '已送出' : '已送出（尚未同步，只存在這支手機）');
-      playAlert(false);
-      return true;
-    }
 
-    function sendQuickMessage(idx) {
-      sendMessage(QUICK_MSGS[idx]);
+      const fromName = appState.profiles[msgSender].name;
+      if (db && currentUser && currentRoomCode !== LOCAL_ROOM) {
+        const ok = await pushMessageToCloud(msg);
+        showToast(ok ? `${fromName} 已送出：${msg.text}` : `已暫存（${fromName}），雲端稍後同步`);
+      } else {
+        showToast(`${fromName} 已送出（未設配對碼，僅存本機）`);
+      }
     }
 
     function sendCustomMessage(e) {
       e.preventDefault();
       const input = document.getElementById('msg-input');
-      if (sendMessage(input.value)) input.value = '';
+      const v = input.value.trim();
+      if (!v) return;
+      input.value = '';
+      sendQuickMessage(v);
     }
 
-    // ----- 提示音與震動 -----
-    const SOUND_KEY = 'ume_sound_v1';
-    let soundOn = localStorage.getItem(SOUND_KEY) !== 'off';
-    let audioCtx = null;
-
-    function unlockAudio() {
-      try {
-        if (!audioCtx) {
-          const AC = window.AudioContext || window.webkitAudioContext;
-          if (AC) audioCtx = new AC();
-        }
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      } catch (e) { /* ignore */ }
-    }
-    ['pointerdown', 'touchstart', 'keydown'].forEach((ev) => window.addEventListener(ev, unlockAudio, { passive: true }));
-
-    function beep(freq, delay, dur, vol = 0.15) {
-      if (!audioCtx || audioCtx.state !== 'running') return;
-      const t = audioCtx.currentTime + delay;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(vol, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + dur + 0.05);
-    }
-
-    function playAlert(incoming) {
-      if (!soundOn) return;
-      unlockAudio();
-      if (incoming) {
-        beep(880, 0, 0.16);
-        beep(1175, 0.18, 0.16);
-        beep(1568, 0.36, 0.28);
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
-      } else {
-        beep(660, 0, 0.09, 0.08);
-        if (navigator.vibrate) navigator.vibrate(30);
-      }
-    }
-
-    function updateSoundBtn() {
-      const btn = document.getElementById('msg-sound-btn');
-      if (!btn) return;
-      btn.textContent = soundOn ? '🔔' : '🔕';
-      btn.title = soundOn ? '提示音與震動：開（點一下關閉）' : '提示音與震動：關（點一下開啟）';
-    }
-
-    function toggleMsgSound() {
-      soundOn = !soundOn;
-      try { localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off'); } catch (e) { /* ignore */ }
-      updateSoundBtn();
-      if (soundOn) {
-        unlockAudio();
-        playAlert(true);
-        showToast('提示音與震動已開啟');
-      } else {
-        showToast('提示音與震動已關閉');
-      }
-    }
-
-    // ----- 歷史訊息與每週自動清理（只保留最近 7 天）-----
-    const MSG_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
-
-    function cleanupOldMessages() {
-      const cutoff = Date.now() - MSG_RETENTION_MS;
-      const old = messages.filter((m) => m.createdAt < cutoff);
-      if (old.length === 0) return;
-      messages = messages.filter((m) => m.createdAt >= cutoff);
+    async function ackLatestMessage(id) {
+      const m = messages.find((x) => x.id === id);
+      if (!m || m.readAt) return;
+      m.readAt = Date.now();
+      m.synced = false;
       persistMessages();
-      if (db && currentUser) {
-        old.filter((m) => m.room !== LOCAL_ROOM).forEach((m) => {
-          deleteDoc(msgDocRef(m)).catch((err) => console.warn('Old message delete failed:', err));
-        });
+      renderMessageBox();
+      if (db && currentUser && m.room !== LOCAL_ROOM) {
+        await pushMessageToCloud(m);
       }
+      showToast('已回覆「收到了 ♥」');
     }
 
     function openMsgHistory() {
       cleanupOldMessages();
-      renderMsgHistory();
       const modal = document.getElementById('msg-modal');
+      const listEl = document.getElementById('msg-modal-list');
+      const roomMsgs = messages
+        .filter((m) => m.room === currentRoomCode)
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+      if (roomMsgs.length === 0) {
+        listEl.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">最近 7 天沒有訊息紀錄</div>';
+      } else {
+        listEl.innerHTML = roomMsgs.map((m) => {
+          const isMe = m.from === 'me';
+          const who = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
+          return `
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+              <div class="flex items-center justify-between gap-2 text-[11px]">
+                <span class="font-bold ${isMe ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(who)}</span>
+                <div class="flex items-center gap-2">
+                  ${m.readAt ? '<span class="text-emerald-400">已收到 ♥</span>' : '<span class="text-slate-500">未讀</span>'}
+                  <span class="font-mono text-slate-500">${timeAgo(m.createdAt)}</span>
+                </div>
+              </div>
+              <div class="text-sm text-white break-words">${escapeHtml(m.text)}</div>
+            </div>
+          `;
+        }).join('');
+      }
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       lucide.createIcons();
@@ -4172,44 +4165,119 @@
       modal.classList.remove('flex');
     }
 
-    function renderMsgHistory() {
-      const listEl = document.getElementById('msg-modal-list');
-      const list = messages
+    function renderMessageBox() {
+      cleanupOldMessages();
+      const meName = appState.profiles.me.name;
+      const partnerName = appState.profiles.partner.name;
+      const btnMe = document.getElementById('msg-who-me');
+      const btnPartner = document.getElementById('msg-who-partner');
+      if (!btnMe) return;
+
+      const soundBtn = document.getElementById('msg-sound-btn');
+      if (soundBtn) soundBtn.textContent = msgSoundOn ? '🔔' : '🔕';
+
+      btnMe.textContent = meName;
+      btnPartner.textContent = partnerName;
+      btnMe.className = msgSender === 'me'
+        ? 'px-2.5 py-1 rounded-md font-bold transition-all bg-sky-500 text-slate-950'
+        : 'px-2.5 py-1 rounded-md font-bold transition-all text-slate-400 hover:text-white';
+      btnPartner.className = msgSender === 'partner'
+        ? 'px-2.5 py-1 rounded-md font-bold transition-all bg-rose-500 text-white'
+        : 'px-2.5 py-1 rounded-md font-bold transition-all text-slate-400 hover:text-white';
+
+      const senderName = msgSender === 'me' ? meName : partnerName;
+      const prefix = document.getElementById('msg-prefix');
+      if (prefix) prefix.textContent = `${senderName} 想跟你說…`;
+
+      const chipsEl = document.getElementById('msg-chips');
+      chipsEl.innerHTML = QUICK_MSGS.map((text, idx) => `
+        <button type="button" onclick="sendQuickMessage(QUICK_MSGS[${idx}])"
+          class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-sky-500/20 border border-slate-700 hover:border-sky-400 text-xs font-bold text-slate-100 transition-all active:scale-95">
+          ${escapeHtml(text)}
+        </button>
+      `).join('');
+
+      const roomMsgs = messages
         .filter((m) => m.room === currentRoomCode)
         .sort((a, b) => b.createdAt - a.createdAt);
-      if (list.length === 0) {
-        listEl.innerHTML = '<div class="text-center text-sm text-slate-500 py-8">最近 7 天沒有訊息</div>';
-        return;
-      }
-      let lastDay = '';
-      listEl.innerHTML = list.map((m) => {
-        const d = new Date(m.createdAt);
-        const day = `${d.getMonth() + 1}/${d.getDate()}`;
-        const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-        const head = day !== lastDay ? `<div class="text-[11px] font-mono font-bold text-sky-300 pt-2 px-1">${day}</div>` : '';
-        lastDay = day;
-        const name = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
-        const mine = m.from === msgSender;
-        const color = m.from === 'me' ? 'text-sky-300' : 'text-rose-300';
-        return `${head}
-          <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
-            <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 ${mine ? 'bg-sky-500/15 border border-sky-500/30' : 'bg-slate-900/90 border border-slate-800'}">
-              <div class="flex items-center justify-between gap-3 text-[11px]">
-                <span class="font-bold ${color}">${escapeHtml(name)}</span>
-                <span class="font-mono text-slate-500">${time}</span>
-              </div>
-              <div class="mt-0.5 text-sm text-white break-words">${escapeHtml(m.text)}</div>
+
+      const latestEl = document.getElementById('msg-latest');
+      if (roomMsgs.length === 0) {
+        latestEl.innerHTML = `
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs text-slate-400">
+            還沒有訊息，點下方按鈕或輸入一句話傳給對方吧！
+          </div>
+        `;
+      } else {
+        const m = roomMsgs[0];
+        const fromIsMe = m.from === 'me';
+        const fromName = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
+        const isIncoming = m.from !== msgSender;
+        const borderCls = fromIsMe ? 'border-sky-500/40 bg-sky-500/10' : 'border-rose-500/40 bg-rose-500/10';
+        const nameCls = fromIsMe ? 'text-sky-300' : 'text-rose-300';
+
+        let statusHtml = '';
+        if (m.readAt) {
+          statusHtml = `<span class="text-[11px] font-bold text-emerald-300">對方已收到 ♥</span>`;
+        } else if (isIncoming) {
+          statusHtml = `<button type="button" onclick="ackLatestMessage('${m.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 text-[11px] font-bold active:scale-95 transition-all">收到了 ♥</button>`;
+        } else {
+          statusHtml = `<span class="text-[11px] text-slate-400">等待對方確認…</span>`;
+        }
+
+        latestEl.innerHTML = `
+          <div class="p-3.5 rounded-2xl border ${borderCls} space-y-1.5">
+            <div class="flex items-center justify-between gap-2 text-xs">
+              <span class="font-bold ${nameCls}">${escapeHtml(fromName)} 想跟你說：</span>
+              <span class="font-mono text-[11px] text-slate-400">${timeAgo(m.createdAt)}</span>
             </div>
-          </div>`;
-      }).join('');
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-base font-bold text-white break-words">${escapeHtml(m.text)}</div>
+              <div class="shrink-0">${statusHtml}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      const histEl = document.getElementById('msg-history');
+      if (roomMsgs.length === 0) {
+        histEl.innerHTML = '';
+      } else {
+        histEl.innerHTML = `
+          <div class="flex justify-end pt-0.5">
+            <button type="button" onclick="openMsgHistory()" class="text-[11px] text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1">
+              <i data-lucide="history" class="w-3.5 h-3.5"></i>
+              <span>歷史訊息（近 7 天，共 ${roomMsgs.length} 則）</span>
+            </button>
+          </div>
+        `;
+      }
+
+      lucide.createIcons();
     }
 
-    setInterval(cleanupOldMessages, 60 * 60 * 1000);
+    // ==================== 12. MASTER REFRESH & INIT ====================
+    function refreshAllUI() {
+      document.getElementById('nav-name-me').textContent = appState.profiles.me.name;
+      document.getElementById('nav-name-partner').textContent = appState.profiles.partner.name;
+      document.getElementById('form-user-me').textContent = appState.profiles.me.name;
+      document.getElementById('form-user-partner').textContent = appState.profiles.partner.name;
 
-    Object.assign(window, { setMsgSender, sendQuickMessage, sendCustomMessage, toggleMsgSound, openMsgHistory, closeMsgHistory });
-    setInterval(() => { if (activeTab === 'home') renderMessageBox(); }, 60000);
+      if (activeTab === 'home') {
+        renderHomeHub();
+      } else if (activeTab === 'vault') {
+        renderVaultPage();
+      } else if (activeTab === 'dashboard') {
+        renderDashboard();
+      } else if (activeTab === 'query') {
+        runCompoundQuery();
+      } else if (activeTab === 'profile') {
+        renderProfilePage();
+      } else if (activeTab === 'album') {
+        renderAlbum();
+      }
+    }
 
-    // ==================== 12. PWA MODAL & INITIALIZATION ====================
     function openPwaModal() {
       const modal = document.getElementById('pwa-modal');
       modal.classList.remove('hidden');
@@ -4223,41 +4291,16 @@
       modal.classList.remove('flex');
     }
 
-    function refreshAllUI() {
-      document.getElementById('nav-name-me').textContent = appState.profiles.me.name;
-      document.getElementById('nav-name-partner').textContent = appState.profiles.partner.name;
-      if (activeTab === 'home') renderHomeHub();
-      if (activeTab === 'vault') renderVaultPage();
-      if (activeTab === 'dashboard') renderDashboard();
-      if (activeTab === 'log') setLogFormUser(logFormUser);
-      if (activeTab === 'query') runCompoundQuery();
-      if (activeTab === 'profile') renderProfilePage();
-      if (activeTab === 'album') renderAlbum();
-    }
-
+    // Expose functions globally for inline HTML handlers
     Object.assign(window, {
-      setActiveContext,
-      openSyncModal,
-      closeSyncModal,
-      handleJoinRoomSubmit,
-      copyShareInvite,
-      openPwaModal,
-      closePwaModal,
+      switchTab,
       openBetweenApp,
-      handleVaultTotalDepositInput,
-      adjustVaultTotalDeposit,
-      updateLiveVaultDraftCheck,
-      submitVaultGoalForm,
-      startEditGoal,
-      cancelEditGoal,
-      quickAdjustGoalSaved,
-      deleteVaultGoal,
+      setActiveContext,
       syncActionUser,
       quickAddWater,
       addCustomWater,
       quickAddProtein,
       addCustomProtein,
-      switchTab,
       setLogFormUser,
       setLogCategory,
       updateLiveBmiPreview,
@@ -4275,8 +4318,6 @@
       selectProfileTab,
       saveProfileSettings,
       resetDemoData,
-      googleSignIn,
-      googleSignOut,
       setAlbumUser,
       handleAlbumFilesChosen,
       submitAlbumPhoto,
@@ -4284,31 +4325,46 @@
       closePhotoModal,
       addPhotoToCompare,
       clearAlbumCompare,
-      deleteAlbumPhoto
+      deleteAlbumPhoto,
+      QUICK_MSGS,
+      setMsgSender,
+      sendQuickMessage,
+      sendCustomMessage,
+      ackLatestMessage,
+      openMsgHistory,
+      closeMsgHistory,
+      toggleMsgSound,
+      openPwaModal,
+      closePwaModal,
+      openSyncModal,
+      closeSyncModal,
+      handleJoinRoomSubmit,
+      copyShareInvite,
+      googleSignIn,
+      googleSignOut,
+      handleVaultTotalDepositInput,
+      adjustVaultTotalDeposit,
+      updateLiveVaultDraftCheck,
+      submitVaultGoalForm,
+      startEditGoal,
+      cancelEditGoal,
+      quickAdjustGoalSaved,
+      deleteVaultGoal
     });
 
-    // module script 是延遲執行，DOMContentLoaded 可能已經觸發過，所以兩種情況都處理
-    function initApp() {
-      setupPwaAssets();
-      document.getElementById('log-date').value = getTodayStr(0);
-      document.getElementById('filter-start-date').value = getTodayStr(-7);
-      document.getElementById('filter-end-date').value = getTodayStr(0);
-
-      setActiveContext('both');
-      setLogFormUser('me');
-      setLogCategory('body');
-      switchTab('home');
-      lucide.createIcons();
-      loadAlbumFromLocal();
-      loadMessagesLocal();
-      initCloudSync();
-    }
-
-    if (document.readyState === 'loading') {
-      window.addEventListener('DOMContentLoaded', initApp);
-    } else {
-      initApp();
-    }
+    // Boot application
+    setupPwaAssets();
+    const todayStr = getTodayStr(0);
+    document.getElementById('log-date').value = todayStr;
+    document.getElementById('filter-start-date').value = getTodayStr(-7);
+    document.getElementById('filter-end-date').value = todayStr;
+    setLogCategory('body');
+    setActiveContext('both');
+    switchTab('home');
+    initCloudSync();
+    loadAlbumFromLocal();
+    loadMessagesLocal();
+    lucide.createIcons();
   </script>
 </body>
 </html>
