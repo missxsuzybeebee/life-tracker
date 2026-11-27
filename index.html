@@ -1630,8 +1630,8 @@
   </div>
 
   <!-- Message History Modal -->
-  <div id="msg-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="glass-card w-full max-w-md max-h-[80vh] rounded-3xl p-5 flex flex-col border border-sky-500/30">
+  <div id="msg-modal" onclick="if (event.target === this) closeMsgHistory()" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-md max-h-[85vh] rounded-3xl p-5 flex flex-col border border-sky-500/30">
       <div class="flex items-center justify-between gap-2">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <i data-lucide="history" class="w-5 h-5 text-sky-400"></i>
@@ -1642,7 +1642,17 @@
         </button>
       </div>
       <p class="text-[11px] text-slate-400 mt-1">只保留最近 7 天，超過的訊息會自動清除</p>
-      <div id="msg-modal-list" class="mt-3 space-y-2 overflow-y-auto overflow-x-hidden pr-1"></div>
+      <div id="msg-modal-list" class="mt-3 space-y-2 overflow-y-auto overflow-x-hidden pr-1 min-h-[80px] flex-1"></div>
+
+      <div class="mt-3 pt-3 border-t border-slate-800 space-y-2 shrink-0">
+        <div id="msg-modal-chips" class="flex gap-2 overflow-x-auto pb-1"></div>
+        <form onsubmit="sendFromHistory(event)" class="flex gap-2">
+          <input type="text" id="msg-modal-input" maxlength="60" placeholder="在這裡直接回覆…" autocomplete="off" class="flex-1 min-w-0 bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none" />
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-sm shrink-0 flex items-center gap-1.5 active:scale-95 transition-all">
+            <i data-lucide="send" class="w-4 h-4"></i> 送出
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -4425,6 +4435,7 @@
       modal.classList.add('flex');
       lucide.createIcons();
       listEl.scrollTop = listEl.scrollHeight; // 捲到最新一則
+      renderHistoryChips();
     }
 
     function closeMsgHistory() {
@@ -4490,7 +4501,7 @@
 
         let statusHtml = '';
         if (isIncoming) {
-          statusHtml = `<button type="button" onclick="toggleHeart('${m.id}')" class="px-2.5 py-1 rounded-lg border text-[11px] font-bold active:scale-95 transition-all ${m.hearted ? 'bg-rose-500/20 border-rose-400/50 text-rose-200' : 'bg-slate-800 border-slate-700 text-slate-200'}">${m.hearted ? '❤️ 已送愛心' : '🤍 送愛心'}</button>`;
+          statusHtml = `<button type="button" onclick="event.stopPropagation(); toggleHeart('${m.id}')" class="px-2.5 py-1 rounded-lg border text-[11px] font-bold active:scale-95 transition-all ${m.hearted ? 'bg-rose-500/20 border-rose-400/50 text-rose-200' : 'bg-slate-800 border-slate-700 text-slate-200'}">${m.hearted ? '❤️ 已送愛心' : '🤍 送愛心'}</button>`;
         } else if (m.hearted) {
           statusHtml = `<span class="text-[11px] font-bold text-rose-300">對方回了 ❤️</span>`;
         } else if (m.readAt) {
@@ -4500,7 +4511,7 @@
         }
 
         latestEl.innerHTML = `
-          <div class="p-3.5 rounded-2xl border ${borderCls} space-y-1.5">
+          <div onclick="openMsgHistory()" class="cursor-pointer p-3.5 rounded-2xl border ${borderCls} space-y-1.5">
             <div class="flex items-center justify-between gap-2 text-xs">
               <span class="font-bold ${nameCls}">${escapeHtml(fromName)} 想跟你說：</span>
               <span class="font-mono text-[11px] text-slate-400">${timeAgo(m.createdAt)}</span>
@@ -5582,7 +5593,37 @@
       setQuick([...DEFAULT_QUICK_MSGS]);
     }
 
+    // ----- 歷史訊息視窗內直接回覆 -----
+    function renderHistoryChips() {
+      const el = document.getElementById('msg-modal-chips');
+      if (!el) return;
+      el.innerHTML = getQuick().map((text, idx) => `
+        <button type="button" onclick="sendHistoryQuick(${idx})"
+          class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-sky-500/20 border border-slate-700 hover:border-sky-400 text-xs font-bold text-slate-100 whitespace-nowrap shrink-0 active:scale-95 transition-all">
+          ${escapeHtml(text)}
+        </button>`).join('');
+    }
+
+    function sendHistoryQuick(idx) {
+      const text = getQuick()[idx];
+      if (!text) return;
+      sendQuickMessage(text);
+      openMsgHistory();
+    }
+
+    function sendFromHistory(e) {
+      e.preventDefault();
+      const input = document.getElementById('msg-modal-input');
+      const v = input.value.trim();
+      if (!v) return;
+      input.value = '';
+      sendQuickMessage(v);
+      openMsgHistory();
+      input.focus();
+    }
+
     Object.assign(window, {
+      renderHistoryChips, sendHistoryQuick, sendFromHistory,
       getQuick, toggleHeart, openQuickManage, closeQuickManage, addQuick, updateQuick, deleteQuick, resetQuick
     });
 
