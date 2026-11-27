@@ -220,11 +220,11 @@
             雙人總覽
           </button>
           <button type="button" onclick="setActiveContext('me')" id="btn-ctx-me" class="px-2 sm:px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span class="w-2 h-2 rounded-full bg-white"></span>
             <span id="nav-name-me">Chumi</span>
           </button>
           <button type="button" onclick="setActiveContext('partner')" id="btn-ctx-partner" class="px-2 sm:px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
             <span id="nav-name-partner">Weeki</span>
           </button>
         </div>
@@ -286,27 +286,6 @@
         </form>
 
         <div id="msg-history" class="space-y-1"></div>
-      </div>
-
-      <!-- Welcome & Between App Quick Launcher -->
-      <div class="glass-card rounded-2xl p-5 sm:p-6 border border-sky-500/25 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="space-y-1.5">
-          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-            <span>Chumi &amp; Weeki 專屬主頁</span>
-          </div>
-          <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">歡迎回來，今天也一起健康生活與存錢吧</h2>
-          <p class="text-xs sm:text-sm text-slate-400">快速切換 Between 情侶空間、查看即時健康數值與養小豬豬目標進度</p>
-        </div>
-
-        <!-- Between App Launcher Button -->
-        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
-          <button type="button" onclick="openBetweenApp()" class="w-full sm:w-auto px-4 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:opacity-95 text-white font-bold text-sm shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all active:scale-95">
-            <i data-lucide="heart" class="w-4 h-4 fill-current"></i>
-            <span>開啟 Between App</span>
-            <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-90"></i>
-          </button>
-        </div>
       </div>
 
       <!-- Health Summary Card + Quick Entry -->
@@ -650,9 +629,11 @@
               <span id="today-water-pct" class="text-sm font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-lg border border-cyan-500/20">0%</span>
             </div>
 
-            <div class="w-full h-3 bg-slate-800/90 rounded-full overflow-hidden mt-3 p-0.5 border border-slate-700/50">
-              <div id="today-water-bar" class="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-300 transition-all duration-500" style="width: 0%"></div>
+            <div id="water-track" data-kind="water" class="drag-track relative w-full h-4 bg-slate-800/90 rounded-full mt-3 p-0.5 border border-slate-700/50 cursor-pointer touch-none select-none">
+              <div id="today-water-bar" class="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-300" style="width: 0%"></div>
+              <div id="water-knob" class="absolute top-1/2 w-5 h-5 -translate-y-1/2 -ml-2.5 rounded-full bg-white border-2 border-cyan-400 shadow-lg" style="left: 0%"></div>
             </div>
+            <div class="text-[10px] text-slate-500 mt-1">拖拉進度條可直接調整今日飲水量</div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
@@ -698,9 +679,11 @@
               <span id="today-protein-pct" class="text-sm font-mono font-bold text-sky-300 bg-sky-500/10 px-2.5 py-0.5 rounded-lg border border-sky-500/20">0%</span>
             </div>
 
-            <div class="w-full h-3 bg-slate-800/90 rounded-full overflow-hidden mt-3 p-0.5 border border-slate-700/50">
-              <div id="today-protein-bar" class="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-500" style="width: 0%"></div>
+            <div id="protein-track" data-kind="protein" class="drag-track relative w-full h-4 bg-slate-800/90 rounded-full mt-3 p-0.5 border border-slate-700/50 cursor-pointer touch-none select-none">
+              <div id="today-protein-bar" class="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-400" style="width: 0%"></div>
+              <div id="protein-knob" class="absolute top-1/2 w-5 h-5 -translate-y-1/2 -ml-2.5 rounded-full bg-white border-2 border-sky-400 shadow-lg" style="left: 0%"></div>
             </div>
+            <div class="text-[10px] text-slate-500 mt-1">拖拉進度條可直接調整今日蛋白質</div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
@@ -723,7 +706,7 @@
       <!-- SECTION 3: WEEKLY CARDIO, STRENGTH & SLEEP -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <!-- Weekly Cardio -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+        <div onclick="openRecordsModal('cardio')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer hover:border-emerald-500/40 transition-colors">
           <div>
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-2">
@@ -735,9 +718,7 @@
                   <p class="text-[11px] text-slate-400">WHO 建議 150～300 分鐘</p>
                 </div>
               </div>
-              <button type="button" onclick="switchTab('log', 'cardio')" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors">
-                + 紀錄
-              </button>
+              <span class="text-[11px] text-emerald-300/80">查看 / 修改 ›</span>
             </div>
             <div id="cardio-status-list" class="space-y-4 mt-4"></div>
           </div>
@@ -748,7 +729,7 @@
         </div>
 
         <!-- Weekly Strength Training -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+        <div onclick="openRecordsModal('strength')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer hover:border-indigo-500/40 transition-colors">
           <div>
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-2">
@@ -760,9 +741,7 @@
                   <p class="text-[11px] text-slate-400">目標每週至少 2 次</p>
                 </div>
               </div>
-              <button type="button" onclick="switchTab('log', 'strength')" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition-colors">
-                + 紀錄
-              </button>
+              <span class="text-[11px] text-indigo-300/80">查看 / 修改 ›</span>
             </div>
             <div id="strength-status-list" class="space-y-4 mt-4"></div>
           </div>
@@ -772,29 +751,27 @@
           </div>
         </div>
 
-        <!-- Daily Sleep Tracker -->
-        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+        <!-- Daily Steps Tracker (睡眠暫時隱藏) -->
+        <div onclick="openRecordsModal('steps')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer hover:border-violet-500/40 transition-colors">
           <div>
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-400">
-                  <i data-lucide="moon-star" class="w-4 h-4"></i>
+                  <i data-lucide="footprints" class="w-4 h-4"></i>
                 </div>
                 <div>
-                  <h3 class="text-sm font-bold text-white">每日睡眠修復</h3>
-                  <p class="text-[11px] text-slate-400">黃金標準 7～9 小時</p>
+                  <h3 class="text-sm font-bold text-white">每日步數</h3>
+                  <p class="text-[11px] text-slate-400">每日目標 8,000 步</p>
                 </div>
               </div>
-              <button type="button" onclick="switchTab('log', 'sleep')" class="text-xs px-2.5 py-1 rounded-lg bg-violet-500/15 text-violet-300 border border-violet-500/30 hover:bg-violet-500/25 transition-colors">
-                + 紀錄
-              </button>
+              <span class="text-[11px] text-violet-300/80">查看 / 新增 ›</span>
             </div>
             <div id="sleep-status-list" class="space-y-4 mt-4"></div>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span>&lt;7h 不足</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>7-9h 理想</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span>&gt;9h 過長</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span>&lt;5,000</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span>5,000-7,999</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>≥ 8,000 達標</span>
           </div>
         </div>
       </div>
@@ -818,9 +795,9 @@
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
               <i data-lucide="bar-chart-3" class="w-4 h-4 text-violet-400"></i>
-              近 7 日睡眠時數對比 (小時)
+              近 7 日步數對比 (步)
             </h3>
-            <span class="text-[11px] text-slate-400">目標 7-9h</span>
+            <span class="text-[11px] text-slate-400">目標 8,000 步</span>
           </div>
           <div class="h-52 w-full relative">
             <canvas id="dashboardSleepChart"></canvas>
@@ -864,7 +841,7 @@
           <button type="button" onclick="setLogCategory('strength')" id="cat-btn-strength" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
             <i data-lucide="dumbbell" class="w-4 h-4"></i> 肌力訓練
           </button>
-          <button type="button" onclick="setLogCategory('sleep')" id="cat-btn-sleep" class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+          <button type="button" onclick="setLogCategory('sleep')" id="cat-btn-sleep" class="hidden py-2.5 px-3 rounded-xl border text-xs font-bold items-center justify-center gap-1.5 transition-all">
             <i data-lucide="moon" class="w-4 h-4"></i> 每日睡眠
           </button>
         </div>
@@ -1088,7 +1065,7 @@
               <option value="body">身高體重 / BMI</option>
               <option value="cardio">有氧運動</option>
               <option value="strength">肌力訓練</option>
-              <option value="sleep">每日睡眠</option>
+              <option value="steps">每日步數</option>
             </select>
           </div>
 
@@ -1142,8 +1119,8 @@
             <div id="stat-strength" class="text-lg font-mono font-bold text-indigo-400 mt-0.5">0 次</div>
           </div>
           <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
-            <div class="text-[11px] text-slate-400">區間平均睡眠</div>
-            <div id="stat-sleep" class="text-lg font-mono font-bold text-violet-400 mt-0.5">-- 小時</div>
+            <div class="text-[11px] text-slate-400">區間平均步數</div>
+            <div id="stat-sleep" class="text-lg font-mono font-bold text-violet-400 mt-0.5">-- 步</div>
           </div>
         </div>
       </div>
@@ -1176,11 +1153,11 @@
       <!-- Person tabs -->
       <div class="flex items-center gap-3">
         <button type="button" onclick="setAlbumUser('me')" id="album-tab-me" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
-          <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
+          <span class="w-3 h-3 rounded-full bg-white shrink-0"></span>
           <span id="album-tab-label-me" class="truncate">Chumi 的相簿</span>
         </button>
         <button type="button" onclick="setAlbumUser('partner')" id="album-tab-partner" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
-          <span class="w-3 h-3 rounded-full bg-rose-400 shrink-0"></span>
+          <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
           <span id="album-tab-label-partner" class="truncate">Weeki 的相簿</span>
         </button>
       </div>
@@ -1251,15 +1228,97 @@
       </div>
     </section>
 
+    <!-- ==================== TAB 6: PROJECT (還款專案) ==================== -->
+    <section id="view-project" class="hidden space-y-5">
+      <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-4 border border-sky-500/25">
+        <div class="flex items-center gap-3 pb-4 border-b border-slate-800">
+          <div class="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/35 flex items-center justify-center text-sky-400">
+            <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">Project 還款專案</h2>
+            <p class="text-xs text-slate-400">設定每個專案的目標金額，記錄每次還款，自動計算還款進度</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="text-[11px] text-slate-400">目標金額合計</div>
+            <div id="proj-kpi-target" class="text-lg font-mono font-bold text-amber-400 mt-1">$0</div>
+          </div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="text-[11px] text-slate-400">已還款金額</div>
+            <div id="proj-kpi-paid" class="text-lg font-mono font-bold text-sky-400 mt-1">$0</div>
+          </div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="text-[11px] text-slate-400">尚餘金額</div>
+            <div id="proj-kpi-left" class="text-lg font-mono font-bold text-emerald-400 mt-1">$0</div>
+          </div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="text-[11px] text-slate-400">整體還款進度</div>
+            <div id="proj-kpi-pct" class="text-lg font-mono font-bold text-white mt-1">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 id="proj-form-title" class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="target" class="w-5 h-5 text-sky-400"></i>
+            <span>新增專案</span>
+          </h3>
+          <button type="button" id="proj-cancel-edit-btn" onclick="cancelEditProject()" class="hidden text-xs px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">取消編輯</button>
+        </div>
+        <form id="proj-form" onsubmit="submitProjectForm(event)" class="space-y-4">
+          <input type="hidden" id="proj-edit-id" value="" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">專案名稱 <span class="text-rose-400">*</span></label>
+              <input type="text" id="proj-name" maxlength="30" placeholder="例如：機車貸款、學貸" class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">目標金額 (NT$) <span class="text-rose-400">*</span></label>
+              <input type="number" inputmode="decimal" id="proj-target" placeholder="例如 120000" class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">預計完成日期 <span class="text-slate-500">(選填)</span></label>
+              <input type="date" id="proj-deadline" class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">已還款金額 (NT$) <span class="text-slate-500">(選填)</span></label>
+              <input type="number" inputmode="decimal" id="proj-saved" placeholder="預設 0" class="w-full bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none" />
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400">負責對象：</span>
+            <select id="proj-owner" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-400">
+              <option value="both">共同</option>
+              <option value="me">Chumi</option>
+              <option value="partner">Weeki</option>
+            </select>
+          </div>
+          <button type="submit" id="proj-submit-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/25 hover:opacity-95 transition-all">新增專案</button>
+        </form>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2 px-1">
+          <i data-lucide="list-checks" class="w-4 h-4 text-sky-400"></i>
+          <span>專案清單與還款進度</span>
+          <span class="text-xs font-normal text-slate-400">點框內可查看 / 新增 / 修改還款紀錄</span>
+        </h3>
+        <div id="proj-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+    </section>
+
     <!-- ==================== TAB 4: PERSONAL PROFILE PAGE (個人頁面) ==================== -->
     <section id="view-profile" class="hidden space-y-5">
       <div class="flex items-center gap-3">
         <button type="button" onclick="selectProfileTab('me')" id="profile-tab-me" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
-          <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
+          <span class="w-3 h-3 rounded-full bg-white shrink-0"></span>
           <span id="profile-btn-label-me" class="truncate">Chumi 的個人檔案</span>
         </button>
         <button type="button" onclick="selectProfileTab('partner')" id="profile-tab-partner" class="flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all">
-          <span class="w-3 h-3 rounded-full bg-rose-400 shrink-0"></span>
+          <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
           <span id="profile-btn-label-partner" class="truncate">Weeki 的個人檔案</span>
         </button>
       </div>
@@ -1345,7 +1404,7 @@
 
   <!-- Bottom Mobile App-Style Navigation Bar -->
   <nav aria-label="主頁底部導覽列" class="fixed bottom-0 inset-x-0 z-30 bg-[#070B14]/95 backdrop-blur-2xl border-t border-slate-800/90 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.65)]">
-    <div class="max-w-xl mx-auto px-3 py-1.5 grid grid-cols-4 gap-1.5">
+    <div class="max-w-xl mx-auto px-3 py-1.5 grid grid-cols-5 gap-1">
       <!-- 1. 主頁 -->
       <button type="button" onclick="switchTab('home')" id="nav-tab-home" class="app-dock-item is-active flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
         <span class="dock-icon-shell w-10 h-10 rounded-2xl p-0.5 bg-slate-900 border border-sky-400/50 shadow-md flex items-center justify-center overflow-hidden transition-all">
@@ -1418,8 +1477,69 @@
         </span>
         <span class="dock-label text-[11px] font-medium mt-1 text-slate-400 tracking-wide">小豬豬</span>
       </button>
+
+      <!-- 5. Project -->
+      <button type="button" onclick="switchTab('project')" id="nav-tab-project" class="app-dock-item flex flex-col items-center justify-center py-1 rounded-2xl focus:outline-none">
+        <span class="dock-icon-shell w-10 h-10 rounded-2xl bg-slate-900/90 border border-slate-700/90 flex items-center justify-center transition-all">
+          <svg viewBox="0 0 48 48" class="w-6 h-6" aria-hidden="true">
+            <rect x="11" y="9" width="26" height="31" rx="4" fill="none" stroke="#38BDF8" stroke-width="2.4"/>
+            <rect x="18" y="6" width="12" height="6" rx="2" fill="#070B14" stroke="#22D3EE" stroke-width="2.2"/>
+            <path d="M17 22 H31 M17 28 H31 M17 34 H25" stroke="#22D3EE" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="dock-label text-[11px] font-medium mt-1 text-slate-400 tracking-wide">Project</span>
+      </button>
     </div>
   </nav>
+
+  <!-- Ledger Modal (養小豬 / Project 共用：存入或還款明細) -->
+  <div id="ledger-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-md max-h-[88vh] rounded-3xl p-5 flex flex-col border border-sky-500/30">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <h3 id="ledger-title" class="text-base font-bold text-white break-words">明細</h3>
+          <p id="ledger-sub" class="text-[11px] text-slate-400 mt-0.5"></p>
+        </div>
+        <button type="button" onclick="closeLedger()" class="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div id="ledger-summary" class="mt-3"></div>
+
+      <div class="mt-3 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+        <div id="ledger-add-title" class="text-xs font-bold text-slate-300">新增一筆</div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="date" id="ledger-add-date" class="min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-sky-500" />
+          <input type="number" inputmode="decimal" id="ledger-add-amount" placeholder="金額" class="min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-sky-500" />
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="ledger-add-note" maxlength="30" placeholder="備註（選填）" class="flex-1 min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500" />
+          <button type="button" onclick="ledgerAdd()" id="ledger-add-btn" class="px-4 py-2 rounded-xl bg-sky-500 text-slate-950 text-xs font-bold shrink-0 active:scale-95 transition-all">新增</button>
+        </div>
+      </div>
+
+      <div class="mt-3 text-xs font-bold text-slate-300">紀錄明細（新到舊）</div>
+      <div id="ledger-list" class="mt-2 space-y-2 overflow-y-auto overflow-x-hidden pr-1"></div>
+    </div>
+  </div>
+
+  <!-- Records Modal (健康：有氧 / 肌力 / 步數 查看與修改) -->
+  <div id="records-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-md max-h-[88vh] rounded-3xl p-5 flex flex-col border border-sky-500/30">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <h3 id="records-title" class="text-base font-bold text-white">紀錄</h3>
+          <p id="records-sub" class="text-[11px] text-slate-400 mt-0.5"></p>
+        </div>
+        <button type="button" onclick="closeRecordsModal()" class="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="records-add-bar" class="mt-3 flex flex-wrap gap-2"></div>
+      <div id="records-list" class="mt-3 space-y-2 overflow-y-auto overflow-x-hidden pr-1"></div>
+    </div>
+  </div>
 
   <!-- Message History Modal -->
   <div id="msg-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
@@ -1697,6 +1817,7 @@
       return {
         updatedAt: Date.now(),
         vaultTotalDeposit: 150000,
+        projects: [],
         vaultGoals: [
           {
             id: 'g1',
@@ -1727,7 +1848,7 @@
           me: {
             id: 'me',
             name: 'Chumi',
-            gender: 'male',
+            gender: 'female',
             height: 175,
             weight: 71.5,
             waterMult: 35,
@@ -1737,7 +1858,7 @@
           partner: {
             id: 'partner',
             name: 'Weeki',
-            gender: 'female',
+            gender: 'male',
             height: 162,
             weight: 53.0,
             waterMult: 35,
@@ -1787,7 +1908,8 @@
             ...createDefaultState(),
             ...parsed,
             vaultTotalDeposit: typeof parsed.vaultTotalDeposit === 'number' ? parsed.vaultTotalDeposit : 150000,
-            vaultGoals: Array.isArray(parsed.vaultGoals) ? parsed.vaultGoals : createDefaultState().vaultGoals
+            vaultGoals: Array.isArray(parsed.vaultGoals) ? parsed.vaultGoals : createDefaultState().vaultGoals,
+            projects: Array.isArray(parsed.projects) ? parsed.projects : []
           };
         }
       } catch (e) {
@@ -1856,6 +1978,7 @@
           updatedAt: appState.updatedAt,
           vaultTotalDeposit: appState.vaultTotalDeposit,
           vaultGoalsJson: JSON.stringify(appState.vaultGoals),
+          projectsJson: JSON.stringify(appState.projects || []),
           profilesJson: JSON.stringify(appState.profiles),
           dailyIntakeJson: JSON.stringify(appState.dailyIntake),
           recordsJson: JSON.stringify(appState.records)
@@ -1894,6 +2017,7 @@
               const parsedIntake = data.dailyIntakeJson ? JSON.parse(data.dailyIntakeJson) : null;
               const parsedRecords = data.recordsJson ? JSON.parse(data.recordsJson) : null;
               const parsedGoals = data.vaultGoalsJson ? JSON.parse(data.vaultGoalsJson) : appState.vaultGoals;
+              const parsedProjects = data.projectsJson ? JSON.parse(data.projectsJson) : (appState.projects || []);
               const parsedTotal = typeof data.vaultTotalDeposit === 'number' ? data.vaultTotalDeposit : appState.vaultTotalDeposit;
 
               if (parsedProfiles && parsedIntake && parsedRecords) {
@@ -1901,6 +2025,7 @@
                   updatedAt: data.updatedAt || Date.now(),
                   vaultTotalDeposit: parsedTotal,
                   vaultGoals: Array.isArray(parsedGoals) ? parsedGoals : [],
+                  projects: Array.isArray(parsedProjects) ? parsedProjects : [],
                   profiles: parsedProfiles,
                   dailyIntake: parsedIntake,
                   records: parsedRecords
@@ -2170,8 +2295,8 @@
 
       const activeStyle = {
         both: 'bg-sky-500 text-slate-950',
-        me: 'bg-sky-500/25 text-sky-200',
-        partner: 'bg-rose-500/25 text-rose-200'
+        me: 'bg-white/20 text-white',
+        partner: 'bg-sky-500/25 text-sky-200'
       };
       const base = 'px-2 sm:px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1 ';
       ['both', 'me', 'partner'].forEach((k) => {
@@ -2190,14 +2315,15 @@
 
     function switchTab(tabName, optionalSubCategory = null) {
       activeTab = tabName;
-      ['home', 'vault', 'dashboard', 'log', 'query', 'profile', 'album'].forEach((t) => {
+      ['home', 'vault', 'dashboard', 'log', 'query', 'profile', 'album', 'project'].forEach((t) => {
         document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tabName);
       });
 
       const dockMap = {
         home: 'nav-tab-home',
         dashboard: 'nav-tab-dashboard',
-        vault: 'nav-tab-vault'
+        vault: 'nav-tab-vault',
+        project: 'nav-tab-project'
       };
 
       Object.entries(dockMap).forEach(([tabKey, btnId]) => {
@@ -2225,6 +2351,8 @@
         runCompoundQuery();
       } else if (tabName === 'profile') {
         renderProfilePage();
+      } else if (tabName === 'project') {
+        renderProjectPage();
       } else if (tabName === 'album') {
         if (activeContext === 'me' || activeContext === 'partner') albumUser = activeContext;
         renderAlbum();
@@ -2269,14 +2397,12 @@
         const strengthCount = appState.records
           .filter((r) => r.userId === uKey && r.type === 'strength' && r.date >= weekStart).length;
 
-        const latestSleep = appState.records
-          .filter((r) => r.userId === uKey && r.type === 'sleep')
-          .sort((a, b) => b.date.localeCompare(a.date))[0];
+        const todaySteps = getStepsForDate(uKey, getTodayStr(0));
 
-        const nameColor = uKey === 'me' ? 'text-sky-400' : 'text-rose-400';
+        const nameColor = uKey === 'me' ? 'text-slate-100' : 'text-sky-400';
 
         return `
-          <div class="bg-slate-900/75 border border-slate-800/90 rounded-2xl p-4 space-y-3">
+          <div onclick="openPersonHealth('${uKey}')" class="cursor-pointer hover:border-sky-500/50 transition-colors bg-slate-900/75 border border-slate-800/90 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-sm ${nameColor}">${escapeHtml(p.name)}</span>
@@ -2299,9 +2425,10 @@
             </div>
 
             <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-800/70">
-              <span class="text-slate-400">最新睡眠 (目標7-9h)</span>
-              <span class="font-mono font-bold text-violet-300">${latestSleep ? `${latestSleep.hours} 小時` : '尚未紀錄'}</span>
+              <span class="text-slate-400">今日步數 (目標 ${STEP_GOAL.toLocaleString()})</span>
+              <span class="font-mono font-bold text-violet-300">${todaySteps ? todaySteps.toLocaleString() + ' 步' : '尚未紀錄'}</span>
             </div>
+            <div class="text-[11px] text-sky-300/80 text-right">點一下進入 ${escapeHtml(p.name)} 的健康總覽 ›</div>
           </div>
         `;
       }).join('');
@@ -2340,7 +2467,7 @@
           ` : topGoals.map((g) => {
             const pct = g.targetAmount > 0 ? Math.min(100, Math.round((Number(g.savedAmount || 0) / Number(g.targetAmount)) * 100)) : 0;
             return `
-              <div class="bg-slate-900/75 border border-slate-800/80 rounded-xl p-3">
+              <div onclick="openLedger('vault', '${g.id}')" class="cursor-pointer hover:border-sky-500/40 transition-colors bg-slate-900/75 border border-slate-800/80 rounded-xl p-3">
                 <div class="flex items-center justify-between gap-2 text-xs mb-1.5">
                   <span class="font-bold text-white truncate">${escapeHtml(g.item)}</span>
                   <span class="font-mono text-sky-300 shrink-0">${formatCurrency(g.savedAmount || 0)} / ${formatCurrency(g.targetAmount)} (${pct}%)</span>
@@ -2513,10 +2640,10 @@
         let ownerBadgeClass = 'bg-sky-500/15 text-sky-300 border-sky-500/30';
         if (g.owner === 'me') {
           ownerLabel = appState.profiles.me.name;
-          ownerBadgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/40';
+          ownerBadgeClass = 'bg-white/15 text-slate-100 border-white/40';
         } else if (g.owner === 'partner') {
           ownerLabel = appState.profiles.partner.name;
-          ownerBadgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+          ownerBadgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/40';
         }
 
         let deadlineHtml = '<span class="text-slate-500">未設定完成日期</span>';
@@ -2528,7 +2655,7 @@
         }
 
         return `
-          <div class="glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0">
+          <div onclick="openLedger('vault', '${g.id}')" class="cursor-pointer hover:border-sky-500/40 transition-colors glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0">
             <div class="space-y-2.5">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
@@ -2540,10 +2667,10 @@
                 </div>
 
                 <div class="flex items-center gap-1 shrink-0">
-                  <button type="button" onclick="startEditGoal('${g.id}')" title="調整目標金額、item 或時間" class="p-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-slate-700 transition-colors">
+                  <button type="button" onclick="event.stopPropagation(); startEditGoal('${g.id}')" title="調整目標金額、item 或時間" class="p-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-slate-700 transition-colors">
                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                   </button>
-                  <button type="button" onclick="deleteVaultGoal('${g.id}')" title="刪除目標" class="p-2 rounded-xl bg-slate-800/90 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700 transition-colors">
+                  <button type="button" onclick="event.stopPropagation(); deleteVaultGoal('${g.id}')" title="刪除目標" class="p-2 rounded-xl bg-slate-800/90 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700 transition-colors">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
@@ -2566,10 +2693,10 @@
             <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
               <span class="text-[11px] text-slate-400">快速存入進度：</span>
               <div class="flex items-center gap-1.5">
-                <button type="button" onclick="quickAdjustGoalSaved('${g.id}', 1000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-sky-500/20 border border-slate-700 text-xs font-mono text-sky-300">
+                <button type="button" onclick="event.stopPropagation(); quickAdjustGoalSaved('${g.id}', 1000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-sky-500/20 border border-slate-700 text-xs font-mono text-sky-300">
                   +$1,000
                 </button>
-                <button type="button" onclick="quickAdjustGoalSaved('${g.id}', 5000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 border border-slate-700 text-xs font-mono text-emerald-300">
+                <button type="button" onclick="event.stopPropagation(); quickAdjustGoalSaved('${g.id}', 5000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 border border-slate-700 text-xs font-mono text-emerald-300">
                   +$5,000
                 </button>
               </div>
@@ -2631,6 +2758,7 @@
         showToast(`已新增目標「${item}」`);
       }
 
+      (appState.vaultGoals || []).forEach(reconcileLedger);
       const { overBudget, exceedAmount } = computeVaultAllocation();
       saveState();
       cancelEditGoal();
@@ -2685,7 +2813,9 @@
     function quickAdjustGoalSaved(goalId, delta) {
       const goal = (appState.vaultGoals || []).find((g) => g.id === goalId);
       if (!goal) return;
-      goal.savedAmount = Math.max(0, Number(goal.savedAmount || 0) + Number(delta));
+      reconcileLedger(goal);
+      goal.history.push({ id: 'e_' + Date.now(), ts: Date.now(), date: getTodayStr(0), amount: Number(delta), note: '快速存入' });
+      goal.savedAmount = Math.max(0, ledgerSum(goal));
       saveState();
       renderVaultPage();
       showToast(`已為「${goal.item}」累積 ${formatCurrency(delta)}`);
@@ -2719,8 +2849,8 @@
         const activeP = appState.profiles[activeContext];
         badge.textContent = `${activeP.name} 專屬檢視`;
         badge.className = activeContext === 'me'
-          ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30'
-          : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+          ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-white/15 text-slate-100 border border-white/30'
+          : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30';
         subtitle.textContent = `專注檢視 ${activeP.name} 的每日營養、有氧、肌力與睡眠狀態`;
       }
 
@@ -2748,8 +2878,8 @@
         const status = getBMIStatus(bmi);
         const idealWeight = getIdealWeightRange(p.height);
         const isMe = uKey === 'me';
-        const accentColor = isMe ? 'text-sky-400' : 'text-rose-400';
-        const borderGlow = isMe ? 'border-sky-500/25' : 'border-rose-500/25';
+        const accentColor = isMe ? 'text-slate-100' : 'text-sky-400';
+        const borderGlow = isMe ? 'border-white/25' : 'border-sky-500/25';
 
         const clampedBmi = Math.max(15, Math.min(32, bmi));
         const markerPct = ((clampedBmi - 15) / (32 - 15)) * 100;
@@ -2758,7 +2888,7 @@
           <div class="glass-card rounded-2xl p-5 border ${borderGlow} relative overflow-hidden">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-10 h-10 rounded-xl ${isMe ? 'bg-sky-500/15 text-sky-400 border-sky-500/30' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'} border flex items-center justify-center font-bold text-base shrink-0">
+                <div class="w-10 h-10 rounded-xl ${isMe ? 'bg-white/15 text-slate-100 border-white/30' : 'bg-sky-500/15 text-sky-400 border-sky-500/30'} border flex items-center justify-center font-bold text-base shrink-0">
                   ${escapeHtml(p.name.charAt(0))}
                 </div>
                 <div class="min-w-0">
@@ -2797,10 +2927,11 @@
               <div class="relative h-3 w-full">
                 <div style="left: calc(${markerPct}% - 6px)" class="absolute -top-1 w-3 h-3 rotate-45 bg-white border-2 border-slate-950 shadow"></div>
               </div>
-              <div class="flex justify-between text-[10px] font-mono text-slate-500 -mt-1">
-                <span>過輕 &lt;18.5</span>
-                <span class="text-emerald-400 font-semibold">適中 18.5 - 23.9</span>
-                <span>過重 ≥24</span>
+              <div class="flex text-[10px] font-mono leading-tight -mt-1">
+                <span style="width: 20.6%" class="text-amber-300">過輕<br>&lt;18.5</span>
+                <span style="width: 31.8%" class="text-emerald-400 font-semibold">適中<br>18.5-23.9</span>
+                <span style="width: 17.6%" class="text-orange-300">過重<br>24-26.9</span>
+                <span style="width: 30%" class="text-right text-rose-300">輕度以上肥胖<br>≥27</span>
               </div>
             </div>
           </div>
@@ -2829,6 +2960,7 @@
       const waterPct = Math.min(100, Math.round((intake.water / waterTarget) * 100));
       document.getElementById('today-water-pct').textContent = `${waterPct}%`;
       document.getElementById('today-water-bar').style.width = `${waterPct}%`;
+      document.getElementById('water-knob').style.left = `${waterPct}%`;
 
       document.getElementById('protein-multiplier-label').textContent = profile.proteinMult;
       document.getElementById('today-protein-current').textContent = intake.protein;
@@ -2836,6 +2968,7 @@
       const proteinPct = Math.min(100, Math.round((intake.protein / proteinTarget) * 100));
       document.getElementById('today-protein-pct').textContent = `${proteinPct}%`;
       document.getElementById('today-protein-bar').style.width = `${proteinPct}%`;
+      document.getElementById('protein-knob').style.left = `${proteinPct}%`;
     }
 
     function quickAddWater(amount) {
@@ -2898,7 +3031,7 @@
         return `
           <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(p.name)}</span>
+              <span class="text-xs font-bold ${uKey === 'me' ? 'text-slate-100' : 'text-sky-400'}">${escapeHtml(p.name)}</span>
               ${statusBadge}
             </div>
             <div class="flex items-baseline justify-between">
@@ -2933,7 +3066,7 @@
         return `
           <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 flex items-center justify-between">
             <div>
-              <div class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(p.name)}</div>
+              <div class="text-xs font-bold ${uKey === 'me' ? 'text-slate-100' : 'text-sky-400'}">${escapeHtml(p.name)}</div>
               <div class="mt-1 flex items-baseline gap-1.5">
                 <span class="text-xl font-mono font-bold text-white">${count}</span>
                 <span class="text-xs text-slate-400 font-mono">/ 2 次目標</span>
@@ -2966,36 +3099,38 @@
 
       container.innerHTML = users.map((uKey) => {
         const p = appState.profiles[uKey];
-        const sleepLogs = appState.records
-          .filter((r) => r.userId === uKey && r.type === 'sleep')
-          .sort((a, b) => b.date.localeCompare(a.date));
+        const todayStr = getTodayStr(0);
+        const stepLogs = appState.records.filter((r) => r.userId === uKey && r.type === 'steps' && r.date === todayStr);
+        const latest = stepLogs.length > 0;
+        const hrs = getStepsForDate(uKey, todayStr);
+        const stepPct = Math.min(100, Math.round((hrs / STEP_GOAL) * 100));
 
-        const latest = sleepLogs[0];
-        const hrs = latest ? Number(latest.hours) : 0;
-
-        let statusHtml = '<span class="text-[11px] text-slate-500">尚無紀錄</span>';
+        let statusHtml = '<span class="text-[11px] text-slate-500">今日尚無紀錄</span>';
         if (latest) {
-          if (hrs >= 7 && hrs <= 9) {
-            statusHtml = '<span class="text-[11px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">理想睡眠 (7-9h)</span>';
-          } else if (hrs < 7) {
-            statusHtml = '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded">睡眠不足 (&lt;7h)</span>';
+          if (hrs >= STEP_GOAL) {
+            statusHtml = '<span class="text-[11px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">已達標</span>';
+          } else if (hrs < 5000) {
+            statusHtml = '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded">還差一點</span>';
           } else {
-            statusHtml = '<span class="text-[11px] font-bold text-sky-300 bg-sky-500/20 px-2 py-0.5 rounded">睡眠偏長 (&gt;9h)</span>';
+            statusHtml = '<span class="text-[11px] font-bold text-sky-300 bg-sky-500/20 px-2 py-0.5 rounded">進行中</span>';
           }
         }
 
         return `
           <div class="bg-slate-900/75 p-3 rounded-xl border border-slate-800/90 space-y-1.5">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold ${uKey === 'me' ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(p.name)}</span>
+              <span class="text-xs font-bold ${uKey === 'me' ? 'text-slate-100' : 'text-sky-400'}">${escapeHtml(p.name)}</span>
               ${statusHtml}
             </div>
             <div class="flex items-baseline justify-between">
               <div>
-                <span class="text-xl font-mono font-bold text-white">${latest ? hrs : '--'}</span>
-                <span class="text-xs text-slate-400"> 小時</span>
+                <span class="text-xl font-mono font-bold text-white">${latest ? hrs.toLocaleString() : '--'}</span>
+                <span class="text-xs text-slate-400"> 步</span>
               </div>
-              <span class="text-[11px] font-mono text-slate-400">${latest ? latest.date : ''}</span>
+              <span class="text-[11px] font-mono text-slate-400">${stepPct}%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-violet-500 to-fuchsia-400 rounded-full" style="width: ${stepPct}%"></div>
             </div>
           </div>
         `;
@@ -3031,8 +3166,8 @@
             ...(activeContext !== 'partner' ? [{
               label: meName,
               data: meWeights,
-              borderColor: '#0EA5E9',
-              backgroundColor: 'rgba(14, 165, 233, 0.15)',
+              borderColor: '#F1F5F9',
+              backgroundColor: 'rgba(241, 245, 249, 0.15)',
               tension: 0.35,
               spanGaps: true,
               pointRadius: 4
@@ -3040,8 +3175,8 @@
             ...(activeContext !== 'me' ? [{
               label: partnerName,
               data: partnerWeights,
-              borderColor: '#F43F5E',
-              backgroundColor: 'rgba(244, 63, 94, 0.15)',
+              borderColor: '#0EA5E9',
+              backgroundColor: 'rgba(14, 165, 233, 0.15)',
               tension: 0.35,
               spanGaps: true,
               pointRadius: 4
@@ -3065,14 +3200,8 @@
       for (let i = 6; i >= 0; i--) {
         last7Days.push(getTodayStr(-i));
       }
-      const meSleep = last7Days.map((d) => {
-        const found = appState.records.filter((r) => r.userId === 'me' && r.type === 'sleep' && r.date === d).pop();
-        return found ? found.hours : 0;
-      });
-      const partnerSleep = last7Days.map((d) => {
-        const found = appState.records.filter((r) => r.userId === 'partner' && r.type === 'sleep' && r.date === d).pop();
-        return found ? found.hours : 0;
-      });
+      const meSleep = last7Days.map((d) => getStepsForDate('me', d));
+      const partnerSleep = last7Days.map((d) => getStepsForDate('partner', d));
 
       const sCtx = document.getElementById('dashboardSleepChart').getContext('2d');
       if (sleepChartInstance) sleepChartInstance.destroy();
@@ -3084,13 +3213,13 @@
             ...(activeContext !== 'partner' ? [{
               label: meName,
               data: meSleep,
-              backgroundColor: 'rgba(14, 165, 233, 0.8)',
+              backgroundColor: 'rgba(241, 245, 249, 0.85)',
               borderRadius: 6
             }] : []),
             ...(activeContext !== 'me' ? [{
               label: partnerName,
               data: partnerSleep,
-              backgroundColor: 'rgba(244, 63, 94, 0.8)',
+              backgroundColor: 'rgba(14, 165, 233, 0.85)',
               borderRadius: 6
             }] : [])
           ]
@@ -3105,7 +3234,7 @@
             x: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { display: false } },
             y: {
               min: 0,
-              max: 12,
+              suggestedMax: 10000,
               ticks: { color: '#94A3B8', font: { size: 10 } },
               grid: { color: 'rgba(148,163,184,0.08)' }
             }
@@ -3123,10 +3252,10 @@
       btnPartner.textContent = appState.profiles.partner.name;
 
       if (userKey === 'me') {
-        btnMe.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-500 text-slate-950';
+        btnMe.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-900';
         btnPartner.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
       } else {
-        btnPartner.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-500 text-white';
+        btnPartner.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-500 text-slate-950';
         btnMe.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
       }
 
@@ -3350,6 +3479,7 @@
 
       const filtered = appState.records
         .filter((r) => {
+          if (r.type === 'sleep') return false;
           if (fUser !== 'all' && r.userId !== fUser) return false;
           if (fType !== 'all' && r.type !== fType) return false;
           if (r.date < startDate || r.date > endDate) return false;
@@ -3366,15 +3496,15 @@
         .reduce((sum, r) => sum + Number(r.minutes || 0), 0);
 
       const strengthLogs = filtered.filter((r) => r.type === 'strength');
-      const sleepLogs = filtered.filter((r) => r.type === 'sleep');
+      const sleepLogs = filtered.filter((r) => r.type === 'steps');
       const avgSleep = sleepLogs.length
-        ? (sleepLogs.reduce((sum, r) => sum + Number(r.hours || 0), 0) / sleepLogs.length).toFixed(1)
+        ? Math.round(sleepLogs.reduce((sum, r) => sum + Number(r.steps || 0), 0) / sleepLogs.length).toLocaleString()
         : '--';
 
       document.getElementById('stat-count').textContent = `${filtered.length} 筆`;
       document.getElementById('stat-cardio').textContent = `${cardioMins} 分鐘`;
       document.getElementById('stat-strength').textContent = `${strengthLogs.length} 次`;
-      document.getElementById('stat-sleep').textContent = avgSleep === '--' ? '-- 小時' : `${avgSleep} 小時`;
+      document.getElementById('stat-sleep').textContent = avgSleep === '--' ? '-- 步' : `${avgSleep} 步`;
 
       const allMuscleNames = ['背部', '肩膀', '手臂', '腹部', '臀部', '腿部', '核心'];
       const muscleCounts = allMuscleNames.map((mName) =>
@@ -3421,8 +3551,8 @@
       listEl.innerHTML = filtered.map((r) => {
         const who = appState.profiles[r.userId];
         const whoBadge = r.userId === 'me'
-          ? 'bg-sky-500/20 text-sky-300 border-sky-500/30'
-          : 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+          ? 'bg-white/15 text-slate-100 border-white/30'
+          : 'bg-sky-500/20 text-sky-300 border-sky-500/30';
 
         let contentHtml = '';
         if (r.type === 'body') {
@@ -3434,7 +3564,9 @@
           const mTags = (r.muscles || []).map((m) => `<span class="px-1.5 py-0.5 rounded bg-indigo-500/25 text-indigo-200 text-[11px]">${escapeHtml(m)}</span>`).join(' ');
           contentHtml = `<span class="text-indigo-300 font-semibold">肌力訓練</span> · ${mTags} ${r.note ? `<span class="text-slate-400 text-xs">(${escapeHtml(r.note)})</span>` : ''}`;
         } else if (r.type === 'sleep') {
-          contentHtml = `<span class="text-violet-300 font-semibold">每日睡眠</span> · <span class="font-mono text-white">${r.hours} 小時</span> ${r.note ? `<span class="text-slate-400 text-xs">(${escapeHtml(r.note)})</span>` : ''}`;
+          return '';
+        } else if (r.type === 'steps') {
+          contentHtml = `<span class="text-violet-300 font-semibold">每日步數</span> · <span class="font-mono text-white">${Number(r.steps || 0).toLocaleString()} 步</span>`;
         }
 
         return `
@@ -3477,10 +3609,10 @@
       const tabPartner = document.getElementById('profile-tab-partner');
       const tabBase = 'flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all ';
       if (profileTabUser === 'me') {
-        tabMe.className = tabBase + 'border-sky-400 bg-sky-500/15 text-sky-300';
+        tabMe.className = tabBase + 'border-white/70 bg-white/10 text-white';
         tabPartner.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
       } else {
-        tabPartner.className = tabBase + 'border-rose-400 bg-rose-500/15 text-rose-300';
+        tabPartner.className = tabBase + 'border-sky-400 bg-sky-500/15 text-sky-300';
         tabMe.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
       }
 
@@ -3491,8 +3623,8 @@
       const avatar = document.getElementById('profile-avatar-circle');
       avatar.textContent = p.name.charAt(0);
       avatar.className = profileTabUser === 'me'
-        ? 'w-14 h-14 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-2xl font-bold text-sky-300'
-        : 'w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-2xl font-bold text-rose-300';
+        ? 'w-14 h-14 rounded-2xl bg-white/15 border border-white/40 flex items-center justify-center text-2xl font-bold text-white'
+        : 'w-14 h-14 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-2xl font-bold text-sky-300';
 
       document.getElementById('profile-header-name').textContent = p.name;
       document.getElementById('profile-header-meta').textContent = `${p.height} cm · ${p.weight} kg · BMI ${bmi}`;
@@ -3509,7 +3641,7 @@
 
       document.getElementById('profile-history-title').textContent = `${p.name} 的近期身體與運動足跡`;
       const personalLogs = appState.records
-        .filter((r) => r.userId === profileTabUser)
+        .filter((r) => r.userId === profileTabUser && r.type !== 'sleep')
         .sort((a, b) => b.date.localeCompare(a.date))
         .slice(0, 8);
 
@@ -3519,7 +3651,7 @@
         if (r.type === 'body') desc = `身高 ${r.height}cm · 體重 ${r.weight}kg (BMI ${calculateBMI(r.weight, r.height)})`;
         if (r.type === 'cardio') desc = `有氧：${escapeHtml(r.subType)} ${r.minutes} 分鐘`;
         if (r.type === 'strength') desc = `肌力：${(r.muscles || []).map(escapeHtml).join('、')}`;
-        if (r.type === 'sleep') desc = `睡眠：${r.hours} 小時`;
+        if (r.type === 'steps') desc = `步數：${Number(r.steps || 0).toLocaleString()} 步`;
 
         return `
           <div class="flex items-center justify-between gap-2 py-2 px-3 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs">
@@ -3784,10 +3916,10 @@
       const tabPartner = document.getElementById('album-tab-partner');
       const tabBase = 'flex-1 min-w-0 py-3 px-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all ';
       if (albumUser === 'me') {
-        tabMe.className = tabBase + 'border-sky-400 bg-sky-500/15 text-sky-300';
+        tabMe.className = tabBase + 'border-white/70 bg-white/10 text-white';
         tabPartner.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
       } else {
-        tabPartner.className = tabBase + 'border-rose-400 bg-rose-500/15 text-rose-300';
+        tabPartner.className = tabBase + 'border-sky-400 bg-sky-500/15 text-sky-300';
         tabMe.className = tabBase + 'border-slate-800 bg-slate-900/70 text-slate-400';
       }
 
@@ -4132,24 +4264,27 @@
       const listEl = document.getElementById('msg-modal-list');
       const roomMsgs = messages
         .filter((m) => m.room === currentRoomCode)
-        .sort((a, b) => b.createdAt - a.createdAt);
+        .sort((a, b) => a.createdAt - b.createdAt); // 對話式：舊的在上、新的在下
 
       if (roomMsgs.length === 0) {
         listEl.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">最近 7 天沒有訊息紀錄</div>';
       } else {
         listEl.innerHTML = roomMsgs.map((m) => {
           const isMe = m.from === 'me';
+          const mine = m.from === msgSender; // 我說的靠右、對方說的靠左
           const who = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
           return `
-            <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
-              <div class="flex items-center justify-between gap-2 text-[11px]">
-                <span class="font-bold ${isMe ? 'text-sky-400' : 'text-rose-400'}">${escapeHtml(who)}</span>
-                <div class="flex items-center gap-2">
-                  ${m.readAt ? '<span class="text-emerald-400">已收到 ♥</span>' : '<span class="text-slate-500">未讀</span>'}
+            <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+              <div class="max-w-[82%] px-3.5 py-2.5 space-y-1 border ${mine
+                ? 'rounded-2xl rounded-br-md bg-sky-500/20 border-sky-500/40'
+                : 'rounded-2xl rounded-bl-md bg-slate-900/90 border-slate-800'}">
+                <div class="flex items-center justify-between gap-3 text-[11px]">
+                  <span class="font-bold ${isMe ? 'text-slate-100' : 'text-sky-300'}">${escapeHtml(who)}</span>
                   <span class="font-mono text-slate-500">${timeAgo(m.createdAt)}</span>
                 </div>
+                <div class="text-sm text-white break-words">${escapeHtml(m.text)}</div>
+                <div class="text-[10px] text-right ${m.readAt ? 'text-emerald-400' : 'text-slate-500'}">${m.readAt ? '已收到 ♥' : '未讀'}</div>
               </div>
-              <div class="text-sm text-white break-words">${escapeHtml(m.text)}</div>
             </div>
           `;
         }).join('');
@@ -4157,6 +4292,7 @@
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       lucide.createIcons();
+      listEl.scrollTop = listEl.scrollHeight; // 捲到最新一則
     }
 
     function closeMsgHistory() {
@@ -4179,10 +4315,10 @@
       btnMe.textContent = meName;
       btnPartner.textContent = partnerName;
       btnMe.className = msgSender === 'me'
-        ? 'px-2.5 py-1 rounded-md font-bold transition-all bg-sky-500 text-slate-950'
+        ? 'px-2.5 py-1 rounded-md font-bold transition-all bg-white text-slate-900'
         : 'px-2.5 py-1 rounded-md font-bold transition-all text-slate-400 hover:text-white';
       btnPartner.className = msgSender === 'partner'
-        ? 'px-2.5 py-1 rounded-md font-bold transition-all bg-rose-500 text-white'
+        ? 'px-2.5 py-1 rounded-md font-bold transition-all bg-sky-500 text-slate-950'
         : 'px-2.5 py-1 rounded-md font-bold transition-all text-slate-400 hover:text-white';
 
       const senderName = msgSender === 'me' ? meName : partnerName;
@@ -4213,8 +4349,8 @@
         const fromIsMe = m.from === 'me';
         const fromName = appState.profiles[m.from] ? appState.profiles[m.from].name : '';
         const isIncoming = m.from !== msgSender;
-        const borderCls = fromIsMe ? 'border-sky-500/40 bg-sky-500/10' : 'border-rose-500/40 bg-rose-500/10';
-        const nameCls = fromIsMe ? 'text-sky-300' : 'text-rose-300';
+        const borderCls = fromIsMe ? 'border-white/40 bg-white/10' : 'border-sky-500/40 bg-sky-500/10';
+        const nameCls = fromIsMe ? 'text-slate-100' : 'text-sky-300';
 
         let statusHtml = '';
         if (m.readAt) {
@@ -4256,6 +4392,583 @@
       lucide.createIcons();
     }
 
+    // ==================== 11.9 HEALTH: 步數 / 點人員進入 / 拖拉進度條 ====================
+    const STEP_GOAL = 8000;
+
+    function getStepsForDate(userKey, dateStr) {
+      return appState.records
+        .filter((r) => r.userId === userKey && r.type === 'steps' && r.date === dateStr)
+        .reduce((sum, r) => sum + Number(r.steps || 0), 0);
+    }
+
+    function openPersonHealth(userKey) {
+      setActiveContext(userKey);
+      switchTab('dashboard');
+    }
+
+    function setIntakeValue(kind, val, commit) {
+      const key = `${actionTargetUser}_${getTodayStr(0)}`;
+      if (!appState.dailyIntake[key]) appState.dailyIntake[key] = { water: 0, protein: 0 };
+      appState.dailyIntake[key][kind] = val;
+      renderHydrationAndProtein();
+      if (commit) {
+        saveState();
+        const unit = kind === 'water' ? 'ml' : 'g';
+        showToast(`${appState.profiles[actionTargetUser].name} 今日${kind === 'water' ? '飲水' : '蛋白質'}已調整為 ${val} ${unit}`);
+      }
+    }
+
+    function initDragBars() {
+      ['water', 'protein'].forEach((kind) => {
+        const track = document.getElementById(`${kind}-track`);
+        if (!track) return;
+        let dragging = false;
+        const apply = (clientX, commit) => {
+          const rect = track.getBoundingClientRect();
+          const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+          const targets = getDailyTargets(actionTargetUser);
+          const target = kind === 'water' ? targets.waterTarget : targets.proteinTarget;
+          const step = kind === 'water' ? 50 : 1;
+          setIntakeValue(kind, Math.round((ratio * target) / step) * step, commit);
+        };
+        track.addEventListener('pointerdown', (e) => {
+          dragging = true;
+          try { track.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+          apply(e.clientX, false);
+        });
+        track.addEventListener('pointermove', (e) => { if (dragging) apply(e.clientX, false); });
+        track.addEventListener('pointerup', (e) => {
+          if (!dragging) return;
+          dragging = false;
+          apply(e.clientX, true);
+        });
+        track.addEventListener('pointercancel', () => { dragging = false; });
+      });
+    }
+
+    // ==================== 11.10 RECORDS MODAL（有氧 / 肌力 / 步數：查看、修改、刪除）====================
+    const CARDIO_TYPES = ['慢跑 / 路跑', '快走 / 坡度健走', '室內飛輪 / 單車', '游泳', 'HIIT 間歇有氧', '羽球 / 球類運動', '跳繩 / 登階機'];
+    const MUSCLE_NAMES = ['背部', '肩膀', '手臂', '腹部', '臀部', '腿部', '核心'];
+    let recordsModalType = null;
+    let recordsEditId = null;
+
+    function recordsUsers() {
+      return activeContext === 'both' ? ['me', 'partner'] : [activeContext];
+    }
+
+    function openRecordsModal(type) {
+      recordsModalType = type;
+      recordsEditId = null;
+      renderRecordsModal();
+      const modal = document.getElementById('records-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeRecordsModal() {
+      const modal = document.getElementById('records-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      recordsModalType = null;
+      recordsEditId = null;
+    }
+
+    function recordsAddFor(userKey) {
+      const type = recordsModalType;
+      closeRecordsModal();
+      setLogFormUser(userKey);
+      switchTab('log', type);
+    }
+
+    function recordRowSummary(r) {
+      if (r.type === 'cardio') {
+        return `${escapeHtml(r.subType)} · <span class="font-mono text-white">${r.minutes} 分鐘</span>${r.note ? ` <span class="text-slate-400">(${escapeHtml(r.note)})</span>` : ''}`;
+      }
+      if (r.type === 'strength') {
+        const tags = (r.muscles || []).map((m) => `<span class="px-1.5 py-0.5 rounded bg-indigo-500/25 text-indigo-200 text-[11px]">${escapeHtml(m)}</span>`).join(' ');
+        return `${tags} <span class="font-mono text-white">${r.minutes || 0} 分鐘</span>${r.note ? ` <span class="text-slate-400">(${escapeHtml(r.note)})</span>` : ''}`;
+      }
+      return `<span class="font-mono text-white">${Number(r.steps || 0).toLocaleString()} 步</span>`;
+    }
+
+    function recordEditForm(r) {
+      const inputCls = 'min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500';
+      const dateField = `<input type="date" id="rec-edit-date" value="${r.date}" class="${inputCls} font-mono" />`;
+      let body = '';
+      if (r.type === 'cardio') {
+        body = `
+          <select id="rec-edit-sub" class="${inputCls}">
+            ${CARDIO_TYPES.map((t) => `<option value="${escapeHtml(t)}" ${t === r.subType ? 'selected' : ''}>${escapeHtml(t)}</option>`).join('')}
+          </select>
+          <input type="number" id="rec-edit-min" value="${r.minutes || ''}" placeholder="分鐘" class="${inputCls} font-mono" />
+          <input type="text" id="rec-edit-note" value="${escapeHtml(r.note || '')}" placeholder="備註" class="${inputCls} col-span-2" />`;
+      } else if (r.type === 'strength') {
+        body = `
+          <div class="col-span-2 flex flex-wrap gap-1.5">
+            ${MUSCLE_NAMES.map((m) => `
+              <label class="cursor-pointer select-none">
+                <input type="checkbox" name="rec-edit-muscle" value="${m}" class="peer sr-only" ${(r.muscles || []).includes(m) ? 'checked' : ''} />
+                <span class="block px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 peer-checked:bg-indigo-500/25 peer-checked:border-indigo-400 peer-checked:text-indigo-200">${m}</span>
+              </label>`).join('')}
+          </div>
+          <input type="number" id="rec-edit-min" value="${r.minutes || ''}" placeholder="分鐘" class="${inputCls} font-mono" />
+          <input type="text" id="rec-edit-note" value="${escapeHtml(r.note || '')}" placeholder="備註" class="${inputCls}" />`;
+      } else {
+        body = `<input type="number" id="rec-edit-steps" value="${r.steps || ''}" placeholder="步數" class="${inputCls} font-mono" />`;
+      }
+      return `
+        <div class="grid grid-cols-2 gap-2">${dateField}${body}</div>
+        <div class="flex justify-end gap-2 mt-2">
+          <button type="button" onclick="recordsCancelEdit()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold">取消</button>
+          <button type="button" onclick="recordsSaveEdit('${r.id}')" class="px-3 py-1.5 rounded-lg bg-sky-500 text-slate-950 text-xs font-bold">儲存修改</button>
+        </div>`;
+    }
+
+    function renderRecordsModal() {
+      const type = recordsModalType;
+      if (!type) return;
+      const titles = { cardio: '每週有氧運動紀錄', strength: '每週肌力訓練紀錄', steps: '每日步數紀錄' };
+      document.getElementById('records-title').textContent = titles[type];
+      const users = recordsUsers();
+      const weekly = type !== 'steps';
+      const startDate = weekly ? getWeekStartStr() : getTodayStr(-13);
+      document.getElementById('records-sub').textContent = weekly
+        ? `本週（${startDate} 起）新增的紀錄，點鉛筆可修改`
+        : '近 14 天的步數，同一天有多筆時會加總；點鉛筆可修改';
+
+      const addBar = document.getElementById('records-add-bar');
+      if (type === 'steps') {
+        const cls = 'min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500';
+        addBar.innerHTML = `
+          <div class="w-full grid grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-900/80 border border-slate-800">
+            <select id="rec-step-user" class="${cls}">
+              ${users.map((u) => `<option value="${u}">${escapeHtml(appState.profiles[u].name)}</option>`).join('')}
+            </select>
+            <input type="date" id="rec-step-date" value="${getTodayStr(0)}" class="${cls} font-mono" />
+            <input type="number" inputmode="numeric" id="rec-step-val" placeholder="步數（可到手機健康 App 查看後填入）" class="${cls} col-span-2 text-sm font-mono" />
+            <button type="button" onclick="recordsAddSteps()" class="col-span-2 py-2 rounded-xl bg-violet-500 text-white text-xs font-bold">新增步數</button>
+          </div>`;
+      } else {
+        addBar.innerHTML = users.map((u) => `
+          <button type="button" onclick="recordsAddFor('${u}')" class="px-3 py-2 rounded-xl ${u === 'me' ? 'bg-white/10 border-white/35 text-slate-100' : 'bg-sky-500/15 border-sky-500/35 text-sky-300'} border text-xs font-bold">
+            + ${escapeHtml(appState.profiles[u].name)} 新增
+          </button>`).join('');
+      }
+
+      const list = appState.records
+        .filter((r) => r.type === type && users.includes(r.userId) && r.date >= startDate)
+        .sort((a, b) => b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)));
+      const listEl = document.getElementById('records-list');
+      if (list.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-sm text-slate-500 py-8">這段期間還沒有紀錄</div>';
+        return;
+      }
+      listEl.innerHTML = list.map((r) => {
+        const who = appState.profiles[r.userId];
+        const color = r.userId === 'me' ? 'text-slate-100' : 'text-sky-300';
+        if (recordsEditId === r.id) {
+          return `<div class="p-3 rounded-2xl bg-slate-900/90 border border-sky-500/40">
+            <div class="text-xs font-bold ${color} mb-2">${escapeHtml(who.name)} · 修改紀錄</div>${recordEditForm(r)}</div>`;
+        }
+        return `
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2">
+            <div class="min-w-0 text-xs text-slate-200 space-y-1">
+              <div class="flex items-center gap-2"><span class="font-bold ${color}">${escapeHtml(who.name)}</span><span class="font-mono text-slate-400">${r.date}</span></div>
+              <div class="break-words">${recordRowSummary(r)}</div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="recordsStartEdit('${r.id}')" title="修改" class="p-2 rounded-lg bg-slate-800 hover:bg-sky-500/20 text-slate-300 border border-slate-700"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              <button type="button" onclick="recordsDelete('${r.id}')" title="刪除" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>`;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function recordsStartEdit(id) { recordsEditId = id; renderRecordsModal(); }
+    function recordsCancelEdit() { recordsEditId = null; renderRecordsModal(); }
+
+    function recordsAddSteps() {
+      const user = document.getElementById('rec-step-user').value;
+      const date = document.getElementById('rec-step-date').value || getTodayStr(0);
+      const steps = Math.round(Number(document.getElementById('rec-step-val').value));
+      if (!Number.isFinite(steps) || steps <= 0) { showToast('請輸入大於 0 的步數'); return; }
+      appState.records.push({ id: 'rec_' + Date.now(), userId: user, type: 'steps', date, steps });
+      saveState();
+      refreshAllUI();
+      renderRecordsModal();
+      showToast(`已新增 ${appState.profiles[user].name} ${steps.toLocaleString()} 步`);
+    }
+
+    function recordsSaveEdit(id) {
+      const r = appState.records.find((x) => x.id === id);
+      if (!r) return;
+      const date = document.getElementById('rec-edit-date').value || r.date;
+      if (r.type === 'cardio') {
+        const minutes = Math.round(Number(document.getElementById('rec-edit-min').value));
+        if (!Number.isFinite(minutes) || minutes <= 0) { showToast('請輸入大於 0 的分鐘數'); return; }
+        r.subType = document.getElementById('rec-edit-sub').value;
+        r.minutes = minutes;
+        r.note = document.getElementById('rec-edit-note').value.trim();
+      } else if (r.type === 'strength') {
+        const muscles = Array.from(document.querySelectorAll('input[name="rec-edit-muscle"]:checked')).map((c) => c.value);
+        if (muscles.length === 0) { showToast('請至少勾選一個肌群'); return; }
+        r.muscles = muscles;
+        r.minutes = Math.round(Number(document.getElementById('rec-edit-min').value)) || 0;
+        r.note = document.getElementById('rec-edit-note').value.trim();
+      } else {
+        const steps = Math.round(Number(document.getElementById('rec-edit-steps').value));
+        if (!Number.isFinite(steps) || steps <= 0) { showToast('請輸入大於 0 的步數'); return; }
+        r.steps = steps;
+      }
+      r.date = date;
+      recordsEditId = null;
+      saveState();
+      refreshAllUI();
+      renderRecordsModal();
+      showToast('已儲存修改');
+    }
+
+    function recordsDelete(id) {
+      if (!confirm('確定要刪除這筆紀錄嗎？')) return;
+      appState.records = appState.records.filter((x) => x.id !== id);
+      saveState();
+      refreshAllUI();
+      renderRecordsModal();
+      showToast('已刪除紀錄');
+    }
+
+    // ==================== 11.11 LEDGER（養小豬 / Project：存入或還款明細，可新增與修改）====================
+    let ledgerKind = null;
+    let ledgerId = null;
+    let ledgerEditId = null;
+
+    function ledgerItems(kind) {
+      return kind === 'vault' ? (appState.vaultGoals || []) : (appState.projects || []);
+    }
+
+    function ledgerSum(item) {
+      return (item.history || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    }
+
+    // 讓 savedAmount 與明細一致：沒有明細時建立「初始金額」，金額被手動改過時補一筆「手動調整」
+    function reconcileLedger(item) {
+      if (!Array.isArray(item.history)) item.history = [];
+      const saved = Math.max(0, Number(item.savedAmount || 0));
+      const diff = saved - ledgerSum(item);
+      if (Math.abs(diff) > 0.001) {
+        item.history.push({
+          id: 'e_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+          ts: Date.now(),
+          date: getTodayStr(0),
+          amount: diff,
+          note: item.history.length === 0 ? '初始金額' : '手動調整'
+        });
+      }
+    }
+
+    function getLedgerItem() {
+      return ledgerItems(ledgerKind).find((x) => x.id === ledgerId) || null;
+    }
+
+    function openLedger(kind, id) {
+      ledgerKind = kind;
+      ledgerId = id;
+      ledgerEditId = null;
+      const item = getLedgerItem();
+      if (!item) return;
+      reconcileLedger(item);
+      document.getElementById('ledger-add-date').value = getTodayStr(0);
+      document.getElementById('ledger-add-amount').value = '';
+      document.getElementById('ledger-add-note').value = '';
+      renderLedger();
+      const modal = document.getElementById('ledger-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLedger() {
+      const modal = document.getElementById('ledger-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      ledgerKind = null;
+      ledgerId = null;
+      ledgerEditId = null;
+    }
+
+    function renderLedger() {
+      const item = getLedgerItem();
+      if (!item) return;
+      const isProject = ledgerKind === 'project';
+      const savedLabel = isProject ? '已還款' : '已累積';
+      const addLabel = isProject ? '還款' : '存入';
+      const target = Math.max(1, Number(item.targetAmount || 0));
+      const saved = Math.max(0, Number(item.savedAmount || 0));
+      const pct = Math.min(100, Math.round((saved / target) * 100));
+
+      document.getElementById('ledger-title').textContent = item.item;
+      document.getElementById('ledger-sub').textContent = isProject ? 'Project 還款專案' : '養小豬豬目標';
+      document.getElementById('ledger-add-title').textContent = `新增一筆${addLabel}（輸入負數代表${isProject ? '修正' : '領出'}）`;
+      document.getElementById('ledger-add-btn').textContent = `新增${addLabel}`;
+      document.getElementById('ledger-summary').innerHTML = `
+        <div class="rounded-2xl p-3 bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex flex-wrap items-baseline justify-between gap-1 text-xs">
+            <span class="text-slate-400">${savedLabel}</span>
+            <span class="font-mono font-bold text-white"><span class="text-sky-300">${formatCurrency(saved)}</span> / ${formatCurrency(target)}
+              <span class="ml-1.5 px-2 py-0.5 rounded bg-sky-500/15 text-sky-300">${pct}%</span></span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-400 rounded-full" style="width: ${pct}%"></div>
+          </div>
+          <div class="text-[11px] text-slate-400 text-right">尚餘 ${formatCurrency(Math.max(0, target - saved))}</div>
+        </div>`;
+
+      const list = [...(item.history || [])].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.ts || 0) - (a.ts || 0));
+      const listEl = document.getElementById('ledger-list');
+      if (list.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-sm text-slate-500 py-6">還沒有任何紀錄</div>';
+        return;
+      }
+      const cls = 'min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500';
+      listEl.innerHTML = list.map((e) => {
+        if (ledgerEditId === e.id) {
+          return `
+            <div class="p-3 rounded-2xl bg-slate-900/90 border border-sky-500/40 space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="date" id="led-edit-date" value="${e.date}" class="${cls} font-mono" />
+                <input type="number" inputmode="decimal" id="led-edit-amount" value="${e.amount}" class="${cls} font-mono" />
+                <input type="text" id="led-edit-note" value="${escapeHtml(e.note || '')}" maxlength="30" placeholder="備註" class="${cls} col-span-2" />
+              </div>
+              <div class="flex justify-end gap-2">
+                <button type="button" onclick="ledgerCancelEdit()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold">取消</button>
+                <button type="button" onclick="ledgerSaveEdit('${e.id}')" class="px-3 py-1.5 rounded-lg bg-sky-500 text-slate-950 text-xs font-bold">儲存修改</button>
+              </div>
+            </div>`;
+        }
+        const amt = Number(e.amount || 0);
+        const when = e.ts ? new Date(e.ts) : null;
+        const time = when ? `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}` : '';
+        return `
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-[11px] font-mono text-slate-400">${escapeHtml(e.date)} ${time}</div>
+              <div class="text-sm font-mono font-bold ${amt >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${amt >= 0 ? '+' : '-'}${formatCurrency(Math.abs(amt))}</div>
+              ${e.note ? `<div class="text-[11px] text-slate-400 break-words">${escapeHtml(e.note)}</div>` : ''}
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="ledgerStartEdit('${e.id}')" title="修改" class="p-2 rounded-lg bg-slate-800 hover:bg-sky-500/20 text-slate-300 border border-slate-700"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              <button type="button" onclick="ledgerDelete('${e.id}')" title="刪除" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>`;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function ledgerAfterChange(msg) {
+      const item = getLedgerItem();
+      if (!item) return;
+      item.savedAmount = Math.max(0, ledgerSum(item));
+      saveState();
+      refreshAllUI();
+      renderLedger();
+      if (msg) showToast(msg);
+    }
+
+    function ledgerAdd() {
+      const item = getLedgerItem();
+      if (!item) return;
+      const date = document.getElementById('ledger-add-date').value || getTodayStr(0);
+      const amount = Number(document.getElementById('ledger-add-amount').value);
+      const note = document.getElementById('ledger-add-note').value.trim();
+      if (!Number.isFinite(amount) || amount === 0) { showToast('請輸入不為 0 的金額'); return; }
+      if (ledgerSum(item) + amount < 0) { showToast('這筆會讓總額小於 0，請檢查金額'); return; }
+      item.history.push({ id: 'e_' + Date.now(), ts: Date.now(), date, amount, note });
+      document.getElementById('ledger-add-amount').value = '';
+      document.getElementById('ledger-add-note').value = '';
+      ledgerAfterChange(`已新增 ${formatCurrency(Math.abs(amount))}`);
+    }
+
+    function ledgerStartEdit(eid) { ledgerEditId = eid; renderLedger(); }
+    function ledgerCancelEdit() { ledgerEditId = null; renderLedger(); }
+
+    function ledgerSaveEdit(eid) {
+      const item = getLedgerItem();
+      if (!item) return;
+      const e = item.history.find((x) => x.id === eid);
+      if (!e) return;
+      const amount = Number(document.getElementById('led-edit-amount').value);
+      if (!Number.isFinite(amount) || amount === 0) { showToast('請輸入不為 0 的金額'); return; }
+      const newSum = ledgerSum(item) - Number(e.amount || 0) + amount;
+      if (newSum < 0) { showToast('修改後總額會小於 0，請檢查金額'); return; }
+      e.amount = amount;
+      e.date = document.getElementById('led-edit-date').value || e.date;
+      e.note = document.getElementById('led-edit-note').value.trim();
+      ledgerEditId = null;
+      ledgerAfterChange('已儲存修改');
+    }
+
+    function ledgerDelete(eid) {
+      const item = getLedgerItem();
+      if (!item) return;
+      const e = item.history.find((x) => x.id === eid);
+      if (!e) return;
+      if (ledgerSum(item) - Number(e.amount || 0) < 0) { showToast('刪除後總額會小於 0，請先修改其他筆'); return; }
+      if (!confirm('確定要刪除這筆紀錄嗎？')) return;
+      item.history = item.history.filter((x) => x.id !== eid);
+      ledgerAfterChange('已刪除紀錄');
+    }
+
+    // ==================== 11.12 PROJECT（還款專案）====================
+    function renderProjectPage() {
+      const projects = appState.projects || [];
+      const totalTarget = projects.reduce((s, p) => s + Math.max(0, Number(p.targetAmount || 0)), 0);
+      const totalPaid = projects.reduce((s, p) => s + Math.max(0, Number(p.savedAmount || 0)), 0);
+      const overallPct = totalTarget > 0 ? Math.min(100, Math.round((totalPaid / totalTarget) * 100)) : 0;
+      document.getElementById('proj-kpi-target').textContent = formatCurrency(totalTarget);
+      document.getElementById('proj-kpi-paid').textContent = formatCurrency(totalPaid);
+      document.getElementById('proj-kpi-left').textContent = formatCurrency(Math.max(0, totalTarget - totalPaid));
+      document.getElementById('proj-kpi-pct').textContent = `${overallPct}%`;
+
+      const listEl = document.getElementById('proj-list');
+      if (projects.length === 0) {
+        listEl.innerHTML = '<div class="glass-card rounded-2xl p-8 text-center text-slate-400 text-sm md:col-span-2">還沒有專案，請在上方填寫「專案名稱」與「目標金額」建立第一個專案。</div>';
+        lucide.createIcons();
+        return;
+      }
+
+      listEl.innerHTML = projects.map((p) => {
+        const target = Math.max(1, Number(p.targetAmount || 0));
+        const paid = Math.max(0, Number(p.savedAmount || 0));
+        const pct = Math.min(100, Math.round((paid / target) * 100));
+        let ownerLabel = '共同';
+        let ownerCls = 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+        if (p.owner === 'me') { ownerLabel = appState.profiles.me.name; ownerCls = 'bg-white/15 text-slate-100 border-white/40'; }
+        else if (p.owner === 'partner') { ownerLabel = appState.profiles.partner.name; ownerCls = 'bg-sky-500/20 text-sky-300 border-sky-500/40'; }
+        let deadlineHtml = '<span class="text-slate-500">未設定完成日期</span>';
+        if (p.deadline) {
+          const diff = Math.ceil((new Date(p.deadline) - new Date(getTodayStr(0))) / 86400000);
+          deadlineHtml = `<span class="font-mono text-slate-300">預計完成：${escapeHtml(p.deadline)} (${diff >= 0 ? `剩 ${diff} 天` : `已逾期 ${Math.abs(diff)} 天`})</span>`;
+        }
+        return `
+          <div onclick="openLedger('project', '${p.id}')" class="cursor-pointer hover:border-sky-500/40 transition-colors glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0">
+            <div class="space-y-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h4 class="text-base font-bold text-white break-words">${escapeHtml(p.item)}</h4>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold border ${ownerCls}">${escapeHtml(ownerLabel)}</span>
+                  </div>
+                  <div class="text-xs mt-1">${deadlineHtml}</div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button type="button" onclick="event.stopPropagation(); startEditProject('${p.id}')" title="修改專案" class="p-2 rounded-xl bg-slate-800/90 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-slate-700"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                  <button type="button" onclick="event.stopPropagation(); deleteProject('${p.id}')" title="刪除專案" class="p-2 rounded-xl bg-slate-800/90 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                </div>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-800/80"><div class="text-[10px] text-slate-400">目標金額</div><div class="text-xs font-mono font-bold text-amber-300 mt-0.5">${formatCurrency(target)}</div></div>
+                <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-800/80"><div class="text-[10px] text-slate-400">已還款</div><div class="text-xs font-mono font-bold text-sky-300 mt-0.5">${formatCurrency(paid)}</div></div>
+                <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-800/80"><div class="text-[10px] text-slate-400">尚餘</div><div class="text-xs font-mono font-bold text-emerald-300 mt-0.5">${formatCurrency(Math.max(0, target - paid))}</div></div>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs"><span class="text-slate-400">還款進度</span><span class="font-mono font-bold text-white">${pct}%</span></div>
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-400 rounded-full transition-all duration-500" style="width: ${pct}%"></div></div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+              <span class="text-[11px] text-slate-400">快速還款：</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="event.stopPropagation(); quickAdjustProject('${p.id}', 1000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-sky-500/20 border border-slate-700 text-xs font-mono text-sky-300">+$1,000</button>
+                <button type="button" onclick="event.stopPropagation(); quickAdjustProject('${p.id}', 5000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 border border-slate-700 text-xs font-mono text-emerald-300">+$5,000</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function submitProjectForm(e) {
+      e.preventDefault();
+      const editId = document.getElementById('proj-edit-id').value;
+      const item = document.getElementById('proj-name').value.trim();
+      const targetAmount = Number(String(document.getElementById('proj-target').value || '').trim());
+      const deadline = document.getElementById('proj-deadline').value || '';
+      const rawSaved = String(document.getElementById('proj-saved').value || '').trim();
+      const savedAmount = rawSaved === '' ? 0 : Number(rawSaved);
+      const owner = document.getElementById('proj-owner').value || 'both';
+      if (!item) { showToast('請填寫專案名稱'); return; }
+      if (!Number.isFinite(targetAmount) || targetAmount <= 0) { showToast('請填寫大於 0 的目標金額'); return; }
+      if (!Number.isFinite(savedAmount) || savedAmount < 0) { showToast('已還款金額請填寫 0 以上的數字'); return; }
+      if (!Array.isArray(appState.projects)) appState.projects = [];
+
+      let proj;
+      if (editId) {
+        proj = appState.projects.find((p) => p.id === editId);
+        if (proj) Object.assign(proj, { item, targetAmount, deadline, savedAmount, owner });
+        showToast(`已更新專案「${item}」`);
+      } else {
+        proj = { id: 'proj_' + Date.now(), item, targetAmount, deadline, savedAmount, owner, history: [] };
+        appState.projects.push(proj);
+        showToast(`已新增專案「${item}」`);
+      }
+      if (proj) reconcileLedger(proj);
+      saveState();
+      cancelEditProject();
+      renderProjectPage();
+    }
+
+    function startEditProject(id) {
+      const p = (appState.projects || []).find((x) => x.id === id);
+      if (!p) return;
+      document.getElementById('proj-edit-id').value = p.id;
+      document.getElementById('proj-name').value = p.item;
+      document.getElementById('proj-target').value = p.targetAmount;
+      document.getElementById('proj-deadline').value = p.deadline || '';
+      document.getElementById('proj-saved').value = p.savedAmount || 0;
+      document.getElementById('proj-owner').value = p.owner || 'both';
+      document.getElementById('proj-form-title').innerHTML = `<i data-lucide="pencil" class="w-5 h-5 text-amber-400"></i><span>修改專案：${escapeHtml(p.item)}</span>`;
+      document.getElementById('proj-submit-btn').textContent = '儲存專案修改';
+      document.getElementById('proj-cancel-edit-btn').classList.remove('hidden');
+      lucide.createIcons();
+      document.getElementById('proj-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cancelEditProject() {
+      document.getElementById('proj-edit-id').value = '';
+      document.getElementById('proj-form').reset();
+      document.getElementById('proj-form-title').innerHTML = '<i data-lucide="target" class="w-5 h-5 text-sky-400"></i><span>新增專案</span>';
+      document.getElementById('proj-submit-btn').textContent = '新增專案';
+      document.getElementById('proj-cancel-edit-btn').classList.add('hidden');
+      lucide.createIcons();
+    }
+
+    function deleteProject(id) {
+      const p = (appState.projects || []).find((x) => x.id === id);
+      if (!p || !confirm(`確定要刪除專案「${p.item}」與它的所有還款紀錄嗎？`)) return;
+      appState.projects = appState.projects.filter((x) => x.id !== id);
+      saveState();
+      renderProjectPage();
+      showToast('已刪除專案');
+    }
+
+    function quickAdjustProject(id, delta) {
+      const p = (appState.projects || []).find((x) => x.id === id);
+      if (!p) return;
+      reconcileLedger(p);
+      p.history.push({ id: 'e_' + Date.now(), ts: Date.now(), date: getTodayStr(0), amount: Number(delta), note: '快速還款' });
+      p.savedAmount = Math.max(0, ledgerSum(p));
+      saveState();
+      renderProjectPage();
+      showToast(`已為「${p.item}」還款 ${formatCurrency(delta)}`);
+    }
+
+    Object.assign(window, {
+      openPersonHealth, openRecordsModal, closeRecordsModal, recordsAddFor, recordsAddSteps,
+      recordsStartEdit, recordsCancelEdit, recordsSaveEdit, recordsDelete,
+      openLedger, closeLedger, ledgerAdd, ledgerStartEdit, ledgerCancelEdit, ledgerSaveEdit, ledgerDelete,
+      submitProjectForm, startEditProject, cancelEditProject, deleteProject, quickAdjustProject
+    });
+
     // ==================== 12. MASTER REFRESH & INIT ====================
     function refreshAllUI() {
       document.getElementById('nav-name-me').textContent = appState.profiles.me.name;
@@ -4275,6 +4988,8 @@
         renderProfilePage();
       } else if (activeTab === 'album') {
         renderAlbum();
+      } else if (activeTab === 'project') {
+        renderProjectPage();
       }
     }
 
@@ -4364,6 +5079,7 @@
     initCloudSync();
     loadAlbumFromLocal();
     loadMessagesLocal();
+    initDragBars();
     lucide.createIcons();
   </script>
 </body>
