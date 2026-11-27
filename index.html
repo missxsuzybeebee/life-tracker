@@ -405,10 +405,10 @@
 
           <!-- 3 Allocation KPI Cards -->
           <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
+            <div onclick="openLedger('deposit', 'total')" class="cursor-pointer hover:border-amber-500/50 transition-colors bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
               <div class="text-[11px] text-slate-400">共同總存款</div>
               <div id="vault-kpi-total" class="text-lg sm:text-xl font-mono font-bold text-amber-400 mt-1">$0</div>
-              <div class="text-[11px] text-slate-500 mt-0.5">可用資金池</div>
+              <div class="text-[11px] text-amber-300/80 mt-0.5">點一下查看存入紀錄 ›</div>
             </div>
 
             <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
@@ -562,8 +562,9 @@
             <i data-lucide="list-checks" class="w-4 h-4 text-sky-400"></i>
             <span>儲蓄目標清單與進度條</span>
           </h3>
-          <span class="text-xs text-slate-400">可隨時編輯目標 item、金額與預計完成日期</span>
+          <button type="button" onclick="openDoneModal('vault')" id="vault-done-btn" class="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 text-xs font-bold shrink-0">✅ 已完成 (0)</button>
         </div>
+        <div class="text-[11px] text-slate-400 px-1">← 往左滑可標記完成；點框內可查看 / 新增紀錄</div>
 
         <div id="vault-goals-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Populated dynamically by JS -->
@@ -1305,8 +1306,9 @@
         <h3 class="text-sm font-bold text-white flex items-center gap-2 px-1">
           <i data-lucide="list-checks" class="w-4 h-4 text-sky-400"></i>
           <span>專案清單與還款進度</span>
-          <span class="text-xs font-normal text-slate-400">點框內可查看 / 新增 / 修改還款紀錄</span>
+          <button type="button" onclick="openDoneModal('project')" id="proj-done-btn" class="ml-auto px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 text-xs font-bold shrink-0">✅ 已完成 (0)</button>
         </h3>
+        <div class="text-[11px] text-slate-400 px-1">← 往左滑可標記完成；點框內可查看 / 新增 / 修改還款紀錄</div>
         <div id="proj-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </section>
@@ -1493,6 +1495,22 @@
     </div>
   </nav>
 
+  <!-- Done Modal (已完成 / 已達標) -->
+  <div id="done-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-md max-h-[88vh] rounded-3xl p-5 flex flex-col border border-emerald-500/30">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <h3 id="done-title" class="text-base font-bold text-white">✅ 已完成</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">已達標的項目會收在這裡，點一下可查看紀錄，也可以還原</p>
+        </div>
+        <button type="button" onclick="closeDoneModal()" class="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="done-list" class="mt-3 space-y-2 overflow-y-auto overflow-x-hidden pr-1"></div>
+    </div>
+  </div>
+
   <!-- Ledger Modal (養小豬 / Project 共用：存入或還款明細) -->
   <div id="ledger-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="glass-card w-full max-w-md max-h-[88vh] rounded-3xl p-5 flex flex-col border border-sky-500/30">
@@ -1587,6 +1605,27 @@
         </ol>
         <button type="button" onclick="testNtfy()" class="w-full py-2 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-200 text-xs font-bold">送一則測試通知給自己</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Quick Reply Manage Modal -->
+  <div id="quick-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-md max-h-[88vh] rounded-3xl p-5 flex flex-col border border-sky-500/30">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <h3 class="text-base font-bold text-white">✏️ 管理快速回覆</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">修改內容會自動儲存，並同步給對方（需連上雲端）</p>
+        </div>
+        <button type="button" onclick="closeQuickManage()" class="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="quick-list" class="mt-3 space-y-2 overflow-y-auto overflow-x-hidden pr-1"></div>
+      <div class="mt-3 flex gap-2">
+        <input type="text" id="quick-add-input" maxlength="30" placeholder="新增一句快速回覆…" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();addQuick();}" class="flex-1 min-w-0 bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none" />
+        <button type="button" onclick="addQuick()" class="px-4 py-2.5 rounded-xl bg-sky-500 text-slate-950 text-sm font-bold shrink-0 active:scale-95 transition-all">新增</button>
+      </div>
+      <button type="button" onclick="resetQuick()" class="mt-3 text-[11px] text-slate-400 hover:text-sky-300 self-end">還原成預設的五句</button>
     </div>
   </div>
 
@@ -1867,6 +1906,8 @@
         updatedAt: Date.now(),
         vaultTotalDeposit: 150000,
         projects: [],
+        quickMsgs: null,
+        vaultDepositHistory: [],
         vaultGoals: [
           {
             id: 'g1',
@@ -1958,7 +1999,9 @@
             ...parsed,
             vaultTotalDeposit: typeof parsed.vaultTotalDeposit === 'number' ? parsed.vaultTotalDeposit : 150000,
             vaultGoals: Array.isArray(parsed.vaultGoals) ? parsed.vaultGoals : createDefaultState().vaultGoals,
-            projects: Array.isArray(parsed.projects) ? parsed.projects : []
+            projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+            vaultDepositHistory: Array.isArray(parsed.vaultDepositHistory) ? parsed.vaultDepositHistory : [],
+            quickMsgs: Array.isArray(parsed.quickMsgs) ? parsed.quickMsgs : null
           };
         }
       } catch (e) {
@@ -2028,6 +2071,8 @@
           vaultTotalDeposit: appState.vaultTotalDeposit,
           vaultGoalsJson: JSON.stringify(appState.vaultGoals),
           projectsJson: JSON.stringify(appState.projects || []),
+          depositHistoryJson: JSON.stringify(appState.vaultDepositHistory || []),
+          quickMsgsJson: JSON.stringify(Array.isArray(appState.quickMsgs) ? appState.quickMsgs : null),
           profilesJson: JSON.stringify(appState.profiles),
           dailyIntakeJson: JSON.stringify(appState.dailyIntake),
           recordsJson: JSON.stringify(appState.records)
@@ -2067,6 +2112,8 @@
               const parsedRecords = data.recordsJson ? JSON.parse(data.recordsJson) : null;
               const parsedGoals = data.vaultGoalsJson ? JSON.parse(data.vaultGoalsJson) : appState.vaultGoals;
               const parsedProjects = data.projectsJson ? JSON.parse(data.projectsJson) : (appState.projects || []);
+              const parsedDeposit = data.depositHistoryJson ? JSON.parse(data.depositHistoryJson) : (appState.vaultDepositHistory || []);
+              const parsedQuick = data.quickMsgsJson ? JSON.parse(data.quickMsgsJson) : null;
               const parsedTotal = typeof data.vaultTotalDeposit === 'number' ? data.vaultTotalDeposit : appState.vaultTotalDeposit;
 
               if (parsedProfiles && parsedIntake && parsedRecords) {
@@ -2075,6 +2122,8 @@
                   vaultTotalDeposit: parsedTotal,
                   vaultGoals: Array.isArray(parsedGoals) ? parsedGoals : [],
                   projects: Array.isArray(parsedProjects) ? parsedProjects : [],
+                  vaultDepositHistory: Array.isArray(parsedDeposit) ? parsedDeposit : [],
+                  quickMsgs: Array.isArray(parsedQuick) ? parsedQuick : null,
                   profiles: parsedProfiles,
                   dailyIntake: parsedIntake,
                   records: parsedRecords
@@ -2484,12 +2533,12 @@
 
       const { totalDeposit, allocatedSum, unallocated, overBudget, exceedAmount } = computeVaultAllocation();
       const previewEl = document.getElementById('home-vault-preview');
-      const topGoals = (appState.vaultGoals || []).slice(0, 3);
+      const topGoals = (appState.vaultGoals || []).filter((g) => !g.completed).slice(0, 3);
 
       previewEl.innerHTML = `
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3">
-            <div class="text-[11px] text-slate-400">共同總存款</div>
+          <div onclick="openLedger('deposit', 'total')" class="cursor-pointer hover:border-amber-500/50 transition-colors bg-slate-900/85 border border-slate-800 rounded-xl p-3">
+            <div class="text-[11px] text-slate-400">共同總存款 <span class="text-amber-300/80">› 紀錄</span></div>
             <div class="text-lg font-mono font-bold text-amber-400 mt-0.5">${formatCurrency(totalDeposit)}</div>
           </div>
           <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3">
@@ -2551,7 +2600,7 @@
     function computeVaultAllocation(overrideTotal = null, overrideGoals = null) {
       const totalDeposit = Math.max(0, Number(overrideTotal !== null ? overrideTotal : appState.vaultTotalDeposit || 0));
       const goals = overrideGoals !== null ? overrideGoals : (appState.vaultGoals || []);
-      const allocatedSum = goals.reduce((sum, g) => sum + Math.max(0, Number(g.savedAmount || 0)), 0);
+      const allocatedSum = goals.filter((g) => !g.completed).reduce((sum, g) => sum + Math.max(0, Number(g.savedAmount || 0)), 0);
       const diff = totalDeposit - allocatedSum;
       const overBudget = diff < 0;
       const unallocated = diff > 0 ? diff : 0;
@@ -2616,10 +2665,14 @@
       appState.vaultTotalDeposit = parsed;
       renderVaultAllocationStatus(parsed);
       saveState();
+      clearTimeout(depositLogTimer);
+      // 停止輸入 1 秒後，把這次手動修改記進紀錄（日期是修改當天）
+      depositLogTimer = setTimeout(() => { reconcileLedger(depositAdapter); saveState(); }, 1000);
     }
 
     function adjustVaultTotalDeposit(delta) {
       const nextVal = Math.max(0, Number(appState.vaultTotalDeposit || 0) + Number(delta || 0));
+      logDepositChange(nextVal);
       appState.vaultTotalDeposit = nextVal;
       const input = document.getElementById('vault-total-deposit-input');
       if (input) input.value = nextVal;
@@ -2668,7 +2721,8 @@
       renderVaultAllocationStatus();
 
       const listEl = document.getElementById('vault-goals-list');
-      const goals = appState.vaultGoals || [];
+      const goals = (appState.vaultGoals || []).filter((g) => !g.completed);
+      updateDoneBtns();
 
       if (goals.length === 0) {
         listEl.innerHTML = `
@@ -2704,7 +2758,11 @@
         }
 
         return `
-          <div onclick="openLedger('vault', '${g.id}')" class="cursor-pointer hover:border-sky-500/40 transition-colors glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0">
+          <div class="relative overflow-hidden rounded-2xl min-w-0">
+          <div class="swipe-panel opacity-0 absolute inset-y-0 right-0 w-24 bg-emerald-600 rounded-r-2xl">
+            <button type="button" onclick="completeItem('vault', '${g.id}')" class="w-full h-full text-white text-sm font-bold">✓ 完成</button>
+          </div>
+          <div data-swipe-id="${g.id}" style="touch-action: pan-y" onclick="swipeCardClick(this, 'vault', '${g.id}')" class="relative cursor-pointer hover:border-sky-500/40 transition-colors glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0 bg-[#0b1221]">
             <div class="space-y-2.5">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
@@ -2750,6 +2808,7 @@
                 </button>
               </div>
             </div>
+          </div>
           </div>
         `;
       }).join('');
@@ -4097,7 +4156,15 @@
     }
 
     // ==================== 11.8 QUICK MESSAGES (想跟你說…) ====================
-    const QUICK_MSGS = ['記得喝水🥤', '趕快吃飯了🍽️', '記得吃藥喔💊', '快去休息💤', '愛你💕'];
+    const DEFAULT_QUICK_MSGS = ['記得喝水🥤', '趕快吃飯了🍽️', '記得吃藥喔💊', '快去休息💤', '愛你💕'];
+    const QUICK_KEY = 'ume_quick_msgs_v1';
+    const QUICK_MSGS = [...DEFAULT_QUICK_MSGS];
+    try {
+      const savedQuick = JSON.parse(localStorage.getItem(QUICK_KEY) || 'null');
+      if (Array.isArray(savedQuick) && savedQuick.length > 0) {
+        QUICK_MSGS.splice(0, QUICK_MSGS.length, ...savedQuick.map((t) => String(t).slice(0, 30)));
+      }
+    } catch (e) { /* ignore */ }
     const MSG_KEY = 'ume_messages_v1';
     const WHO_KEY = 'ume_whoami_v1';
     let messages = [];
@@ -4215,7 +4282,8 @@
           from: msg.from,
           text: msg.text,
           createdAt: msg.createdAt,
-          readAt: msg.readAt ?? null
+          readAt: msg.readAt ?? null,
+          hearted: !!msg.hearted
         });
         msg.synced = true;
         persistMessages();
@@ -4311,6 +4379,17 @@
 
     function openMsgHistory() {
       cleanupOldMessages();
+      // 打開歷史訊息就視為已讀：把對方傳來的未讀訊息標記已讀並同步
+      let markedRead = false;
+      messages.forEach((m) => {
+        if (m.room === currentRoomCode && m.from !== msgSender && !m.readAt) {
+          m.readAt = Date.now();
+          m.synced = false;
+          markedRead = true;
+          if (db && currentUser && m.room !== LOCAL_ROOM) pushMessageToCloud(m);
+        }
+      });
+      if (markedRead) { persistMessages(); renderMessageBox(); }
       const modal = document.getElementById('msg-modal');
       const listEl = document.getElementById('msg-modal-list');
       const roomMsgs = messages
@@ -4334,7 +4413,9 @@
                   <span class="font-mono text-slate-500">${timeAgo(m.createdAt)}</span>
                 </div>
                 <div class="text-sm text-white break-words">${escapeHtml(m.text)}</div>
-                <div class="text-[10px] text-right ${m.readAt ? 'text-emerald-400' : 'text-slate-500'}">${m.readAt ? '已收到 ♥' : '未讀'}</div>
+                ${mine
+                  ? `<div class="text-[10px] text-right ${m.hearted ? 'text-rose-300' : (m.readAt ? 'text-emerald-400' : 'text-slate-500')}">${m.hearted ? '對方回了 ❤️' : (m.readAt ? '已讀' : '未讀')}</div>`
+                  : `<div class="flex justify-end"><button type="button" onclick="toggleHeart('${m.id}')" class="px-2 py-0.5 rounded-full border text-[11px] font-bold active:scale-95 transition-all ${m.hearted ? 'bg-rose-500/20 border-rose-400/50 text-rose-200' : 'bg-slate-800 border-slate-700 text-slate-300'}">${m.hearted ? '❤️ 已送愛心' : '🤍 送愛心'}</button></div>`}
               </div>
             </div>
           `;
@@ -4377,12 +4458,16 @@
       if (prefix) prefix.textContent = `${senderName} 想跟你說…`;
 
       const chipsEl = document.getElementById('msg-chips');
-      chipsEl.innerHTML = QUICK_MSGS.map((text, idx) => `
-        <button type="button" onclick="sendQuickMessage(QUICK_MSGS[${idx}])"
+      chipsEl.innerHTML = getQuick().map((text, idx) => `
+        <button type="button" onclick="sendQuickMessage(getQuick()[${idx}])"
           class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-sky-500/20 border border-slate-700 hover:border-sky-400 text-xs font-bold text-slate-100 transition-all active:scale-95">
           ${escapeHtml(text)}
         </button>
-      `).join('');
+      `).join('') + `
+        <button type="button" onclick="openQuickManage()"
+          class="px-3 py-1.5 rounded-full bg-transparent border border-dashed border-slate-600 hover:border-sky-400 text-xs font-bold text-slate-400 hover:text-sky-300 transition-all">
+          ✏️ 新增 / 管理
+        </button>`;
 
       const roomMsgs = messages
         .filter((m) => m.room === currentRoomCode)
@@ -4404,12 +4489,14 @@
         const nameCls = fromIsMe ? 'text-slate-100' : 'text-sky-300';
 
         let statusHtml = '';
-        if (m.readAt) {
-          statusHtml = `<span class="text-[11px] font-bold text-emerald-300">對方已收到 ♥</span>`;
-        } else if (isIncoming) {
-          statusHtml = `<button type="button" onclick="ackLatestMessage('${m.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 text-[11px] font-bold active:scale-95 transition-all">收到了 ♥</button>`;
+        if (isIncoming) {
+          statusHtml = `<button type="button" onclick="toggleHeart('${m.id}')" class="px-2.5 py-1 rounded-lg border text-[11px] font-bold active:scale-95 transition-all ${m.hearted ? 'bg-rose-500/20 border-rose-400/50 text-rose-200' : 'bg-slate-800 border-slate-700 text-slate-200'}">${m.hearted ? '❤️ 已送愛心' : '🤍 送愛心'}</button>`;
+        } else if (m.hearted) {
+          statusHtml = `<span class="text-[11px] font-bold text-rose-300">對方回了 ❤️</span>`;
+        } else if (m.readAt) {
+          statusHtml = `<span class="text-[11px] font-bold text-emerald-300">對方已讀</span>`;
         } else {
-          statusHtml = `<span class="text-[11px] text-slate-400">等待對方確認…</span>`;
+          statusHtml = `<span class="text-[11px] text-slate-400">未讀</span>`;
         }
 
         latestEl.innerHTML = `
@@ -4719,6 +4806,7 @@
     }
 
     function getLedgerItem() {
+      if (ledgerKind === 'deposit') return depositAdapter;
       return ledgerItems(ledgerKind).find((x) => x.id === ledgerId) || null;
     }
 
@@ -4751,6 +4839,7 @@
       const item = getLedgerItem();
       if (!item) return;
       const isProject = ledgerKind === 'project';
+      const isDeposit = ledgerKind === 'deposit';
       const savedLabel = isProject ? '已還款' : '已累積';
       const addLabel = isProject ? '還款' : '存入';
       const target = Math.max(1, Number(item.targetAmount || 0));
@@ -4758,10 +4847,14 @@
       const pct = Math.min(100, Math.round((saved / target) * 100));
 
       document.getElementById('ledger-title').textContent = item.item;
-      document.getElementById('ledger-sub').textContent = isProject ? 'Project 還款專案' : '養小豬豬目標';
+      document.getElementById('ledger-sub').textContent = isDeposit ? '共同總存款：什麼時候存入、領出多少' : (isProject ? 'Project 還款專案' : '養小豬豬目標');
       document.getElementById('ledger-add-title').textContent = `新增一筆${addLabel}（輸入負數代表${isProject ? '修正' : '領出'}）`;
       document.getElementById('ledger-add-btn').textContent = `新增${addLabel}`;
-      document.getElementById('ledger-summary').innerHTML = `
+      document.getElementById('ledger-summary').innerHTML = isDeposit ? `
+        <div class="rounded-2xl p-3 bg-slate-900/80 border border-slate-800 flex items-baseline justify-between">
+          <span class="text-xs text-slate-400">目前共同總存款</span>
+          <span class="text-lg font-mono font-bold text-amber-400">${formatCurrency(saved)}</span>
+        </div>` : `
         <div class="rounded-2xl p-3 bg-slate-900/80 border border-slate-800 space-y-2">
           <div class="flex flex-wrap items-baseline justify-between gap-1 text-xs">
             <span class="text-slate-400">${savedLabel}</span>
@@ -4871,7 +4964,8 @@
 
     // ==================== 11.12 PROJECT（還款專案）====================
     function renderProjectPage() {
-      const projects = appState.projects || [];
+      const projects = (appState.projects || []).filter((p) => !p.completed);
+      updateDoneBtns();
       const totalTarget = projects.reduce((s, p) => s + Math.max(0, Number(p.targetAmount || 0)), 0);
       const totalPaid = projects.reduce((s, p) => s + Math.max(0, Number(p.savedAmount || 0)), 0);
       const overallPct = totalTarget > 0 ? Math.min(100, Math.round((totalPaid / totalTarget) * 100)) : 0;
@@ -4901,7 +4995,11 @@
           deadlineHtml = `<span class="font-mono text-slate-300">預計完成：${escapeHtml(p.deadline)} (${diff >= 0 ? `剩 ${diff} 天` : `已逾期 ${Math.abs(diff)} 天`})</span>`;
         }
         return `
-          <div onclick="openLedger('project', '${p.id}')" class="cursor-pointer hover:border-sky-500/40 transition-colors glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0">
+          <div class="relative overflow-hidden rounded-2xl min-w-0">
+          <div class="swipe-panel opacity-0 absolute inset-y-0 right-0 w-24 bg-emerald-600 rounded-r-2xl">
+            <button type="button" onclick="completeItem('project', '${p.id}')" class="w-full h-full text-white text-sm font-bold">✓ 完成</button>
+          </div>
+          <div data-swipe-id="${p.id}" style="touch-action: pan-y" onclick="swipeCardClick(this, 'project', '${p.id}')" class="relative cursor-pointer hover:border-sky-500/40 transition-colors glass-card rounded-2xl p-5 border border-slate-800/90 flex flex-col justify-between gap-4 min-w-0 bg-[#0b1221]">
             <div class="space-y-2.5">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
@@ -4933,6 +5031,7 @@
                 <button type="button" onclick="event.stopPropagation(); quickAdjustProject('${p.id}', 5000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 border border-slate-700 text-xs font-mono text-emerald-300">+$5,000</button>
               </div>
             </div>
+          </div>
           </div>`;
       }).join('');
       lucide.createIcons();
@@ -5214,6 +5313,279 @@
       enableNotifications, openNotifyModal, closeNotifyModal, setNtfyOn, setNtfyText, copyNtfyTopic, testNtfy
     });
 
+    // ==================== 11.14 完成 / 已完成區 / 左滑 / 共同總存款紀錄 ====================
+    let depositLogTimer = null;
+    const depositAdapter = {
+      get item() { return '共同總存款'; },
+      get targetAmount() { return 0; },
+      get savedAmount() { return appState.vaultTotalDeposit; },
+      set savedAmount(v) { appState.vaultTotalDeposit = v; },
+      get history() {
+        if (!Array.isArray(appState.vaultDepositHistory)) appState.vaultDepositHistory = [];
+        return appState.vaultDepositHistory;
+      },
+      set history(v) { appState.vaultDepositHistory = v; }
+    };
+
+    function logDepositChange(nextVal) {
+      reconcileLedger(depositAdapter);
+      const diff = Number(nextVal) - Number(appState.vaultTotalDeposit || 0);
+      if (diff !== 0) {
+        depositAdapter.history.push({ id: 'e_' + Date.now(), ts: Date.now(), date: getTodayStr(0), amount: diff, note: '快速調整' });
+      }
+    }
+
+    function listOfKind(kind) {
+      return kind === 'vault' ? (appState.vaultGoals || []) : (appState.projects || []);
+    }
+
+    function updateDoneBtns() {
+      const v = (appState.vaultGoals || []).filter((g) => g.completed).length;
+      const p = (appState.projects || []).filter((x) => x.completed).length;
+      const vb = document.getElementById('vault-done-btn');
+      const pb = document.getElementById('proj-done-btn');
+      if (vb) vb.textContent = `✅ 已完成 (${v})`;
+      if (pb) pb.textContent = `✅ 已完成 (${p})`;
+    }
+
+    function completeItem(kind, id) {
+      const it = listOfKind(kind).find((x) => x.id === id);
+      if (!it) return;
+      it.completed = true;
+      it.completedAt = getTodayStr(0);
+      saveState();
+      refreshAllUI();
+      showToast(`🎉「${it.item}」已完成，收進「已完成」`);
+    }
+
+    function restoreItem(kind, id) {
+      const it = listOfKind(kind).find((x) => x.id === id);
+      if (!it) return;
+      it.completed = false;
+      delete it.completedAt;
+      saveState();
+      refreshAllUI();
+      renderDoneModal();
+      showToast(`已把「${it.item}」還原到進行中`);
+    }
+
+    let doneKind = null;
+
+    function openDoneModal(kind) {
+      doneKind = kind;
+      renderDoneModal();
+      const modal = document.getElementById('done-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDoneModal() {
+      const modal = document.getElementById('done-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      doneKind = null;
+    }
+
+    function renderDoneModal() {
+      if (!doneKind) return;
+      const isProject = doneKind === 'project';
+      document.getElementById('done-title').textContent = isProject ? '✅ 已完成的 Project' : '✅ 已達標的儲蓄目標';
+      const list = listOfKind(doneKind)
+        .filter((x) => x.completed)
+        .sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''));
+      const el = document.getElementById('done-list');
+      if (list.length === 0) {
+        el.innerHTML = '<div class="text-center text-sm text-slate-500 py-8">還沒有已完成的項目<br><span class="text-[11px]">在清單中把框框往左滑就會移到這裡</span></div>';
+        return;
+      }
+      el.innerHTML = list.map((x) => `
+        <div onclick="openLedger('${doneKind}', '${x.id}')" class="cursor-pointer p-3 rounded-2xl bg-slate-900/90 border border-emerald-500/25 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-sm font-bold text-white break-words">${escapeHtml(x.item)}</div>
+            <div class="text-[11px] font-mono text-slate-400 mt-0.5">${formatCurrency(Number(x.savedAmount || 0))} / ${formatCurrency(Number(x.targetAmount || 0))}</div>
+            <div class="text-[11px] text-emerald-300 mt-0.5">完成日 ${escapeHtml(x.completedAt || '')} · 點一下看紀錄</div>
+          </div>
+          <button type="button" onclick="event.stopPropagation(); restoreItem('${doneKind}', '${x.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 border border-slate-700 text-xs font-bold text-slate-200 shrink-0">還原</button>
+        </div>`).join('');
+    }
+
+    // ----- 左滑：露出「完成」，滑到底直接完成 -----
+    let swipeSuppressUntil = 0;
+
+    function setSwipePanel(card, show) {
+      const p = card.parentElement ? card.parentElement.querySelector('.swipe-panel') : null;
+      if (p) p.style.opacity = show ? '1' : '0';
+    }
+
+    function closeSwipe(card) {
+      card.style.transition = 'transform .2s';
+      card.style.transform = '';
+      card.dataset.open = '0';
+      setTimeout(() => setSwipePanel(card, false), 200);
+    }
+
+    function swipeCardClick(card, kind, id) {
+      if (Date.now() < swipeSuppressUntil) return;
+      if (card.dataset.open === '1') { closeSwipe(card); return; }
+      openLedger(kind, id);
+    }
+
+    function initSwipe(listId, kind) {
+      const list = document.getElementById(listId);
+      if (!list) return;
+      let st = null;
+      list.addEventListener('pointerdown', (e) => {
+        const card = e.target.closest('[data-swipe-id]');
+        if (!card || e.target.closest('button')) return;
+        list.querySelectorAll('[data-open="1"]').forEach((o) => { if (o !== card) closeSwipe(o); });
+        st = { card, x: e.clientX, y: e.clientY, dx: 0, active: false, w: card.offsetWidth, base: card.dataset.open === '1' ? -96 : 0, pid: e.pointerId };
+      });
+      list.addEventListener('pointermove', (e) => {
+        if (!st) return;
+        const dx = e.clientX - st.x;
+        const dy = e.clientY - st.y;
+        if (!st.active) {
+          if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+            st.active = true;
+            try { st.card.setPointerCapture(st.pid); } catch (err) { /* ignore */ }
+            st.card.style.transition = 'none';
+            setSwipePanel(st.card, true);
+          } else if (Math.abs(dy) > 10) {
+            st = null;
+            return;
+          } else {
+            return;
+          }
+        }
+        st.dx = Math.min(0, st.base + dx);
+        st.card.style.transform = `translateX(${st.dx}px)`;
+      });
+      const end = () => {
+        if (!st) return;
+        const s = st;
+        st = null;
+        if (!s.active) return;
+        swipeSuppressUntil = Date.now() + 350;
+        const c = s.card;
+        c.style.transition = 'transform .2s';
+        if (s.dx < -s.w * 0.55) {
+          c.style.transform = 'translateX(-110%)';
+          setTimeout(() => completeItem(kind, c.dataset.swipeId), 200);
+        } else if (s.dx < -60) {
+          c.style.transform = 'translateX(-96px)';
+          c.dataset.open = '1';
+        } else {
+          closeSwipe(c);
+        }
+      };
+      list.addEventListener('pointerup', end);
+      list.addEventListener('pointercancel', end);
+    }
+
+    function initSwipeLists() {
+      initSwipe('vault-goals-list', 'vault');
+      initSwipe('proj-list', 'project');
+    }
+
+    Object.assign(window, {
+      completeItem, restoreItem, openDoneModal, closeDoneModal, swipeCardClick
+    });
+
+    // ==================== 11.15 愛心回覆 / 快速回覆管理 ====================
+    function toggleHeart(id) {
+      const m = messages.find((x) => x.id === id);
+      if (!m) return;
+      m.hearted = !m.hearted;
+      if (m.hearted && !m.readAt) m.readAt = Date.now();
+      m.synced = false;
+      persistMessages();
+      renderMessageBox();
+      if (db && currentUser && m.room !== LOCAL_ROOM) pushMessageToCloud(m);
+      const modal = document.getElementById('msg-modal');
+      if (modal && !modal.classList.contains('hidden')) {
+        const listEl = document.getElementById('msg-modal-list');
+        const top = listEl.scrollTop;
+        openMsgHistory();
+        listEl.scrollTop = top;
+      }
+      showToast(m.hearted ? '已送出愛心 ❤️' : '已收回愛心');
+    }
+
+    // 快速回覆存在 appState.quickMsgs（跟其他資料一起雲端同步）；null 代表使用預設
+    function getQuick() {
+      return Array.isArray(appState.quickMsgs) ? appState.quickMsgs : QUICK_MSGS;
+    }
+
+    function setQuick(list) {
+      appState.quickMsgs = list;
+      saveState();
+      renderMessageBox();
+      renderQuickManage();
+    }
+
+    function openQuickManage() {
+      renderQuickManage();
+      const modal = document.getElementById('quick-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeQuickManage() {
+      const modal = document.getElementById('quick-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderQuickManage() {
+      const el = document.getElementById('quick-list');
+      if (!el) return;
+      if (getQuick().length === 0) {
+        el.innerHTML = '<div class="text-center text-sm text-slate-500 py-6">目前沒有快速回覆，請在下方新增</div>';
+        return;
+      }
+      el.innerHTML = getQuick().map((t, i) => `
+        <div class="flex items-center gap-2">
+          <input type="text" value="${escapeHtml(t)}" maxlength="30" onchange="updateQuick(${i}, this.value)"
+            class="flex-1 min-w-0 bg-slate-900 border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none" />
+          <button type="button" onclick="deleteQuick(${i})" title="刪除" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700 shrink-0">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>`).join('');
+      lucide.createIcons();
+    }
+
+    function addQuick() {
+      const input = document.getElementById('quick-add-input');
+      const v = input.value.trim().slice(0, 30);
+      if (!v) return;
+      if (getQuick().length >= 12) { showToast('最多 12 句，請先刪除一些'); return; }
+      input.value = '';
+      setQuick([...getQuick(), v]);
+      showToast('已新增快速回覆');
+    }
+
+    function updateQuick(idx, val) {
+      const v = String(val || '').trim().slice(0, 30);
+      if (!v) { renderQuickManage(); showToast('內容不能是空的，要刪除請按垃圾桶'); return; }
+      const next = [...getQuick()];
+      next[idx] = v;
+      setQuick(next);
+    }
+
+    function deleteQuick(idx) {
+      setQuick(getQuick().filter((_, i) => i !== idx));
+    }
+
+    function resetQuick() {
+      if (!confirm('要還原成預設的五句快速回覆嗎？')) return;
+      setQuick([...DEFAULT_QUICK_MSGS]);
+    }
+
+    Object.assign(window, {
+      toggleHeart, openQuickManage, closeQuickManage, addQuick, updateQuick, deleteQuick, resetQuick
+    });
+
     // ==================== 12. MASTER REFRESH & INIT ====================
     function refreshAllUI() {
       document.getElementById('nav-name-me').textContent = appState.profiles.me.name;
@@ -5326,6 +5698,7 @@
     loadMessagesLocal();
     initDragBars();
     initNotifications();
+    initSwipeLists();
     lucide.createIcons();
   </script>
 </body>
