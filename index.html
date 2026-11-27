@@ -263,6 +263,7 @@
           </h3>
           <div class="flex items-center gap-1.5 text-xs">
             <button type="button" onclick="toggleMsgSound()" id="msg-sound-btn" title="提示音與震動" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-sm leading-none mr-1">🔔</button>
+            <button type="button" onclick="openNotifyModal()" id="msg-notify-btn" title="開啟手機通知欄提醒" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-bold leading-none mr-1 text-slate-300">📲 通知</button>
             <span class="text-slate-400">我是</span>
             <div class="bg-slate-900 p-0.5 rounded-lg border border-slate-800 flex">
               <button type="button" onclick="setMsgSender('me')" id="msg-who-me" class="px-2.5 py-1 rounded-md font-bold transition-all">Chumi</button>
@@ -1538,6 +1539,54 @@
       </div>
       <div id="records-add-bar" class="mt-3 flex flex-wrap gap-2"></div>
       <div id="records-list" class="mt-3 space-y-2 overflow-y-auto overflow-x-hidden pr-1"></div>
+    </div>
+  </div>
+
+  <!-- Notify Modal (網頁通知 + ntfy 手機推播) -->
+  <div id="notify-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl p-5 space-y-4 border border-sky-500/30">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-base font-bold text-white">📲 訊息通知設定</h3>
+        <button type="button" onclick="closeNotifyModal()" class="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+        <div class="text-xs font-bold text-white">方式 1：網頁通知（UMe 開著或在背景時）</div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">需要同目錄的 sw.js。iPhone 請先「加入主畫面」並從桌面圖示開啟。</p>
+        <button type="button" onclick="enableNotifications()" class="w-full py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-bold">開啟網頁通知並測試</button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+        <div class="text-xs font-bold text-white">方式 2：ntfy 手機推播（UMe 關掉也會響）</div>
+
+        <label class="flex items-center justify-between gap-3 cursor-pointer">
+          <span class="text-xs text-slate-200">傳訊息時同步送到 ntfy</span>
+          <input type="checkbox" id="ntfy-on" onchange="setNtfyOn(this.checked)" class="w-4 h-4 accent-sky-500" />
+        </label>
+        <label class="flex items-center justify-between gap-3 cursor-pointer">
+          <span class="text-xs text-slate-200">通知帶完整訊息內容 <span class="text-slate-500">（關閉則只顯示「傳來一則新訊息」）</span></span>
+          <input type="checkbox" id="ntfy-text" onchange="setNtfyText(this.checked)" class="w-4 h-4 accent-sky-500" />
+        </label>
+
+        <div>
+          <div class="text-[11px] text-slate-400 mb-1">你的收訊頻道（<span id="ntfy-who">Chumi</span> 的手機請訂閱這個）</div>
+          <div class="flex gap-2">
+            <input type="text" id="ntfy-topic" readonly class="flex-1 min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-[11px] font-mono text-sky-200 focus:outline-none" />
+            <button type="button" onclick="copyNtfyTopic()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 shrink-0">複製</button>
+          </div>
+          <div id="ntfy-hint" class="text-[11px] text-amber-300 mt-1"></div>
+        </div>
+
+        <ol class="list-decimal list-inside text-[11px] text-slate-400 space-y-1 leading-relaxed">
+          <li>手機安裝 <b class="text-slate-200">ntfy</b> App（App Store / Google Play）。</li>
+          <li>打開 ntfy，按「＋」訂閱主題，貼上上面的頻道名稱，伺服器用預設的 ntfy.sh。</li>
+          <li>回到這裡打開上方開關。對方傳訊息給你時，手機就會跳通知。</li>
+          <li>兩人要各自在自己的手機上「我是」選對人，頻道名稱才不會訂閱錯。</li>
+        </ol>
+        <button type="button" onclick="testNtfy()" class="w-full py-2 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-200 text-xs font-bold">送一則測試通知給自己</button>
+      </div>
     </div>
   </div>
 
@@ -4207,6 +4256,7 @@
           playPing();
           flashMsgBox();
           showToast(`${fromName} 傳來：${m.text}`);
+          showSystemNotification(`${fromName} 想跟你說…`, m.text);
         }
       }, (err) => console.warn('Message snapshot error:', err));
     }
@@ -4226,6 +4276,7 @@
       messages.unshift(msg);
       persistMessages();
       renderMessageBox();
+      notifyNtfy(msg);
 
       const fromName = appState.profiles[msgSender].name;
       if (db && currentUser && currentRoomCode !== LOCAL_ROOM) {
@@ -4969,6 +5020,200 @@
       submitProjectForm, startEditProject, cancelEditProject, deleteProject, quickAdjustProject
     });
 
+    // ==================== 11.13 系統通知欄（需要 sw.js 與使用者允許通知）====================
+    let swReg = null;
+
+    function updateNotifyBtn() {
+      const btn = document.getElementById('msg-notify-btn');
+      if (!btn) return;
+      if (!('Notification' in window)) {
+        btn.textContent = '📲 通知';
+        btn.title = 'iPhone 請先「加入主畫面」，從桌面圖示開啟後才能使用通知';
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        btn.textContent = '📲 通知：開';
+        btn.className = btn.className.replace('text-slate-300', 'text-emerald-300');
+      } else if (Notification.permission === 'denied') {
+        btn.textContent = '📲 已封鎖';
+        btn.title = '請到手機設定 → 網站 / App 通知，把 UMe 的通知打開';
+      } else {
+        btn.textContent = '📲 通知';
+      }
+    }
+
+    async function registerSw() {
+      if (!('serviceWorker' in navigator)) return null;
+      try {
+        swReg = await navigator.serviceWorker.register('sw.js');
+        return swReg;
+      } catch (err) {
+        console.warn('Service worker 註冊失敗（請確認 sw.js 已放在 index.html 旁邊）:', err);
+        return null;
+      }
+    }
+
+    async function enableNotifications() {
+      if (!('Notification' in window)) {
+        showToast('此瀏覽器不支援通知。iPhone 請先用 Safari「加入主畫面」，再從桌面圖示開啟');
+        return;
+      }
+      if (Notification.permission === 'denied') {
+        showToast('通知已被封鎖，請到手機設定中打開 UMe 的通知');
+        updateNotifyBtn();
+        return;
+      }
+      const result = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+      updateNotifyBtn();
+      if (result !== 'granted') {
+        showToast('沒有允許通知，無法在通知欄提醒');
+        return;
+      }
+      await registerSw();
+      showToast('通知已開啟，送出一則測試通知');
+      showSystemNotification('UMe 通知測試', '看到這則表示通知欄提醒已經成功開啟 ♥', true);
+    }
+
+    async function showSystemNotification(title, body, force = false) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      if (!force && !document.hidden) return; // 畫面開著時已有提示音與跳出訊息，避免重複
+      const options = {
+        body,
+        tag: 'ume-msg',
+        renotify: true,
+        vibrate: [200, 100, 200],
+        icon: (document.getElementById('apple-touch-icon') || {}).href || undefined
+      };
+      try {
+        const reg = swReg || (await registerSw());
+        if (reg && reg.showNotification) {
+          await reg.showNotification(title, options);
+          return;
+        }
+        new Notification(title, options);
+      } catch (err) {
+        console.warn('Notification failed:', err);
+      }
+    }
+
+    function initNotifications() {
+      updateNotifyBtn();
+      if ('Notification' in window && Notification.permission === 'granted') registerSw();
+    }
+
+    // ----- ntfy 手機推播：每位收件人一個專屬頻道（由配對碼雜湊產生，沒有配對碼的人猜不到）-----
+    const NTFY_KEY = 'ume_ntfy_v1';
+    const NTFY_SERVER = 'https://ntfy.sh';
+    let ntfyCfg = { on: false, text: true };
+    try { ntfyCfg = { ...ntfyCfg, ...JSON.parse(localStorage.getItem(NTFY_KEY) || '{}') }; } catch (e) { /* ignore */ }
+
+    function saveNtfyCfg() {
+      try { localStorage.setItem(NTFY_KEY, JSON.stringify(ntfyCfg)); } catch (e) { /* ignore */ }
+    }
+
+    async function ntfyTopicFor(room, who) {
+      const text = `ume-ntfy|${room}|${who}`;
+      if (window.crypto && crypto.subtle) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+        const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+        return 'ume-' + hex.slice(0, 28);
+      }
+      let h = 5381;
+      for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) >>> 0;
+      return 'ume-' + h.toString(16).padStart(8, '0') + '-local';
+    }
+
+    async function ntfyPublish(topic, title, message) {
+      const res = await fetch(NTFY_SERVER + '/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, title, message, priority: 4, tags: ['heart'] })
+      });
+      return res.ok;
+    }
+
+    async function notifyNtfy(msg) {
+      if (!ntfyCfg.on || !msg || msg.room === LOCAL_ROOM) return;
+      try {
+        const to = msg.from === 'me' ? 'partner' : 'me';
+        const topic = await ntfyTopicFor(msg.room, to);
+        const fromName = appState.profiles[msg.from] ? appState.profiles[msg.from].name : '';
+        await ntfyPublish(topic, `${fromName} 想跟你說…`, ntfyCfg.text ? msg.text : '傳來一則新訊息');
+      } catch (err) {
+        console.warn('ntfy 傳送失敗:', err);
+      }
+    }
+
+    async function renderNotifyModal() {
+      document.getElementById('ntfy-on').checked = !!ntfyCfg.on;
+      document.getElementById('ntfy-text').checked = !!ntfyCfg.text;
+      document.getElementById('ntfy-who').textContent = appState.profiles[msgSender].name;
+      const topicEl = document.getElementById('ntfy-topic');
+      const hint = document.getElementById('ntfy-hint');
+      if (currentRoomCode === LOCAL_ROOM) {
+        topicEl.value = '';
+        hint.textContent = '請先在「同步設定」輸入專屬配對碼，才會產生頻道名稱。';
+        return;
+      }
+      topicEl.value = await ntfyTopicFor(currentRoomCode, msgSender);
+      hint.textContent = '';
+    }
+
+    function openNotifyModal() {
+      renderNotifyModal();
+      const modal = document.getElementById('notify-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeNotifyModal() {
+      const modal = document.getElementById('notify-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      updateNotifyBtn();
+    }
+
+    function setNtfyOn(v) {
+      ntfyCfg.on = !!v;
+      saveNtfyCfg();
+      showToast(ntfyCfg.on ? '已開啟：傳訊息時會同步送到 ntfy' : '已關閉 ntfy 推播');
+    }
+
+    function setNtfyText(v) {
+      ntfyCfg.text = !!v;
+      saveNtfyCfg();
+    }
+
+    async function copyNtfyTopic() {
+      const topic = document.getElementById('ntfy-topic').value;
+      if (!topic) { showToast('請先設定配對碼'); return; }
+      try {
+        await navigator.clipboard.writeText(topic);
+        showToast('已複製頻道名稱，貼到 ntfy App 訂閱');
+      } catch (err) {
+        const el = document.getElementById('ntfy-topic');
+        el.select();
+        document.execCommand('copy');
+        showToast('已複製頻道名稱');
+      }
+    }
+
+    async function testNtfy() {
+      if (currentRoomCode === LOCAL_ROOM) { showToast('請先設定配對碼'); return; }
+      try {
+        const topic = await ntfyTopicFor(currentRoomCode, msgSender);
+        const ok = await ntfyPublish(topic, 'UMe 通知測試', '看到這則表示 ntfy 推播成功 ♥');
+        showToast(ok ? '已送出測試通知，請看手機通知欄' : '送出失敗，請稍後再試');
+      } catch (err) {
+        showToast('送出失敗，請確認網路連線');
+      }
+    }
+
+    Object.assign(window, {
+      enableNotifications, openNotifyModal, closeNotifyModal, setNtfyOn, setNtfyText, copyNtfyTopic, testNtfy
+    });
+
     // ==================== 12. MASTER REFRESH & INIT ====================
     function refreshAllUI() {
       document.getElementById('nav-name-me').textContent = appState.profiles.me.name;
@@ -5080,6 +5325,7 @@
     loadAlbumFromLocal();
     loadMessagesLocal();
     initDragBars();
+    initNotifications();
     lucide.createIcons();
   </script>
 </body>
