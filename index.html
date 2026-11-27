@@ -3052,7 +3052,7 @@
         const markerPct = ((clampedBmi - 15) / (32 - 15)) * 100;
 
         return `
-          <div class="glass-card rounded-2xl p-5 border ${borderGlow} relative overflow-hidden">
+          <div onclick="openQuickLog('${uKey}')" class="cursor-pointer hover:border-sky-500/40 transition-colors glass-card rounded-2xl p-5 border ${borderGlow} relative overflow-hidden">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5 min-w-0">
                 <div class="w-10 h-10 rounded-xl ${isMe ? 'bg-white/15 text-slate-100 border-white/30' : 'bg-sky-500/15 text-sky-400 border-sky-500/30'} border flex items-center justify-center font-bold text-base shrink-0">
@@ -3064,6 +3064,7 @@
                     <span class="text-xs font-mono text-slate-400">${p.height} cm · ${p.weight} kg</span>
                   </div>
                   <p class="text-[11px] text-slate-400 mt-0.5">${status.advice}</p>
+                  <p class="text-[11px] text-sky-300/80 mt-0.5">點一下框框 → 新增 ${escapeHtml(p.name)} 的紀錄 ›</p>
                 </div>
               </div>
 
@@ -4599,6 +4600,11 @@
         .reduce((sum, r) => sum + Number(r.steps || 0), 0);
     }
 
+    function openQuickLog(userKey) {
+      setLogFormUser(userKey);
+      switchTab('log');
+    }
+
     function openPersonHealth(userKey) {
       setActiveContext(userKey);
       switchTab('dashboard');
@@ -5838,7 +5844,7 @@
     });
 
     Object.assign(window, {
-      openImportModal, closeImportModal, renderImportLink, copyImportLink, importWeightFile
+      openQuickLog, openImportModal, closeImportModal, renderImportLink, copyImportLink, importWeightFile
     });
 
     // ==================== 12. MASTER REFRESH & INIT ====================
